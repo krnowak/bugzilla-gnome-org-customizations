@@ -1,0 +1,13 @@
+[% IF error == "traceparser_bad_hash" %]
+    [% title = "Bad Hash While Parsing Trace" %]
+    There was an error while parsing a stack trace. The following hash
+    is not a valid MD5 hash: [% hash FILTER html %].
+[% ELSIF error == "traceparser_bad_type" %]
+    [% title = "Bad Trace Type" %]
+    The <code>type</code> argument must be a class name starting with
+    <code>Parse::StackTrace::Type</code>.
+[% ELSIF error == "traceparser_no_hash" %]
+    [% title = "Hash Required" %]
+    You must specify a value for both the <code>full_hash</code> and
+    <code>short_hash</code> parameters.
+[% END %]
