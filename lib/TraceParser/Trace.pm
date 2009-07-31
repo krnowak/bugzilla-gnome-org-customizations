@@ -84,15 +84,17 @@ sub parse_from_text {
 
     my @all_functions;
     my $quality = 0;
+    my $has_symbols = 1;
     my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
     foreach my $frame (@{ $crash_thread->frames }) {
         foreach my $item (qw(function args number file line code)) {
             $quality++ if defined $frame->$item;
         }
         my $function = $frame->function;
-        if (defined $function && !grep($_ eq $function, IGNORE_FUNCTIONS)) {
+        if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
             push(@all_functions, $frame->function);
         }
+        $has_symbols = 0 if $function eq '??';
     }
 
     my $max_short_stack = $#all_functions > 4 ? 4 : $#all_functions;
@@ -101,7 +103,7 @@ sub parse_from_text {
     my $short_hash = md5_base64(join(',', @short_stack));
 
     return {
-        has_symbols => 0, # FIXME
+        has_symbols => $has_symbols,
         full_hash   => $full_hash,
         short_hash  => $short_hash,
         short_stack => join(', ', @short_stack),
