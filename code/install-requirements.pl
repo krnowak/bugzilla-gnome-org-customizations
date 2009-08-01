@@ -27,7 +27,7 @@ use constant REQUIRED_MODULES => [
     {
         package => 'Parse-StackTrace',
         module  => 'Parse::StackTrace',
-        version => 0.04,
+        version => 0.05,
     },
 ];
 

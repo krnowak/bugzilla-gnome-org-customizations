@@ -35,11 +35,11 @@ use Digest::MD5 qw(md5_base64);
 ###############################
 
 use constant DB_COLUMNS => qw(
-    bug_id
     has_symbols
     id
     full_hash
     short_hash
+    thetext
     type
     quality
 );
@@ -47,11 +47,11 @@ use constant DB_COLUMNS => qw(
 use constant DB_TABLE => 'trace';
 
 use constant VALIDATORS => {
-    bug_id      => \&_check_bug_id,
     has_symbols => \&Bugzilla::Object::check_boolean,
     full_hash   => \&_check_hash,
     short_hash  => \&_check_hash,
     short_stack => \&_check_short_stack,
+    thetext     => \&_check_thetext,
     type        => \&_check_type,
     quality     => \&_check_quality,
 };
@@ -74,8 +74,8 @@ use constant IGNORE_FUNCTIONS => qw(
 # Constructors #
 ################
 
-# Returns a hash suitable for passing to create() (without the bug_id
-# argument), or undef if there is no trace in the comment.
+# Returns a hash suitable for passing to create(), or undef if there is no
+# trace in the comment.
 sub parse_from_text {
     my ($class, $text) = @_;
     my $trace = Parse::StackTrace->parse(types => TRACE_TYPES, 
@@ -87,26 +87,34 @@ sub parse_from_text {
     my $has_symbols = 1;
     my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
     foreach my $frame (@{ $crash_thread->frames }) {
-        foreach my $item (qw(function args number file line code)) {
-            $quality++ if defined $frame->$item;
+        foreach my $item (qw(args number file line code)) {
+            $quality++ if defined $frame->$item && $frame->$item ne '';
         }
         my $function = $frame->function;
         if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
             push(@all_functions, $frame->function);
         }
-        $has_symbols = 0 if $function eq '??';
+        if ($function eq '??') {
+            $has_symbols = 0;
+        }
+        else {
+            $quality++;
+        }
     }
 
     my $max_short_stack = $#all_functions > 4 ? 4 : $#all_functions;
     my @short_stack = @all_functions[0..$max_short_stack];
-    my $full_hash = md5_base64(join(',', @all_functions));
+    my $stack_hash = md5_base64(join(',', @all_functions));
     my $short_hash = md5_base64(join(',', @short_stack));
+    my $trace_text = $trace->text;
 
     return {
         has_symbols => $has_symbols,
-        full_hash   => $full_hash,
+        stack_hash  => $stack_hash,
         short_hash  => $short_hash,
         short_stack => join(', ', @short_stack),
+        trace_hash  => md5_base64($text),
+        trace_text  => $trace_text,
         type        => ref($trace),
         quality     => $quality,
     };
@@ -120,23 +128,21 @@ sub has_symbols { return $_[0]->{has_symbols}; }
 sub full_hash   { return $_[0]->{full_hash};   }
 sub short_hash  { return $_[0]->{short_hash};  }
 sub short_stack { return $_[0]->{short_stack}; }
+sub trace_text  { return $_[0]->{trace_text};  }
 sub type        { return $_[0]->{type};        }
 sub quality     { return $_[0]->{quality};     }
 
-sub bug {
+sub stacktrace_object {
     my $self = shift;
-    $self->{bug} ||= new Bugzilla::Bug($self->{bug_id});
-    return $self->{bug};
+    my $type = $self->type;
+    eval("use $type") || die $@;
+    $self->{stacktrace_object} ||= $type->parse({ text => $self->trace_text });
+    return $self->{stacktrace_object};
 }
 
 ###############################
 ###       Validators        ###
 ###############################
-
-sub _check_bug_id {
-    my ($self, $bug_id) = @_;
-    return Bugzilla::Bug->check($bug_id)->id;
-}
 
 sub _check_hash {
     my ($self, $hash) = @_;
@@ -149,10 +155,20 @@ sub _check_hash {
 
 sub _check_short_stack { return trim($_[1]) || '' }
 
+sub _check_thetext {
+    my ($invocant, $text) = @_;
+    if (!$text or $text =~ /^\s+$/s) {
+        my $class = ref($invocant) || $invocant;
+        ThrowCodeError('param_required', { function => "${class}::create",
+                                           param    => 'thetext' });
+    }
+    return $text;
+}
+
 sub _check_type {
     my ($invocant, $type) = @_;
     $type = trim($type);
-    if (!$type)
+    if (!$type) {
         my $class = ref($invocant) || $invocant;
         ThrowCodeError('param_required', { function => "${class}::create",
                                            param    => 'type' });
