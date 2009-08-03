@@ -29,17 +29,21 @@ $schema->{trace} = {
     FIELDS => [
         id          => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1, 
                         PRIMARYKEY => 1},
+        bug_id      => {TYPE => 'INT3', NOTNULL => 1, 
+                        REFERENCES => {TABLE  => 'bugs',
+                                       COLUMN => 'bug_id',
+                                       DELETE => 'CASCADE'}},
         type        => {TYPE => 'varchar(255)', NOTNULL => 1},
         short_stack => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
         short_hash  => {TYPE => 'char(22)', NOTNULL => 1},
         stack_hash  => {TYPE => 'char(22)', NOTNULL => 1},
         trace_hash  => {TYPE => 'char(22)', NOTNULL => 1},
         trace_text  => {TYPE => 'LONGTEXT', NOTNULL => 1},
-        has_symbols => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
         quality     => {TYPE => 'INT3', NOTNULL => 1},
     ],
     INDEXES => [
         trace_short_hash_idx => ['short_hash'],
-        trace_full_hash_idx  => ['full_hash'],
+        trace_full_hash_idx  => ['stack_hash'],
+        trace_bug_id_idx => ['bug_id'],
     ],
 };

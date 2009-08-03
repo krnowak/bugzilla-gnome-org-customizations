@@ -35,11 +35,13 @@ use Digest::MD5 qw(md5_base64);
 ###############################
 
 use constant DB_COLUMNS => qw(
-    has_symbols
     id
-    full_hash
+    bug_id
     short_hash
-    thetext
+    short_stack
+    stack_hash
+    trace_hash
+    trace_text
     type
     quality
 );
@@ -47,16 +49,22 @@ use constant DB_COLUMNS => qw(
 use constant DB_TABLE => 'trace';
 
 use constant VALIDATORS => {
-    has_symbols => \&Bugzilla::Object::check_boolean,
-    full_hash   => \&_check_hash,
+    stack_hash  => \&_check_hash,
     short_hash  => \&_check_hash,
+    trace_hash  => \&_check_hash,
     short_stack => \&_check_short_stack,
-    thetext     => \&_check_thetext,
+    trace_text  => \&_check_thetext,
     type        => \&_check_type,
     quality     => \&_check_quality,
 };
 
-use constant REQUIRED_CREATE_FIELDS => qw(type full_hash short_hash);
+use constant REQUIRED_CREATE_FIELDS => qw(
+    type
+    trace_hash
+    stack_hash
+    short_hash
+    trace_text
+);
 
 # This is how long a Base64 MD5 Hash is.
 use constant HASH_SIZE => 22;
@@ -77,14 +85,13 @@ use constant IGNORE_FUNCTIONS => qw(
 # Returns a hash suitable for passing to create(), or undef if there is no
 # trace in the comment.
 sub parse_from_text {
-    my ($class, $text) = @_;
+    my ($class, $text, $bug_id) = @_;
     my $trace = Parse::StackTrace->parse(types => TRACE_TYPES, 
                                          text => $text);
     return undef if !$trace;
 
     my @all_functions;
     my $quality = 0;
-    my $has_symbols = 1;
     my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
     foreach my $frame (@{ $crash_thread->frames }) {
         foreach my $item (qw(args number file line code)) {
@@ -93,11 +100,6 @@ sub parse_from_text {
         my $function = $frame->function;
         if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
             push(@all_functions, $frame->function);
-        }
-        if ($function eq '??') {
-            $has_symbols = 0;
-        }
-        else {
             $quality++;
         }
     }
@@ -107,28 +109,39 @@ sub parse_from_text {
     my $stack_hash = md5_base64(join(',', @all_functions));
     my $short_hash = md5_base64(join(',', @short_stack));
     my $trace_text = $trace->text;
+    my $trace_hash = md5_base64($trace_text);
 
     return {
-        has_symbols => $has_symbols,
+        bug_id      => $bug_id,
         stack_hash  => $stack_hash,
         short_hash  => $short_hash,
         short_stack => join(', ', @short_stack),
-        trace_hash  => md5_base64($text),
+        trace_hash  => $trace_hash,
         trace_text  => $trace_text,
         type        => ref($trace),
         quality     => $quality,
     };
 }
 
+sub new_from_text {
+    my ($class, $text, $bug_id) = @_;
+    my $parsed = Parse::StackTrace->parse(types => TRACE_TYPES,
+                                          text => $text);
+    return undef if !$parsed;
+    my $hash = md5_base64($parsed->text);
+    my $traces = $class->match({ trace_hash => $hash, bug_id => $bug_id });
+    return $traces->[0];
+}
+
 ###############################
 ####      Accessors      ######
 ###############################
 
-sub has_symbols { return $_[0]->{has_symbols}; }
 sub full_hash   { return $_[0]->{full_hash};   }
 sub short_hash  { return $_[0]->{short_hash};  }
 sub short_stack { return $_[0]->{short_stack}; }
-sub trace_text  { return $_[0]->{trace_text};  }
+sub trace_hash  { return $_[0]->{trace_hash};  }
+sub text        { return $_[0]->{trace_text};  }
 sub type        { return $_[0]->{type};        }
 sub quality     { return $_[0]->{quality};     }
 
