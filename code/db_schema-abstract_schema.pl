@@ -43,7 +43,7 @@ $schema->{trace} = {
     ],
     INDEXES => [
         trace_short_hash_idx => ['short_hash'],
-        trace_full_hash_idx  => ['stack_hash'],
+        trace_stack_hash_idx => ['stack_hash'],
         trace_bug_id_idx => ['bug_id'],
     ],
 };
