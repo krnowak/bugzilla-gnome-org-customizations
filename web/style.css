@@ -3,6 +3,11 @@
     margin-top: -.5em;
 }
 
+.thread_start {
+  font-weight: bold;
+  margin-top: 0;
+}
+
 .frames {
   list-style-type: none;
   margin: 0;
