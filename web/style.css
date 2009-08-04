@@ -22,6 +22,10 @@
   color: #c00;
 }
 
+.crash .frame_function {
+  color: #4e9a06;
+}
+
 .frame_file_container {
   margin-left: 3em;
 }
