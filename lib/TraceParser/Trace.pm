@@ -48,6 +48,8 @@ use constant DB_COLUMNS => qw(
 
 use constant DB_TABLE => 'trace';
 
+use constant LIST_ORDER => 'bug_id';
+
 use constant VALIDATORS => {
     stack_hash  => \&_check_hash,
     short_hash  => \&_check_hash,
@@ -130,7 +132,12 @@ sub new_from_text {
     return undef if !$parsed;
     my $hash = md5_base64($parsed->text);
     my $traces = $class->match({ trace_hash => $hash, bug_id => $bug_id });
-    return $traces->[0];
+    if (@$traces) {
+        $traces->[0]->{stacktrace_object} = $parsed;
+        return $traces->[0];
+    }
+    warn "No trace found on bug $bug_id with hash $hash";
+    return undef;
 }
 
 ###############################
@@ -148,7 +155,7 @@ sub quality     { return $_[0]->{quality};     }
 sub stacktrace_object {
     my $self = shift;
     my $type = $self->type;
-    eval("use $type") || die $@;
+    eval("use $type; 1;") or die $@;
     $self->{stacktrace_object} ||= $type->parse({ text => $self->trace_text });
     return $self->{stacktrace_object};
 }

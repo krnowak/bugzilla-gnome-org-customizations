@@ -1,0 +1,67 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla TraceParser Plugin.
+  #
+  # The Initial Developer of the Original Code is Canonical Ltd.
+  # Portions created by Canonical Ltd. are Copyright (C) 2009
+  # Canonical Ltd. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Max Kanat-Alexander <mkanat@bugzilla.org>
+  #%]
+
+</pre>
+<p class="trace_link" title="See Full Trace">
+  <a href="page.cgi?id=trace.html&id=[% trace.id FILTER url_quote %]">Trace 
+    [% trace.id FILTER html %]</a></p>
+<table border="0" cellpadding="0" cellspacing="0"><tr><td>
+<div class="trace">
+  [% IF trace.type.match('Python') %]
+    PYTHON TRACE
+  [% ELSE %]
+    [% SET st = trace.stacktrace_object %]
+    [% IF st.thread_with_crash %]
+      [% threads = [st.thread_with_crash] %]
+    [% ELSE %]
+      [% threads = st.threads %]
+    [% END %]
+    
+    [% FOREACH thread = threads %]
+      [% IF thread.number || thread.description %]
+        <p class="thread_start">Thread [% thread.number FILTER html %] 
+          ([% thread.description FILTER html %])</p>
+      [% END %]
+
+      <ul class="frames">
+        [% FOREACH frame = thread.frames %]
+          <li class="frame [% ' crash' IF frame.is_crash %]">
+            [% IF frame.number.defined %]
+              <span class="frame_number">#[% frame.number FILTER html %]</span>
+            [% END %]
+            <span class="frame_function">[% frame.function FILTER html %]</span>
+            [% IF frame.file %]
+              <div class="frame_file_container">
+                at <span class="frame_file">[% frame.file FILTER html %]</span>
+                [% IF frame.line %]
+                  line 
+                  <span class="frame_line">[% frame.line FILTER html %]</span>
+                [% END %]
+              </div>
+            [% END %]
+          </li>
+        [% END %]
+      </ul>
+    [% END %]
+  [% END %]
+</div>
+</td></tr></table>
+<pre>

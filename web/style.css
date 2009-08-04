@@ -1,0 +1,35 @@
+.trace_link {
+    margin-bottom: .5em;
+    margin-top: -.5em;
+}
+
+.frames {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.trace {
+  border: 1px dashed gray;
+  padding: .5em;
+}
+
+.frame {
+  margin-bottom: .25em;
+}
+
+.frame_function {
+  color: #c00;
+}
+
+.frame_file_container {
+  margin-left: 3em;
+}
+
+.frame_file {
+  font-style: italic;
+}
+
+.frame_line {
+  font-weight: bold;
+}
