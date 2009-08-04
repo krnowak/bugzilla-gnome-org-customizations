@@ -26,6 +26,7 @@ use TraceParser::Trace;
 
 our @EXPORT = qw(
     linkify_comment
+    page
 );
 
 sub linkify_comment {
@@ -41,6 +42,16 @@ sub linkify_comment {
                        \$replacement)
       || ThrowTemplateError($template->error);
     push(@$replace, $replacement);
+}
+
+
+sub page {
+    my %params = @_;
+    my ($vars, $page) = @params{qw(vars page_id)};
+    return if $page !~ '^trace\.';
+    my $trace_id = Bugzilla->cgi->param('trace_id');
+    my $trace = TraceParser::Trace->check({ id => $trace_id });
+    $vars->{trace} = $trace;
 }
 
 1;
