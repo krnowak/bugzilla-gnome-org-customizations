@@ -32,7 +32,7 @@ our @EXPORT = qw(
 sub linkify_comment {
     my %params = @_;
     my ($text, $bug_id, $match, $replace) = @params{qw(text bug_id match replace)};
-    my $trace = TraceParser::Trace->new_from_text($$text, $bug_id);
+    my $trace = TraceParser::Trace->new_or_create_from_text($$text, $bug_id);
     return if !$trace;
     my $template = Bugzilla->template_inner;
     my $match_text = quotemeta($trace->text);
