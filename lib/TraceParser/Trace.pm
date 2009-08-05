@@ -132,11 +132,11 @@ sub parse_from_text {
         my $max_short_stack = $#all_functions >= STACK_SIZE ? STACK_SIZE 
                               : $#all_functions;
         my @short_stack = @all_functions[0..($max_short_stack-1)];
-        $stack_hash = md5_base64(join(',', @all_functions));
-        $short_hash = md5_base64(join(',', @short_stack));
+        $stack_hash = _hash(join(',', @all_functions));
+        $short_hash = _hash(join(',', @short_stack));
     }
     my $trace_text = $trace->text;
-    my $trace_hash = md5_base64($trace_text);
+    my $trace_hash = _hash($trace_text);
 
     return {
         stack_hash  => $stack_hash,
@@ -146,6 +146,12 @@ sub parse_from_text {
         type        => ref($trace),
         quality     => $quality,
     };
+}
+
+sub _hash {
+    my $str = shift;
+    utf8::encode($str) if utf8::is_utf8($str);
+    return md5_base64($str);
 }
 
 ###############################
