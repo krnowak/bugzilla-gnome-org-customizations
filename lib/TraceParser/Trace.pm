@@ -122,7 +122,9 @@ sub parse_from_text {
         }
     }
 
-    $quality = "$quality.0" / scalar(@frames);
+    if ($quality) {
+        $quality = "$quality.0" / scalar(@frames);
+    }
 
     my $stack_hash;
     my $short_hash;
