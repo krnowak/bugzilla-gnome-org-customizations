@@ -38,14 +38,14 @@ sub install_update_db {
     return if $has_traces;
 
     print "Parsing traces from comments...\n";
-    my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
+    my $total = 75000; #$dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
 
     if ($dbh->isa('Bugzilla::DB::Mysql')) {
         $dbh->{'mysql_use_result'} = 1;
     }
 
     my $sth = $dbh->prepare('SELECT comment_id, thetext FROM longdescs 
-                           ORDER BY comment_id');
+                           ORDER BY comment_id DESC LIMIT 75000');
     $sth->execute();
     my $count = 1;
     my @traces;
@@ -93,7 +93,7 @@ sub format_comment {
     }
     else {
         my $stacktrace = TraceParser::Trace->stacktrace_from_text($$text);
-        $trace->{stacktrace_object} = $stacktrace;
+        $trace->{stack} = $stacktrace;
         $match_text = $stacktrace->text;
     }
 
@@ -114,6 +114,22 @@ sub page {
     return if $page !~ '^trace\.';
     my $trace_id = Bugzilla->cgi->param('trace_id');
     my $trace = TraceParser::Trace->check({ id => $trace_id });
+    $trace->bug->check_is_visible;
+
+    if ($trace->stack_hash) {
+        my $identical_traces = TraceParser::Trace->match(
+            { stack_hash => $trace->stack_hash });
+        my $similar_traces = TraceParser::Trace->match(
+            { short_hash => $trace->short_hash });
+        # Remove identical traces.
+        my %identical = map { $_->id => 1 } @$identical_traces;
+        @$similar_traces = grep { !$identical{$_->id} } @$similar_traces;
+        # Remove this trace from the identical traces.
+        @$identical_traces = grep { $_->id != $trace->id } @$identical_traces;
+        $vars->{similar_traces} = $similar_traces;
+        $vars->{identical_traces} = $identical_traces;
+    }
+
     $vars->{trace} = $trace;
 }
 

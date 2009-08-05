@@ -55,13 +55,10 @@ use constant VALIDATORS => {
     trace_hash  => \&_check_hash,
     trace_text  => \&_check_thetext,
     type        => \&_check_type,
-    quality     => \&_check_quality,
 };
 
 use constant REQUIRED_CREATE_FIELDS => qw(
     comment_id
-    short_hash
-    stack_hash
     trace_hash
     trace_text
     type
@@ -70,10 +67,14 @@ use constant REQUIRED_CREATE_FIELDS => qw(
 # This is how long a Base64 MD5 Hash is.
 use constant HASH_SIZE => 22;
 
+# How many functions we should be hashing for the short_hash.
+use constant STACK_SIZE => 5;
+
 use constant TRACE_TYPES => ['GDB', 'Python'];
 
 use constant IGNORE_FUNCTIONS => qw(
    __kernel_vsyscall
+   __libc_start_main
    raise
    abort
    ??
@@ -95,26 +96,42 @@ sub parse_from_text {
     my $trace = $class->stacktrace_from_text($text);
     return undef if !$trace;
 
+    my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
+    my @frames = @{ $crash_thread->frames };
+    my ($has_crash) = grep { $_->is_crash } @frames;
+
     my @all_functions;
     my $quality = 0;
-    my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
-    foreach my $frame (@{ $crash_thread->frames }) {
+    my $counting_functions = 0;
+    foreach my $frame (@frames) {
+        if (!$has_crash or $frame->number > $has_crash->number) {
+            $counting_functions++;
+        }
+        next if !$counting_functions;
+
         foreach my $item (qw(args number file line code)) {
             $quality++ if defined $frame->$item && $frame->$item ne '';
         }
+
         my $function = $frame->function;
         if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
-            push(@all_functions, $frame->function);
+            $function =~ s/^IA__//;
+            push(@all_functions, $function);
             $quality++;
         }
     }
 
-    $quality = $quality / scalar(@{ $crash_thread->frames });
+    $quality = "$quality.0" / scalar(@frames);
 
-    my $max_short_stack = $#all_functions > 4 ? 4 : $#all_functions;
-    my @short_stack = @all_functions[0..$max_short_stack];
-    my $stack_hash = md5_base64(join(',', @all_functions));
-    my $short_hash = md5_base64(join(',', @short_stack));
+    my $stack_hash;
+    my $short_hash;
+    if (@all_functions) {
+        my $max_short_stack = $#all_functions >= STACK_SIZE ? STACK_SIZE 
+                              : $#all_functions;
+        my @short_stack = @all_functions[0..($max_short_stack-1)];
+        $stack_hash = md5_base64(join(',', @all_functions));
+        $short_hash = md5_base64(join(',', @short_stack));
+    }
     my $trace_text = $trace->text;
     my $trace_hash = md5_base64($trace_text);
 
@@ -133,7 +150,7 @@ sub parse_from_text {
 ###############################
 
 sub comment_id  { return $_[0]->{comment_id};  }
-sub full_hash   { return $_[0]->{full_hash};   }
+sub stack_hash  { return $_[0]->{stack_hash};  }
 sub short_hash  { return $_[0]->{short_hash};  }
 sub trace_hash  { return $_[0]->{trace_hash};  }
 sub text        { return $_[0]->{trace_text};  }
@@ -150,12 +167,12 @@ sub bug {
     return $self->{bug};
 }
 
-sub stacktrace_object {
+sub stack {
     my $self = shift;
     my $type = $self->type;
     eval("use $type; 1;") or die $@;
-    $self->{stacktrace_object} ||= $type->parse({ text => $self->trace_text });
-    return $self->{stacktrace_object};
+    $self->{stack} ||= $type->parse({ text => $self->trace_text });
+    return $self->{stack};
 }
 
 ###############################
@@ -165,7 +182,7 @@ sub stacktrace_object {
 sub _check_hash {
     my ($self, $hash) = @_;
     $hash = trim($hash);
-    ThrowCodeError('traceparser_no_hash') if !$hash;
+    return undef if !$hash;
     length($hash) == HASH_SIZE
         or ThrowCodeError('traceparser_bad_hash', { hash => $hash });
     return $hash;
@@ -193,7 +210,5 @@ sub _check_type {
       or ThrowCodeError('traceparser_bad_type', { type => $type });
     return $type;
 }
-
-sub _check_quality { return int($_[1]); }
 
 1;

@@ -31,11 +31,11 @@
   color: #4e9a06;
 }
 
-.frame_file_container {
-  margin-left: 3em;
+.frame_file_container, .frame_library_container {
+  margin-left: 2em;
 }
 
-.frame_file {
+.frame_file, .frame_library {
   font-style: italic;
 }
 

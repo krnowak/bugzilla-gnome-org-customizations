@@ -27,9 +27,8 @@
 <table border="0" cellpadding="0" cellspacing="0"><tr><td>
 <div class="trace">
   [% IF trace.type.match('Python') %]
-    PYTHON TRACE
   [% ELSE %]
-    [% SET st = trace.stacktrace_object %]
+    [% SET st = trace.stack %]
     [% IF st.thread_with_crash %]
       [% threads = [st.thread_with_crash] %]
     [% ELSE %]
@@ -49,6 +48,12 @@
               <span class="frame_number">#[% frame.number FILTER html %]</span>
             [% END %]
             <span class="frame_function">[% frame.function FILTER html %]</span>
+            [% IF frame.library %]
+              <div class="frame_library_container">
+                from 
+                <span class="frame_library">[% frame.library FILTER html %]</span>
+              </div>
+            [% END %]
             [% IF frame.file %]
               <div class="frame_file_container">
                 at <span class="frame_file">[% frame.file FILTER html %]</span>
