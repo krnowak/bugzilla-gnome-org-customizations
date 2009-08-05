@@ -38,13 +38,14 @@ sub install_update_db {
     return if $has_traces;
 
     print "Parsing traces from comments...\n";
-    my $total = 50000; #$dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
+    my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
 
     if ($dbh->isa('Bugzilla::DB::Mysql')) {
         $dbh->{'mysql_use_result'} = 1;
     }
 
-    my $sth = $dbh->prepare('SELECT comment_id, thetext FROM longdescs ORDER BY comment_id DESC LIMIT 50000');
+    my $sth = $dbh->prepare('SELECT comment_id, thetext FROM longdescs 
+                           ORDER BY comment_id');
     $sth->execute();
     my $count = 1;
     my @traces;
