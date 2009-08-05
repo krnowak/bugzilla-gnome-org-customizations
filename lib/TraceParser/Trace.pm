@@ -36,9 +36,8 @@ use Digest::MD5 qw(md5_base64);
 
 use constant DB_COLUMNS => qw(
     id
-    bug_id
+    comment_id
     short_hash
-    short_stack
     stack_hash
     trace_hash
     trace_text
@@ -48,24 +47,24 @@ use constant DB_COLUMNS => qw(
 
 use constant DB_TABLE => 'trace';
 
-use constant LIST_ORDER => 'bug_id';
+use constant LIST_ORDER => 'comment_id';
 
 use constant VALIDATORS => {
     stack_hash  => \&_check_hash,
     short_hash  => \&_check_hash,
     trace_hash  => \&_check_hash,
-    short_stack => \&_check_short_stack,
     trace_text  => \&_check_thetext,
     type        => \&_check_type,
     quality     => \&_check_quality,
 };
 
 use constant REQUIRED_CREATE_FIELDS => qw(
-    type
-    trace_hash
-    stack_hash
+    comment_id
     short_hash
+    stack_hash
+    trace_hash
     trace_text
+    type
 );
 
 # This is how long a Base64 MD5 Hash is.
@@ -84,12 +83,16 @@ use constant IGNORE_FUNCTIONS => qw(
 # Constructors #
 ################
 
+sub stacktrace_from_text {
+    my ($class, $text) = @_;
+    return Parse::StackTrace->parse(types => TRACE_TYPES, text => $text);
+}
+
 # Returns a hash suitable for passing to create(), or undef if there is no
 # trace in the comment.
 sub parse_from_text {
     my ($class, $text) = @_;
-    my $trace = Parse::StackTrace->parse(types => TRACE_TYPES, 
-                                         text => $text);
+    my $trace = $class->stacktrace_from_text($text);
     return undef if !$trace;
 
     my @all_functions;
@@ -106,6 +109,8 @@ sub parse_from_text {
         }
     }
 
+    $quality = $quality / scalar(@{ $crash_thread->frames });
+
     my $max_short_stack = $#all_functions > 4 ? 4 : $#all_functions;
     my @short_stack = @all_functions[0..$max_short_stack];
     my $stack_hash = md5_base64(join(',', @all_functions));
@@ -116,7 +121,6 @@ sub parse_from_text {
     return {
         stack_hash  => $stack_hash,
         short_hash  => $short_hash,
-        short_stack => join(', ', @short_stack),
         trace_hash  => $trace_hash,
         trace_text  => $trace_text,
         type        => ref($trace),
@@ -124,32 +128,27 @@ sub parse_from_text {
     };
 }
 
-sub new_from_text {
-    my ($class, $text, $bug_id) = @_;
-    my $parsed = Parse::StackTrace->parse(types => TRACE_TYPES,
-                                          text => $text);
-    return undef if !$parsed;
-    my $hash = md5_base64($parsed->text);
-    my $traces = $class->match({ trace_hash => $hash, bug_id => $bug_id });
-    if (@$traces) {
-        $traces->[0]->{stacktrace_object} = $parsed;
-        return $traces->[0];
-    }
-    warn "No trace found on bug $bug_id with hash $hash";
-    return undef;
-}
-
 ###############################
 ####      Accessors      ######
 ###############################
 
+sub comment_id  { return $_[0]->{comment_id};  }
 sub full_hash   { return $_[0]->{full_hash};   }
 sub short_hash  { return $_[0]->{short_hash};  }
-sub short_stack { return $_[0]->{short_stack}; }
 sub trace_hash  { return $_[0]->{trace_hash};  }
 sub text        { return $_[0]->{trace_text};  }
 sub type        { return $_[0]->{type};        }
 sub quality     { return $_[0]->{quality};     }
+
+sub bug {
+    my $self = shift;
+    return $self->{bug} if exists $self->{bug};
+    my $bug_id = Bugzilla->dbh->selectrow_array(
+        'SELECT bug_id FROM longdescs WHERE comment_id = ?', undef, 
+        $self->comment_id);
+    $self->{bug} = new Bugzilla::Bug($bug_id);
+    return $self->{bug};
+}
 
 sub stacktrace_object {
     my $self = shift;
@@ -171,8 +170,6 @@ sub _check_hash {
         or ThrowCodeError('traceparser_bad_hash', { hash => $hash });
     return $hash;
 }
-
-sub _check_short_stack { return trim($_[1]) || '' }
 
 sub _check_thetext {
     my ($invocant, $text) = @_;

@@ -23,8 +23,5 @@
 use strict;
 use warnings;
 use Bugzilla;
-use Bugzilla::Error;
-use TraceParser::Trace;
 use TraceParser::Hooks;
-
-linkify_comment(%{ Bugzilla->hook_args });
+format_comment(%{ Bugzilla->hook_args });
