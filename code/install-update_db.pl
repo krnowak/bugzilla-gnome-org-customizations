@@ -23,47 +23,5 @@
 use strict;
 use warnings;
 use Bugzilla;
-use Bugzilla::Install::Util qw(indicate_progress);
-
-use TraceParser::Trace;
-
-my $dbh = Bugzilla->dbh;
-my $has_traces = $dbh->selectrow_array('SELECT 1 FROM trace ' 
-                                        . $dbh->sql_limit('1'));
-if (!$has_traces) {
-    print "Parsing traces from comments...\n";
-    my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
-
-    if ($dbh->isa('Bugzilla::DB::Mysql')) {
-        $dbh->{'mysql_use_result'} = 1;
-    }
-
-    my $sth = $dbh->prepare('SELECT bug_id, thetext FROM longdescs');
-    $sth->execute();
-    my $count = 0;
-    my @traces;
-    while (my ($bug_id, $text) = $sth->fetchrow_array) {
-        $count++;
-        my $trace = TraceParser::Trace->parse_from_text($text, $bug_id);
-        push(@traces, $trace) if $trace;
-        indicate_progress({ current => $count, total => $total, 
-                            every => 100 });
-    }
-
-    my $total_traces = scalar(@traces);
-    print "Parsed $total_traces traces.\n";
-
-    if ($dbh->isa('Bugzilla::DB::Mysql')) {
-        $dbh->{'mysql_use_result'} = 0;
-    }
-
-    print "Inserting parsed traces into DB...\n";
-    $count = 1;
-    $dbh->bz_start_transaction();
-    while (my $trace = shift @traces) {
-        TraceParser::Trace->create($trace);
-        indicate_progress({ current => $count++, total => $total_traces, 
-                            every => 100 });
-    }
-    $dbh->bz_commit_transaction();
-}
+use TraceParser::Hooks;
+install_update_db();

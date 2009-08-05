@@ -87,7 +87,7 @@ use constant IGNORE_FUNCTIONS => qw(
 # Returns a hash suitable for passing to create(), or undef if there is no
 # trace in the comment.
 sub parse_from_text {
-    my ($class, $text, $bug_id) = @_;
+    my ($class, $text) = @_;
     my $trace = Parse::StackTrace->parse(types => TRACE_TYPES, 
                                          text => $text);
     return undef if !$trace;
@@ -114,7 +114,6 @@ sub parse_from_text {
     my $trace_hash = md5_base64($trace_text);
 
     return {
-        bug_id      => $bug_id,
         stack_hash  => $stack_hash,
         short_hash  => $short_hash,
         short_stack => join(', ', @short_stack),
