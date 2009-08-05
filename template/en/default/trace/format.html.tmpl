@@ -27,6 +27,26 @@
 <table border="0" cellpadding="0" cellspacing="0"><tr><td>
 <div class="trace">
   [% IF trace.type.match('Python') %]
+    <ul class="frames">
+      [% SET thread = trace.stack.threads.0 %]
+      [% FOREACH frame = thread.frames.reverse %]
+        <li class="frame">
+          File "<span class="frame_file">[% frame.file FILTER html %]</span>",
+          line <span class="frame_line">[% frame.line FILTER html %]</span>
+          [% IF frame.function %]
+            in <span class="frame_function">
+                 [%- frame.function FILTER html %]</span>
+          [% END %]
+          [% IF frame.code %]
+            <pre class="frame_code">[% frame.code FILTER html %]</pre>
+          [% END %]
+        </li>
+      [% END %]
+    </ul>
+    [% IF thread.description %]
+      <span class="thread_description">
+        [%- thread.description FILTER html %]</span>
+    [% END %]
   [% ELSE %]
     [% SET st = trace.stack %]
     [% IF st.thread_with_crash %]
@@ -37,7 +57,7 @@
     
     [% FOREACH thread = threads %]
       [% IF thread.number || thread.description %]
-        <p class="thread_start">Thread [% thread.number FILTER html %] 
+        <p class="thread_description">Thread [% thread.number FILTER html %] 
           ([% thread.description FILTER html %])</p>
       [% END %]
 

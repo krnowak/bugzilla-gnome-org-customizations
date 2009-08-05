@@ -47,11 +47,16 @@
         <a href="page.cgi?id=trace.html&amp;trace_id=
                  [%- this_trace.id FILTER url_quote %]">Trace 
           [% this_trace.id FILTER html %]</a> on
-        [%+ "Bug $bug.id" FILTER bug_link(bug.id) %]
+        [%+ "Bug $bug.id" FILTER bug_link(bug.id) %]:
+        [% bug.bug_status FILTER html %] [%+ bug.resolution FILTER html %]
+        [% IF bug.dup_id %]
+          of [% "bug $bug.dup_id" FILTER bug_link(bug.dup_id) %]
+        [% END %]
         (Quality: [% this_trace.quality FILTER html %])
         [% IF user.can_see_bug(bug) %]
           [%+ bug.product FILTER html %]
         [% END %]
+        
       </li>
     [% END %]
   </ul>

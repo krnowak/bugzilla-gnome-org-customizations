@@ -47,7 +47,7 @@ use constant DB_COLUMNS => qw(
 
 use constant DB_TABLE => 'trace';
 
-use constant LIST_ORDER => 'comment_id';
+use constant LIST_ORDER => 'quality DESC, comment_id';
 
 use constant VALIDATORS => {
     stack_hash  => \&_check_hash,
@@ -77,6 +77,7 @@ use constant IGNORE_FUNCTIONS => qw(
    __libc_start_main
    raise
    abort
+   poll
    ??
 );
 
@@ -125,7 +126,9 @@ sub parse_from_text {
 
     my $stack_hash;
     my $short_hash;
-    if (@all_functions) {
+    # We don't do similarity on traces that have fewer than 2 functions
+    # in their stack.
+    if (@all_functions > 1) {
         my $max_short_stack = $#all_functions >= STACK_SIZE ? STACK_SIZE 
                               : $#all_functions;
         my @short_stack = @all_functions[0..($max_short_stack-1)];
@@ -155,7 +158,10 @@ sub short_hash  { return $_[0]->{short_hash};  }
 sub trace_hash  { return $_[0]->{trace_hash};  }
 sub text        { return $_[0]->{trace_text};  }
 sub type        { return $_[0]->{type};        }
-sub quality     { return $_[0]->{quality};     }
+sub quality     {
+    my $self = shift;
+    return sprintf('%.1f', $self->{quality});
+}
 
 sub bug {
     my $self = shift;
@@ -171,7 +177,7 @@ sub stack {
     my $self = shift;
     my $type = $self->type;
     eval("use $type; 1;") or die $@;
-    $self->{stack} ||= $type->parse({ text => $self->trace_text });
+    $self->{stack} ||= $type->parse(text => $self->text);
     return $self->{stack};
 }
 

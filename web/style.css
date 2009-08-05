@@ -3,7 +3,7 @@
     margin-top: -.5em;
 }
 
-.thread_start {
+.thread_description {
   font-weight: bold;
   margin-top: 0;
 }
@@ -31,8 +31,13 @@
   color: #4e9a06;
 }
 
-.frame_file_container, .frame_library_container {
+.frame_code, .frame_file_container, .frame_library_container {
   margin-left: 2em;
+}
+.frame_code {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .frame_file, .frame_library {
