@@ -36,8 +36,10 @@ $dbh->bz_start_transaction();
 print "Updating trace hashes...\n";
 $count = 1;
 foreach my $trace (@traces) {
-    $dbh->do("UPDATE trace SET stack_hash = ?, short_hash = ? WHERE id = ?",
-             undef, $trace->{stack_hash}, $trace->{short_hash}, $trace->{id});
+    $dbh->do("UPDATE trace SET stack_hash = ?, short_hash = ?, quality = ? 
+               WHERE id = ?",
+             undef, $trace->{stack_hash}, $trace->{short_hash}, 
+             $trace->{quality}, $trace->{id});
     indicate_progress({ current => $count, total => $total, every => 10 });
 }
 $dbh->bz_commit_transaction();

@@ -134,30 +134,17 @@ sub parse_from_text {
     my $trace = $class->stacktrace_from_text($text);
     return undef if !$trace;
 
-    my $crash_thread = $trace->thread_with_crash || $trace->threads->[0];
-    my @frames = @{ $crash_thread->frames };
-    my ($has_crash) = grep { $_->is_crash } @frames;
+    my @frames = @{ $class->_important_stack_frames($trace) };
 
-    my @all_functions;
     my $quality = 0;
-    my $counting_functions = 0;
     foreach my $frame (@frames) {
-        if (!$has_crash or $frame->number > $has_crash->number) {
-            $counting_functions++;
-        }
-        next if !$counting_functions;
-
         foreach my $item (qw(args number file line code)) {
             $quality++ if defined $frame->$item && $frame->$item ne '';
         }
-
-        my $function = $frame->function;
-        if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
-            $function =~ s/^IA__//;
-            push(@all_functions, $function);
-            $quality++;
-        }
     }
+
+    my @all_functions = @{ _relevant_functions(\@frames) };
+    $quality += scalar(@all_functions);
 
     if ($quality) {
         $quality = "$quality.0" / scalar(@frames);
@@ -168,9 +155,7 @@ sub parse_from_text {
     # We don't do similarity on traces that have fewer than 2 functions
     # in their stack.
     if (@all_functions > 1) {
-        my $max_short_stack = $#all_functions >= STACK_SIZE ? STACK_SIZE 
-                              : $#all_functions;
-        my @short_stack = @all_functions[0..($max_short_stack-1)];
+        my @short_stack = @{ $class->short_stack(\@all_functions) };
         $stack_hash = _hash(join(',', @all_functions));
         $short_hash = _hash(join(',', @short_stack));
     }
@@ -223,6 +208,64 @@ sub bug {
         $self->comment_id);
     $self->{bug} = new Bugzilla::Bug($bug_id);
     return $self->{bug};
+}
+
+sub crash_thread {
+    my ($invocant, $st) = @_;
+    $st ||= $invocant->stack;
+    return $st->thread_with_crash || $st->threads->[0];
+}
+
+sub _important_stack_frames {
+    my ($invocant, $st) = @_;
+    $st ||= $invocant->stack;
+
+    my $crash_thread = $invocant->crash_thread($st);
+    my $frames = $crash_thread->frames;
+
+    my $crash_position;
+    my $position = 0;
+    foreach my $frame (@$frames) {
+        if ($frame->is_crash) {
+            $crash_position = $position;
+            last;
+        }
+        $position++;
+    }
+
+    if ($crash_position) {
+        # Also remove the crash frame itself (thus the + 1)
+        @$frames = splice(@$frames, $crash_position + 1);
+    }
+
+    return $frames;
+}
+
+sub _relevant_functions {
+    my ($frames) = @_;
+    my @relevant;
+    foreach my $frame (@$frames) {
+        my $function = $frame->function;
+        if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
+            $function =~ s/^IA__//;
+            push(@relevant, $function);
+        }
+    }
+    return \@relevant;
+}
+
+sub short_stack {
+    my ($invocant, $functions) = @_;
+    $functions ||= _relevant_functions($invocant->_important_stack_frames);
+
+    my @short_stack;
+    my $num_functions = scalar(@$functions);
+    if ($num_functions) {
+        my $max_short_stack = $num_functions >= STACK_SIZE ? STACK_SIZE
+                                                           : $num_functions;
+        @short_stack = @$functions[0..($max_short_stack-1)];
+    }
+    return \@short_stack;
 }
 
 sub stack {
