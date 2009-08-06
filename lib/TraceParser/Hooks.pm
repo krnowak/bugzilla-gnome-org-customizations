@@ -140,19 +140,22 @@ sub _page_trace {
         # Remove this trace from the identical traces.
         @$identical_traces = grep { $_->id != $trace->id } @$identical_traces;
 
-        my (%similar, %identical);
-        foreach my $trace (@$similar_traces) {
-            my $product = $trace->bug->product;
-            $similar{$product} ||= [];
-            push(@{ $similar{$product} }, $trace);
+        my %ungrouped = ( identical => $identical_traces, 
+                          similar   => $similar_traces );
+        my %by_product = ( identical => {}, similar => {} );
+
+        foreach my $type (qw(identical similar)) {
+            my $traces = $ungrouped{$type};
+            my $grouped = $by_product{$type};
+            foreach my $trace (@$traces) {
+                my $product = $trace->bug->product;
+                $grouped->{$product} ||= [];
+                push(@{ $grouped->{$product} }, $trace);
+            }
         }
-        foreach my $trace (@$identical_traces) {
-            my $product = $trace->bug->product;
-            $identical{$product} ||= [];
-            push(@{ $identical{$product} }, $trace);
-        }
-        $vars->{similar_traces} = \%similar;
-        $vars->{identical_traces} = \%identical;
+
+        $vars->{similar_traces} = $by_product{similar};
+        $vars->{identical_traces} = $by_product{identical};
     }
 
     $vars->{trace} = $trace;
