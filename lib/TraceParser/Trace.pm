@@ -99,9 +99,20 @@ sub _do_list_select {
               WHERE id IN(' . join(',', @trace_ids) . ')', {Columns=>[1,2]}) };
         my %unique_ids = map { $bug_ids{$_} => 1 } (keys %bug_ids);
         my $bugs = Bugzilla::Bug->new_from_list([values %bug_ids]);
+
+        # Populate "product" for each bug.
+        my %product_ids = map { $_->{product_id} => 1 } @$bugs;
+        my %products = @{ $dbh->selectcol_arrayref(
+            'SELECT id, name FROM products WHERE id IN(' 
+            . join(',', values %product_ids) . ')', {Columns=>[1,2]}) };
+        foreach my $bug (@$bugs) {
+            $bug->{product} = $products{$bug->{product_id}};
+        }
+
         # Pre-initialize the can_see_bug cache for these bugs.
         Bugzilla->user->visible_bugs($bugs);
         my %bug_map = map { $_->id => $_ } @$bugs;
+
         # And add them to each trace object.
         foreach my $trace (@$objects) {
             my $bug_id = $bug_ids{$trace->id};
