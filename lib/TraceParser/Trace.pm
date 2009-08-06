@@ -40,7 +40,6 @@ use constant DB_COLUMNS => qw(
     short_hash
     stack_hash
     trace_hash
-    trace_text
     type
     quality
 );
@@ -191,11 +190,18 @@ sub comment_id  { return $_[0]->{comment_id};  }
 sub stack_hash  { return $_[0]->{stack_hash};  }
 sub short_hash  { return $_[0]->{short_hash};  }
 sub trace_hash  { return $_[0]->{trace_hash};  }
-sub text        { return $_[0]->{trace_text};  }
 sub type        { return $_[0]->{type};        }
 sub quality     {
     my $self = shift;
     return sprintf('%.1f', $self->{quality});
+}
+
+sub text {
+    my $self = shift;
+    $self->{text} ||= Bugzilla->dbh->selectrow_array(
+        'SELECT trace_text FROM trace WHERE id = ?',
+        undef, $self->id);
+    return $self->{text};
 }
 
 sub bug {
