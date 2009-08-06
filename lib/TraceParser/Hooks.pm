@@ -28,12 +28,36 @@ use Bugzilla::Util qw(detaint_natural);
 use TraceParser::Trace;
 
 our @EXPORT = qw(
+    bug_create
+    bug_update
     install_update_db
     format_comment
     page
 );
 
 use constant DEFAULT_POPULAR_LIMIT => 20;
+
+sub bug_create {
+    my %params = @_;
+    my $bug = $params{bug};
+    my $comment = $bug->longdescs->[0];
+    my $data = TraceParser::Trace->parse_from_text($comment->{body});
+    return if !$data;
+    TraceParser::Trace->create({ %$data, comment_id => $comment->{id} });
+}
+
+sub bug_update {
+    my %params = @_;
+    my ($bug, $timestamp) = @params{qw(bug timestamp)};
+    return if !$bug->{added_comments};
+    my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest', 
+                                              $bug->delta_ts, $timestamp, 1);
+    foreach my $comment (@$comments) {
+        my $data = TraceParser::Trace->parse_from_text($comment->{body});
+        next if !$data;
+        TraceParser::Trace->create({ %$data, comment_id => $comment->{id} });
+    }
+}
 
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
