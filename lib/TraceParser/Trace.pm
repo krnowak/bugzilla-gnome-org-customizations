@@ -104,7 +104,7 @@ sub _do_list_select {
         my %product_ids = map { $_->{product_id} => 1 } @$bugs;
         my %products = @{ $dbh->selectcol_arrayref(
             'SELECT id, name FROM products WHERE id IN(' 
-            . join(',', values %product_ids) . ')', {Columns=>[1,2]}) };
+            . join(',', keys %product_ids) . ')', {Columns=>[1,2]}) };
         foreach my $bug (@$bugs) {
             $bug->{product} = $products{$bug->{product_id}};
         }

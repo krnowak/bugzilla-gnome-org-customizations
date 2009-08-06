@@ -24,6 +24,7 @@ use strict;
 use base qw(Exporter);
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(indicate_progress);
+use Bugzilla::Util qw(detaint_natural);
 use TraceParser::Trace;
 
 our @EXPORT = qw(
@@ -138,8 +139,20 @@ sub _page_trace {
         @$similar_traces = grep { !$identical{$_->id} } @$similar_traces;
         # Remove this trace from the identical traces.
         @$identical_traces = grep { $_->id != $trace->id } @$identical_traces;
-        $vars->{similar_traces} = $similar_traces;
-        $vars->{identical_traces} = $identical_traces;
+
+        my (%similar, %identical);
+        foreach my $trace (@$similar_traces) {
+            my $product = $trace->bug->product;
+            $similar{$product} ||= [];
+            push(@{ $similar{$product} }, $trace);
+        }
+        foreach my $trace (@$identical_traces) {
+            my $product = $trace->bug->product;
+            $identical{$product} ||= [];
+            push(@{ $identical{$product} }, $trace);
+        }
+        $vars->{similar_traces} = \%similar;
+        $vars->{identical_traces} = \%identical;
     }
 
     $vars->{trace} = $trace;
@@ -148,6 +161,7 @@ sub _page_trace {
 sub _page_popular_traces {
     my $vars = shift;
     my $limit = Bugzilla->cgi->param('limit') || DEFAULT_POPULAR_LIMIT;
+    detaint_natural($limit);
     my $dbh = Bugzilla->dbh;
     my %trace_count = @{ $dbh->selectcol_arrayref(
         'SELECT MAX(id), COUNT(*) AS trace_count

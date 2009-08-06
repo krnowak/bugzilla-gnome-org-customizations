@@ -24,14 +24,16 @@
 %]
 
 [% IF identical_traces.size %]
-  <p>Identical Traces:</p>
+  <h2>Traces with an identical stack:</h2>
   [% PROCESS trace_list list = identical_traces %]
 [% END %]
 
 [% IF similar_traces.size %]
-  <p>Similar Traces:</p>
+  <h2>Traces with a <em>similar</em> stack:</h2>
   [% PROCESS trace_list list = similar_traces %]
 [% END %]
+
+<h2>Trace [% trace.id FILTER html %]</h2>
 
 <table border="0" cellpadding="0" cellspacing="0"><tr><td><div class="trace">
 <pre>[% trace.text FILTER html %]
@@ -40,24 +42,23 @@
 [% PROCESS global/footer.html.tmpl %]
 
 [% BLOCK trace_list %]
-  <ul class="trace_list">
-    [% FOREACH this_trace = list %]
-      [% SET bug = this_trace.bug %]
-      <li>
-        <a href="page.cgi?id=trace.html&amp;trace_id=
-                 [%- this_trace.id FILTER url_quote %]">Trace 
-          [% this_trace.id FILTER html %]</a> on
-        [%+ "Bug $bug.id" FILTER bug_link(bug) %]:
-        [% bug.bug_status FILTER html %] [%+ bug.resolution FILTER html %]
-        [% IF bug.dup_id %]
-          of [% "bug $bug.dup_id" FILTER bug_link(bug.dup_id) %]
-        [% END %]
-        (Quality: [% this_trace.quality FILTER html %])
-        [% IF user.can_see_bug(bug) %]
-          [%+ bug.product FILTER html %]
-        [% END %]
-        
-      </li>
-    [% END %]
-  </ul>
+  [% FOREACH product = list.keys.sort %]
+    <p>In <strong>[% product FILTER html %]</strong>:</p>
+    <ul class="trace_list">
+      [% FOREACH this_trace = list.$product %]
+        [% SET bug = this_trace.bug %]
+        <li>
+          <a href="page.cgi?id=trace.html&amp;trace_id=
+                   [%- this_trace.id FILTER url_quote %]">Trace 
+            [% this_trace.id FILTER html %]</a> on
+          [%+ "Bug $bug.id" FILTER bug_link(bug) %]:
+          [% bug.bug_status FILTER html %] [%+ bug.resolution FILTER html %]
+          [% IF bug.dup_id %]
+            of [% "bug $bug.dup_id" FILTER bug_link(bug.dup_id) %]
+          [% END %]
+          (Quality: <strong>[% this_trace.quality FILTER html %]</strong>)
+        </li>
+      [% END %]
+    </ul>
+  [% END %]
 [% END %]
