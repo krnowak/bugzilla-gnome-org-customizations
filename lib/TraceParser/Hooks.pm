@@ -149,6 +149,7 @@ sub _page_trace {
             my $grouped = $by_product{$type};
             foreach my $trace (@$traces) {
                 my $product = $trace->bug->product;
+                next if !Bugzilla->user->can_see_product($product);
                 $grouped->{$product} ||= [];
                 push(@{ $grouped->{$product} }, $trace);
             }
