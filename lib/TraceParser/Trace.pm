@@ -85,6 +85,33 @@ use constant IGNORE_FUNCTIONS => qw(
 # Constructors #
 ################
 
+# Preload the list with important stuff we'll probably need, for performance
+# reasons.
+sub _do_list_select {
+    my $class = shift;
+    my $objects = $class->SUPER::_do_list_select(@_);
+    if (@$objects > 1) {
+        my $dbh = Bugzilla->dbh;
+        my @trace_ids = map { $_->id } @$objects;
+        my %bug_ids = @{ $dbh->selectcol_arrayref(
+            'SELECT trace.id, longdescs.bug_id 
+               FROM trace INNER JOIN longdescs 
+                          ON trace.comment_id = longdescs.comment_id
+              WHERE id IN(' . join(',', @trace_ids) . ')', {Columns=>[1,2]}) };
+        my %unique_ids = map { $bug_ids{$_} => 1 } (keys %bug_ids);
+        my $bugs = Bugzilla::Bug->new_from_list([values %bug_ids]);
+        # Pre-initialize the can_see_bug cache for these bugs.
+        Bugzilla->user->visible_bugs($bugs);
+        my %bug_map = map { $_->id => $_ } @$bugs;
+        # And add them to each trace object.
+        foreach my $trace (@$objects) {
+            my $bug_id = $bug_ids{$trace->id};
+            $trace->{bug} = $bug_map{$bug_id};
+        }
+    }
+    return $objects;
+}
+
 sub stacktrace_from_text {
     my ($class, $text) = @_;
     return Parse::StackTrace->parse(types => TRACE_TYPES, text => $text);
