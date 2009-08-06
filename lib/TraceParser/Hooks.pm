@@ -32,6 +32,8 @@ our @EXPORT = qw(
     page
 );
 
+use constant DEFAULT_POPULAR_LIMIT => 20;
+
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
     my $has_traces = $dbh->selectrow_array('SELECT 1 FROM trace '
@@ -111,7 +113,17 @@ sub format_comment {
 sub page {
     my %params = @_;
     my ($vars, $page) = @params{qw(vars page_id)};
-    return if $page !~ '^trace\.';
+    if ($page =~ '^trace\.') {
+        _page_trace($vars);
+    }
+    elsif ($page =~ '^popular-traces\.') {
+        _page_popular_traces($vars);
+    }
+}
+
+sub _page_trace {
+    my $vars = shift;
+
     my $trace_id = Bugzilla->cgi->param('trace_id');
     my $trace = TraceParser::Trace->check({ id => $trace_id });
     $trace->bug->check_is_visible;
@@ -131,6 +143,23 @@ sub page {
     }
 
     $vars->{trace} = $trace;
+}
+
+sub _page_popular_traces {
+    my $vars = shift;
+    my $limit = Bugzilla->cgi->param('limit') || DEFAULT_POPULAR_LIMIT;
+    my $dbh = Bugzilla->dbh;
+    my %trace_count = @{ $dbh->selectcol_arrayref(
+        'SELECT MAX(id), COUNT(*) AS trace_count
+           FROM trace WHERE short_hash IS NOT NULL
+       GROUP BY short_hash ORDER BY trace_count DESC ' 
+        . $dbh->sql_limit('?'), {Columns=>[1,2]}, $limit) };
+    
+    my @traces = map { new TraceParser::Trace($_) } (keys %trace_count);
+    @traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
+                           @traces;
+    $vars->{traces} = \@traces;
+    $vars->{trace_count} = \%trace_count;
 }
 
 1;
