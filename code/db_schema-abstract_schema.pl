@@ -46,3 +46,18 @@ $schema->{trace} = {
         trace_comment_id_idx => {TYPE => 'UNIQUE', FIELDS => ['comment_id']},
     ],
 };
+
+$schema->{trace_dup} = {
+    FIELDS => [
+        hash      => {TYPE => 'char(22)', NOTNULL => 1},
+        identical => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
+        bug_id    => {TYPE => 'INT3', NOTNULL => 1, 
+                      REFERENCES => {TABLE  => 'bugs',
+                                     COLUMN => 'bug_id'}},
+    ],
+    INDEXES => [
+        trace_dup_hash_idx => {TYPE => 'UNIQUE', 
+                               FIELDS => [qw(hash identical)]},
+        trace_bug_id_idx   => ['bug_id'],
+    ],
+};

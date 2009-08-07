@@ -1,0 +1,24 @@
+[% IF error == "traceparser_dup_to" %]
+    [% title = "Stack Trace Is a Duplicate" %]
+    Thank you for submitting your crash. This crash is a duplicate of
+    [%+ "$terms.bug $dup_to.id" FILTER bug_link(dup_to) %].
+    You have been added to the CC list of that [% terms.bug %]
+    [%~ IF comment_added ~%]
+       , and your crash information has been added to it.
+    [%~ END %].
+
+[% ELSIF error == "traceparser_dup_to_closed" %]
+    [% title = "Stack Trace Is a Duplicate" %]
+    The crash you submitted appears to be a duplicate of 
+    [%+ "$terms.bug $dup_to.id" FILTER bug_link(dup_to) %].
+
+    [% IF dup_to.resolution == 'FIXED' %]
+      This [% terms.bug %] has already been fixed.
+    [% END %]
+
+    See [% "the $terms.bug" FILTER bug_link(dup_to) %] for more information.
+
+[% ELSIF error == "traceparser_trace_too_short" %]
+    [% title = "Trace Too Short To Edit" %]
+    This trace is too short to set properties for it.
+[% END %]

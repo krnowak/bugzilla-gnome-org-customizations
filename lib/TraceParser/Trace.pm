@@ -26,6 +26,7 @@ use base qw(Bugzilla::Object);
 use Bugzilla::Bug;
 use Bugzilla::Error;
 use Bugzilla::Util;
+use Scalar::Util qw(blessed);
 
 use Parse::StackTrace;
 use Digest::MD5 qw(md5_base64);
@@ -173,9 +174,22 @@ sub parse_from_text {
 }
 
 sub _hash {
-    my $str = shift;
+    my ($str) = @_;
     utf8::encode($str) if utf8::is_utf8($str);
     return md5_base64($str);
+}
+
+#################
+# Class Methods #
+#################
+
+sub traces_on_bug {
+    my ($class, $bug) = @_;
+    my $bug_id = blessed $bug ? $bug->id : $bug;
+    my $comment_ids = Bugzilla->dbh->selectcol_arrayref(
+        'SELECT comment_id FROM longdescs WHERE bug_id = ?',
+        undef, $bug_id);
+    return $class->match({ comment_id => $comment_ids });
 }
 
 ###############################
@@ -214,6 +228,22 @@ sub crash_thread {
     my ($invocant, $st) = @_;
     $st ||= $invocant->stack;
     return $st->thread_with_crash || $st->threads->[0];
+}
+
+sub identical_traces {
+    my $self = shift;
+    return $self->{identical_traces} if exists $self->{identical_traces};
+    my $class = ref $self;
+    my $identical ||= $class->match({ stack_hash => $self->stack_hash });
+    @$identical = grep { $_->id != $self->id } @$identical;
+    $self->{identical_traces} = $identical;
+    return $self->{identical_traces};
+}
+
+sub must_dup_to {
+    my $self = shift;
+    my $id = $self->identical_dup_id || $self->similar_dup_id;
+    return new Bugzilla::Bug($id);
 }
 
 sub _important_stack_frames {
@@ -268,6 +298,18 @@ sub short_stack {
     return \@short_stack;
 }
 
+# Gets similar traces without also listing identical traces in the list.
+sub similar_traces {
+    my $self = shift;
+    return $self->{similar_traces} if exists $self->{similar_traces};
+    my $class = ref $self;
+    my $similar = $class->match({ short_hash => $self->short_hash });
+    my %identical = map { $_->id => 1 } @{ $self->identical_traces };
+    @$similar = grep { !$identical{$_->id} and $_->id != $self->id } @$similar;
+    $self->{similar_traces} = $similar;
+    return $similar;
+}
+
 sub stack {
     my $self = shift;
     my $type = $self->type;
@@ -275,6 +317,65 @@ sub stack {
     $self->{stack} ||= $type->parse(text => $self->text);
     return $self->{stack};
 }
+
+###########################
+# Trace Duplicate Methods #
+###########################
+
+sub identical_dup_id {
+    my $self = shift;
+    return $self->{identical_dup_id} if exists $self->{identical_dup_id};
+    $self->{identical_dup_id} = Bugzilla->dbh->selectrow_array(
+        'SELECT bug_id FROM trace_dup WHERE hash = ? AND identical = 1',
+        undef, $self->stack_hash);
+    return $self->{identical_dup_id};
+}
+
+sub similar_dup_id {
+    my $self = shift;
+    return $self->{similar_dup_id} if exists $self->{similar_dup_id};
+    $self->{similar_dup_id} = Bugzilla->dbh->selectrow_array(
+        'SELECT bug_id FROM trace_dup WHERE hash = ? AND identical = 0',
+        undef, $self->short_hash);
+    return $self->{similar_dup_id};
+}
+
+sub update_identical_dup {
+    my ($self, $bug_id) = @_;
+    _update_dup($self->stack_hash, 1, $bug_id);
+}
+
+sub update_similar_dup {
+    my ($self, $bug_id) = @_;
+    _update_dup($self->short_hash, 0, $bug_id);
+}
+
+sub _update_dup {
+    my ($hash, $identical, $bug_id) = @_;
+    my $dbh = Bugzilla->dbh;
+    if (!$bug_id) {
+        $dbh->do("DELETE FROM trace_dup WHERE hash = ? AND identical = ?",
+                 undef, $hash, $identical);
+        return;
+    }
+
+    my $bug = Bugzilla::Bug->check($bug_id);
+    $bug_id = $bug->id; # detaint $bug_id
+
+    my $exists = $dbh->selectrow_array(
+        'SELECT 1 FROM trace_dup WHERE hash = ? AND identical = ?',
+        undef, $hash, $identical);
+    if ($exists) {
+        $dbh->do('UPDATE trace_dup SET bug_id = ? 
+                   WHERE hash = ? AND identical = ?', 
+                 undef, $bug_id, $hash, $identical);
+    }
+    else {
+        $dbh->do('INSERT INTO trace_dup (bug_id, hash, identical)
+                       VALUES (?,?,?)', undef, $bug_id, $hash, $identical);
+    }
+}
+
 
 ###############################
 ###       Validators        ###

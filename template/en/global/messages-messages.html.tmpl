@@ -1,0 +1,7 @@
+[% IF message_tag == "traceparser_dup_to" %]
+    Your crash is a duplicate of the [% terms.bug %] you see below.
+    You have been added to the CC list of this [% terms.bug %]
+    [%~ IF comment_added ~%]
+       , and your crash information has been added to it.
+    [%~ END %].
+[% END %]

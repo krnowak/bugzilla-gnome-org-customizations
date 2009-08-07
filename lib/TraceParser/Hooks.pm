@@ -22,10 +22,15 @@
 package TraceParser::Hooks;
 use strict;
 use base qw(Exporter);
+use Bugzilla::Bug;
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::Util qw(detaint_natural);
+
 use TraceParser::Trace;
+
+use List::Util;
 
 our @EXPORT = qw(
     bug_create
@@ -43,7 +48,93 @@ sub bug_create {
     my $comment = $bug->longdescs->[0];
     my $data = TraceParser::Trace->parse_from_text($comment->{body});
     return if !$data;
-    TraceParser::Trace->create({ %$data, comment_id => $comment->{id} });
+    my $trace = TraceParser::Trace->create(
+        { %$data, comment_id => $comment->{id} });
+    _check_duplicate_trace($trace, $bug, $comment);
+}
+
+sub _check_duplicate_trace {
+    my ($trace, $bug, $comment) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    if (my $dup_to = $trace->must_dup_to) {
+        $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
+        if ($user->can_edit_product($dup_to->product_id)
+            and $user->can_see_bug($dup_to))
+        {
+            _handle_dup_to($trace, $dup_to, $comment);
+        }
+        else {
+            ThrowUserError('traceparser_dup_to_hidden',
+                           { dup_to => $dup_to });
+        }
+    }
+
+    my $identical = $trace->identical_traces;
+    my $similar   = $trace->similar_traces;
+    my $product = $bug->product;
+    my @prod_identical = grep { $_->bug->product eq $product } @$identical;
+    my @prod_similar   = grep { $_->bug->product eq $product } @$identical;
+}
+
+sub _handle_dup_to {
+    my ($trace, $dup_to, $comment) = @_;
+    my $user = Bugzilla->user;
+
+    if ($dup_to->isopened) {
+        $dup_to->add_cc($user);
+
+        # If this trace is higher quality than any other trace on the
+        # bug, then we add the comment. Otherwise we just skip the
+        # comment entirely.
+        my $bug_traces = TraceParser::Trace->traces_on_bug($dup_to);
+        my $higher_quality_traces;
+        foreach my $t (@$bug_traces) {
+            if ($t->quality >= $trace->quality) {
+                $higher_quality_traces = 1;
+                last;
+            }
+        }
+
+        if (!$higher_quality_traces) {
+            $dup_to->add_comment($comment->{thetext}, $comment);
+        }
+
+        $dup_to->update();
+        if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+            my $template = Bugzilla->template;
+            my $cgi = Bugzilla->cgi;
+            my $vars = {};
+            # Do the various silly things required to display show_bug.cgi
+            # in Bugzilla 3.4.
+            $vars->{use_keywords} = 1 if Bugzilla::Keyword::keyword_count();
+            $vars->{bugs} = [$dup_to];
+            $vars->{bugids} = [$dup_to->id];
+            if ($cgi->cookie("BUGLIST")) {
+                $vars->{bug_list} = [split(/:/, $cgi->cookie("BUGLIST"))];
+            }
+            eval {
+                require PatchReader;
+                $vars->{'patchviewerinstalled'} = 1;
+            };
+            $vars->{added_comment} = !$higher_quality_traces;
+            $vars->{message} = 'traceparser_dup_to';
+            print $cgi->header;
+            $template->process('bug/show.html.tmpl', $vars)
+                or ThrowTemplateError($template->error);
+            exit;
+        }
+        else {
+            ThrowUserError('traceparser_dup_to',
+                           { dup_to => $dup_to, 
+                             comment_added => !$higher_quality_traces });
+        }
+    }
+    else {
+        ThrowUserError('traceparser_dup_to_closed',
+                       { dup_to => $dup_to });
+    }
 }
 
 sub bug_update {
@@ -148,21 +239,34 @@ sub page {
 
 sub _page_trace {
     my $vars = shift;
+    my $cgi = Bugzilla->cgi;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
-    my $trace_id = Bugzilla->cgi->param('trace_id');
+    my $trace_id = $cgi->param('trace_id');
     my $trace = TraceParser::Trace->check({ id => $trace_id });
     $trace->bug->check_is_visible;
 
+    my $action = $cgi->param('action') || '';
+    if ($action eq 'update') {
+        $user->in_group('traceparser_edit')
+          or ThrowUserError('auth_failure', 
+                 { action => 'modify', group => 'traceparser_edit',
+                   object => 'settings' });
+        if (!$trace->stack_hash) {
+            ThrowUserError('traceparser_trace_too_short');
+        }
+        my $ident_dup = $cgi->param('identical_dup');
+        my $similar_dup = $cgi->param('similar_dup');
+        $dbh->bz_start_transaction();
+        $trace->update_identical_dup($ident_dup);
+        $trace->update_similar_dup($similar_dup);
+        $dbh->bz_commit_transaction();
+    }
+
     if ($trace->stack_hash) {
-        my $identical_traces = TraceParser::Trace->match(
-            { stack_hash => $trace->stack_hash });
-        my $similar_traces = TraceParser::Trace->match(
-            { short_hash => $trace->short_hash });
-        # Remove identical traces.
-        my %identical = map { $_->id => 1 } @$identical_traces;
-        @$similar_traces = grep { !$identical{$_->id} } @$similar_traces;
-        # Remove this trace from the identical traces.
-        @$identical_traces = grep { $_->id != $trace->id } @$identical_traces;
+        my $identical_traces = $trace->identical_traces;
+        my $similar_traces = $trace->similar_traces;
 
         my %ungrouped = ( identical => $identical_traces, 
                           similar   => $similar_traces );

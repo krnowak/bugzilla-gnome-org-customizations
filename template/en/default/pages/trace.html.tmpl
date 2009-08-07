@@ -23,6 +23,29 @@
    title = "Trace $trace.id From Bug $trace.bug.id" 
 %]
 
+[% IF user.in_group('traceparser_edit') %]
+  <h2>Properties of trace [% trace.id FILTER html %]</h2>
+  <form action="page.cgi?id=trace.html&amp;trace_id=
+                [%- trace.id FILTER url_quote %]"
+        method="POST">
+  <div>
+    <p>If a trace with an <em>identical</em> function stack is submitted,
+    automatically refer the user to this [% terms.bug %]:
+    <input type="text" size="5" id="identical_dup" name="identical_dup"
+           value="[% trace.identical_dup_id FILTER html %]"></p>
+
+    <p>If a trace with a <em>similar</em> (but <strong>not</strong>
+      identical) function stack is submitted, automatically refer
+      to user to this [% terms.bug %]:
+      <input type="text" size="5" id="similar_dup" name="similar_dup"
+             value="[% trace.similar_dup_id FILTER html %]"></p>
+
+    <input type="hidden" name="action" value="update">
+    <input type="submit" value="Submit" id="submit_trace">
+  </div>
+  </form>
+[% END %]
+
 [% IF identical_traces.size %]
   <h2>Traces with an identical stack:</h2>
   [% PROCESS trace_list list = identical_traces %]
