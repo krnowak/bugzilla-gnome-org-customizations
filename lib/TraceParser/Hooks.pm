@@ -245,7 +245,7 @@ sub _page_trace {
 
     my $trace_id = $cgi->param('trace_id');
     my $trace = TraceParser::Trace->check({ id => $trace_id });
-    $trace->bug->check_is_visible;
+    $trace->check_is_visible;
 
     my $action = $cgi->param('action') || '';
     if ($action eq 'update') {
@@ -277,7 +277,8 @@ sub _page_trace {
             my $grouped = $by_product{$type};
             foreach my $trace (@$traces) {
                 my $product = $trace->bug->product;
-                next if !Bugzilla->user->can_see_product($product);
+                next if (!Bugzilla->user->can_see_product($product) 
+                         or $trace->is_hidden);
                 $grouped->{$product} ||= [];
                 push(@{ $grouped->{$product} }, $trace);
             }
@@ -295,16 +296,27 @@ sub _page_popular_traces {
     my $limit = Bugzilla->cgi->param('limit') || DEFAULT_POPULAR_LIMIT;
     detaint_natural($limit);
     my $dbh = Bugzilla->dbh;
+
+    # insidergroup protections. This unfortunately makes the page
+    # slower for users who aren't in the insidergroup.
+    my ($extra_from, $extra_where) = ('', '');
+    if (Bugzilla->params->{insidergroup} and !Bugzilla->user->is_insider) {
+        $extra_from = 'INNER JOIN longdescs ON trace.comment_id ='
+                       . ' longdescs.comment_id';
+        $extra_where = "AND longdescs.isprivate = 0"
+    }
+
     my %trace_count = @{ $dbh->selectcol_arrayref(
-        'SELECT MAX(id), COUNT(*) AS trace_count
-           FROM trace WHERE short_hash IS NOT NULL
-       GROUP BY short_hash ORDER BY trace_count DESC ' 
+        "SELECT MAX(id), COUNT(*) AS trace_count
+           FROM trace $extra_from
+          WHERE short_hash IS NOT NULL $extra_where
+       GROUP BY short_hash ORDER BY trace_count DESC "
         . $dbh->sql_limit('?'), {Columns=>[1,2]}, $limit) };
-    
-    my @traces = map { new TraceParser::Trace($_) } (keys %trace_count);
-    @traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
-                           @traces;
-    $vars->{traces} = \@traces;
+ 
+    my $traces = TraceParser::Trace->new_from_list([keys %trace_count]);
+    @$traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
+                            @$traces;
+    $vars->{traces} = $traces;
     $vars->{trace_count} = \%trace_count;
 }
 

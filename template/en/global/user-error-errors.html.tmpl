@@ -1,4 +1,10 @@
-[% IF error == "traceparser_dup_to" %]
+[% IF error == "traceparser_comment_private" %]
+    [% title = "Trace Is Private" %]
+    Trace [% trace_id FILTER html %] is on a private comment on
+    [%+ terms.bug %] [%+ bug_id FILTER html %] that you do not
+    have access to.
+
+[% ELSIF error == "traceparser_dup_to" %]
     [% title = "Stack Trace Is a Duplicate" %]
     Thank you for submitting your crash. This crash is a duplicate of
     [%+ "$terms.bug $dup_to.id" FILTER bug_link(dup_to) %].

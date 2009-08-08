@@ -93,11 +93,16 @@ sub _do_list_select {
     if (@$objects > 1) {
         my $dbh = Bugzilla->dbh;
         my @trace_ids = map { $_->id } @$objects;
-        my %bug_ids = @{ $dbh->selectcol_arrayref(
-            'SELECT trace.id, longdescs.bug_id 
+        my $comment_info = $dbh->selectall_arrayref(
+            'SELECT trace.id AS id, longdescs.bug_id AS bug_id, 
+                    longdescs.isprivate AS isprivate
                FROM trace INNER JOIN longdescs 
                           ON trace.comment_id = longdescs.comment_id
-              WHERE id IN(' . join(',', @trace_ids) . ')', {Columns=>[1,2]}) };
+              WHERE trace.id IN(' . join(',', @trace_ids) . ')', {Slice=>{}});
+
+        my %bug_ids = map { $_->{id} => $_->{bug_id} } @$comment_info;
+        my %private = map { $_->{id} => $_->{isprivate} } @$comment_info;
+        
         my %unique_ids = map { $bug_ids{$_} => 1 } (keys %bug_ids);
         my $bugs = Bugzilla::Bug->new_from_list([values %bug_ids]);
 
@@ -118,6 +123,7 @@ sub _do_list_select {
         foreach my $trace (@$objects) {
             my $bug_id = $bug_ids{$trace->id};
             $trace->{bug} = $bug_map{$bug_id};
+            $trace->{comment_is_private} = $private{$trace->id};
         }
     }
     return $objects;
@@ -224,6 +230,15 @@ sub bug {
     return $self->{bug};
 }
 
+sub comment_is_private {
+    my $self = shift;
+    return $self->{comment_is_private} if exists $self->{comment_is_private};
+    $self->{comment_is_private} = Bugzilla->dbh->selectrow_array(
+        'SELECT isprivate FROM longdescs WHERE comment_id = ?',
+        undef, $self->id);
+    return $self->{comment_is_private};
+}
+
 sub crash_thread {
     my ($invocant, $st) = @_;
     $st ||= $invocant->stack;
@@ -238,6 +253,23 @@ sub identical_traces {
     @$identical = grep { $_->id != $self->id } @$identical;
     $self->{identical_traces} = $identical;
     return $self->{identical_traces};
+}
+
+sub is_hidden {
+    my $self = shift;
+    if ($self->comment_is_private and !Bugzilla->user->is_insider) {
+        return 1;
+    }
+    return 0;
+}
+
+sub check_is_visible {
+    my $self = shift;
+    $self->bug->check_is_visible;
+    if ($self->is_hidden) {
+        ThrowUserError('traceparser_comment_private',
+                       { trace_id => $self->id, bug_id => $self->bug->id });
+    }
 }
 
 sub must_dup_to {
