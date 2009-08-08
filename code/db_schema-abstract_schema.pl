@@ -36,7 +36,6 @@ $schema->{trace} = {
         type        => {TYPE => 'varchar(255)', NOTNULL => 1},
         short_hash  => {TYPE => 'char(22)'},
         stack_hash  => {TYPE => 'char(22)'},
-        trace_hash  => {TYPE => 'char(22)', NOTNULL => 1},
         trace_text  => {TYPE => 'LONGTEXT', NOTNULL => 1},
         quality     => {TYPE => 'real', NOTNULL => 1},
     ],

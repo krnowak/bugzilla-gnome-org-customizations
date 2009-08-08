@@ -40,7 +40,6 @@ use constant DB_COLUMNS => qw(
     comment_id
     short_hash
     stack_hash
-    trace_hash
     type
     quality
 );
@@ -52,14 +51,12 @@ use constant LIST_ORDER => 'quality DESC, comment_id';
 use constant VALIDATORS => {
     stack_hash  => \&_check_hash,
     short_hash  => \&_check_hash,
-    trace_hash  => \&_check_hash,
     trace_text  => \&_check_thetext,
     type        => \&_check_type,
 };
 
 use constant REQUIRED_CREATE_FIELDS => qw(
     comment_id
-    trace_hash
     trace_text
     type
 );
@@ -167,12 +164,10 @@ sub parse_from_text {
         $short_hash = _hash(join(',', @short_stack));
     }
     my $trace_text = $trace->text;
-    my $trace_hash = _hash($trace_text);
 
     return {
         stack_hash  => $stack_hash,
         short_hash  => $short_hash,
-        trace_hash  => $trace_hash,
         trace_text  => $trace_text,
         type        => ref($trace),
         quality     => $quality,
@@ -205,7 +200,6 @@ sub traces_on_bug {
 sub comment_id  { return $_[0]->{comment_id};  }
 sub stack_hash  { return $_[0]->{stack_hash};  }
 sub short_hash  { return $_[0]->{short_hash};  }
-sub trace_hash  { return $_[0]->{trace_hash};  }
 sub type        { return $_[0]->{type};        }
 sub quality     {
     my $self = shift;
