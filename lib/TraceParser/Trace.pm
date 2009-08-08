@@ -46,7 +46,7 @@ use constant DB_COLUMNS => qw(
 
 use constant DB_TABLE => 'trace';
 
-use constant LIST_ORDER => 'quality DESC, comment_id';
+use constant LIST_ORDER => 'quality DESC, id';
 
 use constant VALIDATORS => {
     stack_hash  => \&_check_hash,
