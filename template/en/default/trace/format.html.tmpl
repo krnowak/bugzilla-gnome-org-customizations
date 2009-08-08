@@ -20,12 +20,19 @@
   #%]
 
 </pre>
+[% SET show = (user.settings.traceparser_show_traces.value == 'on') %]
 <p class="trace_link" title="See Full Trace">
+  <a class="trace_toggle_box" href="#"
+     title="Expand/Collapse Trace"
+     onclick="traceparser_toggle_trace(this, [% trace.id FILTER html %]); return false;">
+    [%~ IF show %]&mdash;[% ELSE %]+[% END %]</a>
   <a href="page.cgi?id=trace.html&trace_id=
            [%- trace.id FILTER url_quote %]">Trace
     [%+ trace.id FILTER html %]</a></p>
+
 <table border="0" cellpadding="0" cellspacing="0"><tr><td>
-<div class="trace">
+<div class="trace [% ' bz_default_hidden' IF !show %]" 
+     id="trace_[% trace.id FILTER html %]">
   [% IF trace.type.match('Python') %]
     <ul class="frames">
       [% SET thread = trace.stack.threads.0 %]

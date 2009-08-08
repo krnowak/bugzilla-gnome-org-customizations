@@ -24,6 +24,7 @@ use strict;
 use warnings;
 use Bugzilla;
 use Bugzilla::Group;
+use Bugzilla::User::Setting qw(add_setting);
 
 if (!new Bugzilla::Group({ name => 'traceparser_edit' })) {
     Bugzilla::Group->create({
@@ -31,3 +32,6 @@ if (!new Bugzilla::Group({ name => 'traceparser_edit' })) {
         description => 'Can edit properties of traces',
         isbuggroup  => 0 });
 }
+
+add_setting('traceparser_show_traces',
+            ['on', 'off'], 'off');
