@@ -72,14 +72,15 @@
         [% SET bug = this_trace.bug %]
         <li>
           <a href="page.cgi?id=trace.html&amp;trace_id=
-                   [%- this_trace.id FILTER url_quote %]">Trace 
-            [% this_trace.id FILTER html %]</a> on
+                   [%- this_trace.id FILTER url_quote %]">Trace
+            [% this_trace.id FILTER html %]</a>
+          (Quality: <strong>[% this_trace.quality FILTER html %]</strong>)
+          on
           [%+ "Bug $bug.id" FILTER bug_link(bug) %]:
           [% bug.bug_status FILTER html %] [%+ bug.resolution FILTER html %]
           [% IF bug.dup_id %]
             of [% "bug $bug.dup_id" FILTER bug_link(bug.dup_id) %]
           [% END %]
-          (Quality: <strong>[% this_trace.quality FILTER html %]</strong>)
         </li>
       [% END %]
     </ul>
