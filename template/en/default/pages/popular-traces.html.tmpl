@@ -32,7 +32,11 @@
       <a href="page.cgi?id=trace.html&amp;trace_id=
                [%- trace.id FILTER url_quote %]">
         [%- trace_count.${trace.id} FILTER html %]</a>:
-      [%+ trace.short_stack.join(", ") FILTER html %]</li>
+      [% FOREACH function = trace.short_stack %]
+        [% function FILTER html %]
+        [%- ' &rarr; ' UNLESS loop.last() %]
+      [% END ~%]
+    </li>
   [% END %]
 </ul>
 

@@ -1,3 +1,7 @@
+.trace_list li {
+  margin-top: .3em;
+}
+
 .trace_link {
   margin-bottom: .5em;
   margin-top: -.5em;

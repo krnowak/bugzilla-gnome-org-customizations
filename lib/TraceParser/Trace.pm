@@ -28,6 +28,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Scalar::Util qw(blessed);
 
+use File::Basename qw(basename dirname);
 use Parse::StackTrace;
 use Digest::MD5 qw(md5_base64);
 
@@ -361,6 +362,18 @@ sub _relevant_functions {
     my @relevant;
     foreach my $frame (@$frames) {
         my $function = $frame->function;
+        if ($frame->file
+            and $frame->isa('Parse::StackTrace::Type::Python::Frame'))
+        {
+            my $file = basename($frame->file);
+            if ($file eq '__init__.py') {
+                $file = basename(dirname($frame->file));
+            }
+            $file =~ s/.py$//i;
+            $function = ".$function" if $function;
+            $function = "$file$function";
+            
+        }
         if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
             $function =~ s/^IA__//;
             push(@relevant, $function);
