@@ -78,6 +78,20 @@ use constant IGNORE_FUNCTIONS => qw(
    ??
 );
 
+# If a trace lacks <signal handler called>, we determine the
+# "interesting thread" by looking for a thread that has
+# functions that match this regex.
+use constant POSSIBLE_CRASH_FUNCTION => qr/signal|segv|sighandler/i;
+
+# Or if that fails, by a thread whose last function *doesn't* match
+# this regex.
+use constant WAIT_FUNCTION => qr/wait|sleep|poll/i;
+
+# However, some wait functions are interesting--for example,
+# if we're waiting on a lock, that's interesting during
+# deadlock traces.
+use constant INTERESTING_WAIT_FUNCTION => qr/lock/i;
+
 ################
 # Constructors #
 ################
@@ -238,10 +252,42 @@ sub comment_is_private {
     return $self->{comment_is_private};
 }
 
-sub crash_thread {
+sub interesting_threads {
     my ($invocant, $st) = @_;
     $st ||= $invocant->stack;
-    return $st->thread_with_crash || $st->threads->[0];
+    # If there's only one thread, return that.
+    if (scalar(@{ $st->threads }) == 1) {
+        return [$st->threads->[0]];
+    }
+
+    # If there's a thread with an explicit signal handler,
+    # then that's the one we want.
+    my $thread = $st->thread_with_crash;
+    return [$thread] if $thread;
+
+    # Search for threads that have a function with
+    # "signal" or "segv" in the name.
+    my @threads;
+    foreach my $t (@{ $st->threads }) {
+        if (grep { $_->function =~ POSSIBLE_CRASH_FUNCTION } @{ $t->frames }) {
+            push(@threads, $t);
+        }
+    }
+    return \@threads if @threads;
+
+    # If we still don't have a thread, return every first thread whose
+    # last function isn't some form of wait or one of the ignored
+    # functions.
+    foreach my $t (@{ $st->threads }) {
+        my $function = $t->frames->[0]->function;
+        if (($function !~ WAIT_FUNCTION
+             or $function =~ INTERESTING_WAIT_FUNCTION)
+            and !grep { $_ eq $function } IGNORE_FUNCTIONS)
+        {
+            push(@threads, $t);
+        }
+    }
+    return \@threads;
 }
 
 sub identical_traces {
@@ -288,7 +334,8 @@ sub _important_stack_frames {
     my ($invocant, $st) = @_;
     $st ||= $invocant->stack;
 
-    my $crash_thread = $invocant->crash_thread($st);
+    my $int_threads = $invocant->interesting_threads($st);
+    my $crash_thread = @$int_threads ? $int_threads->[0] : $st->threads->[0];
     my $frames = $crash_thread->frames;
 
     my $crash_position;

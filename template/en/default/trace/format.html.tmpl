@@ -55,11 +55,10 @@
         [%- thread.description FILTER html %]</span>
     [% END %]
   [% ELSE %]
-    [% SET st = trace.stack %]
-    [% IF st.thread_with_crash %]
-      [% threads = [st.thread_with_crash] %]
+    [% IF trace.interesting_threads %]
+      [% threads = trace.interesting_threads %]
     [% ELSE %]
-      [% threads = st.threads %]
+      [% threads = trace.stack.threads %]
     [% END %]
     
     [% FOREACH thread = threads %]
