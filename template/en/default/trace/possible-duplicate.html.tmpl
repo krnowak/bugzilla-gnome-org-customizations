@@ -1,0 +1,91 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla TraceParser Plugin.
+  #
+  # The Initial Developer of the Original Code is Canonical Ltd.
+  # Portions created by Canonical Ltd. are Copyright (C) 2009
+  # Canonical Ltd. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Max Kanat-Alexander <mkanat@bugzilla.org>
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Possible Duplicate"
+%]
+
+[% USE Bugzilla %]
+
+<p>The crash you have submitted looks very similar to the following
+    [%+ terms.bugs %]. Would you like to CC yourself on one of these
+    [%+ terms.bugs %] instead of filing a new one? If so, select it
+    and then click "Add Me To CC".</p>
+
+<p>Or, if you would like to continue to file this [% terms.bug %],
+  scroll to the bottom of the page and select "Continue To File
+  This [% terms.Bug %]".</p>
+
+<h2>Similar [% terms.Bugs %]</h2>
+
+<form id="submit_dup" method="POST" 
+      action="page.cgi?id=post-duplicate-trace.none">
+  <input type="hidden" name="comment" value="[% comment.body FILTER html %]">
+  <input type="hidden" name="isprivate" 
+         value="[% comment.isprivate FILTER html %]">
+  [% SET shown_bugs = 0 %]
+  [% IF prod_bugs.size %]
+    [% PROCESS trace_bug_list list = prod_bugs limit = 10 %]
+  [% END %]
+
+  [% IF shown_bugs < 10 %]
+    [% FOREACH product = other_bugs.keys %]
+      [% SET shown_bugs = 0 %]
+      [% PROCESS trace_bug_list list = other_bugs.$product
+                                limit = other_limit %]
+    [% END %]
+  [% END %]
+</form>
+
+[% BLOCK trace_bug_list %]
+  <p>Similar [% terms.bugs %] in <strong>[% product FILTER html %]</strong>:</p>
+  <ul class="trace_bug_list">
+    [% FOREACH bug = list %]
+      <li><input type="radio" name="bug_id" value="[% bug.id FILTER html %]">
+        [%= "$terms.Bug $bug.id" FILTER bug_link(bug) %]
+        ([% bug.bug_status FILTER html %][% ' ' IF bug.resolution %]
+         [%- bug.resolution FILTER html -%]):
+        [%= bug.short_desc FILTER html %]</li>
+      [% shown_bugs = loop.count() %]
+      [% LAST IF limit AND shown_bugs > limit %]
+    [% END %]
+    <li class="submit_container">
+      <input type="submit" id="add_cc" value="Add Me To CC Instead">
+    </li>
+  </ul>
+[% END %]
+
+<h2>Continue Filing This Bug</h2>
+
+<form id="create" method="POST" action="post_bug.cgi"
+  [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
+    <input type="hidden" name="ignore_token" value="[% bugid FILTER html %]">
+
+    <p>If none of the above [% terms.bugs %] look like the bug
+      you are trying to file, then 
+      <input type="submit" id="file_bug_again" 
+             value="Continue to File This [% terms.Bug %]"></p>
+    [% PROCESS "global/hidden-fields.html.tmpl"
+               exclude="^(Bugzilla_login|Bugzilla_password|ignore_token)$" %]
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

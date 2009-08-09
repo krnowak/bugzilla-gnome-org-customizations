@@ -31,6 +31,7 @@ use Bugzilla::Util qw(detaint_natural);
 use TraceParser::Trace;
 
 use List::Util;
+use POSIX qw(ceil);
 
 our @EXPORT = qw(
     bug_create
@@ -45,7 +46,9 @@ use constant DEFAULT_POPULAR_LIMIT => 20;
 sub bug_create {
     my %params = @_;
     my $bug = $params{bug};
-    my $comment = $bug->longdescs->[0];
+    my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest',
+        '1970-01-01', $bug->creation_ts, 'raw');
+    my $comment = $comments->[0];
     my $data = TraceParser::Trace->parse_from_text($comment->{body});
     return if !$data;
     my $trace = TraceParser::Trace->create(
@@ -55,86 +58,184 @@ sub bug_create {
 
 sub _check_duplicate_trace {
     my ($trace, $bug, $comment) = @_;
+    my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
+    my $template = Bugzilla->template;
     my $user = Bugzilla->user;
 
     if (my $dup_to = $trace->must_dup_to) {
         $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
-        if ($user->can_edit_product($dup_to->product_id)
-            and $user->can_see_bug($dup_to))
-        {
-            _handle_dup_to($trace, $dup_to, $comment);
+        _handle_dup_to($trace, $dup_to, $comment);
+    }
+
+    my @identical = grep { $_->is_visible } @{ $trace->identical_traces };
+    my @similar   = grep { $_->is_visible } @{ $trace->similar_traces };
+    if (@identical or @similar) {
+        $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
+        my $product = $bug->product;
+        my @prod_traces  = grep { $_->bug->product eq $product } 
+                                (@identical, @similar);
+        my @other_traces = grep { $_->bug->product ne $product } 
+                                (@identical, @similar);
+
+        my %vars = (
+            comment    => $comment,
+            prod_bugs  => _traces_to_bugs(\@prod_traces),
+            other_bugs => _traces_to_bugs(\@other_traces),
+            product    => $product,
+        );
+        my $total_other_bugs = scalar(@{ $vars{other_bugs} });
+
+        my %by_product;
+        foreach my $bug (@{ $vars{other_bugs} }) {
+            $by_product{$bug->product} ||= [];
+            push(@{ $by_product{$bug->product} }, $bug);
         }
-        else {
-            ThrowUserError('traceparser_dup_to_hidden',
-                           { dup_to => $dup_to });
+        $vars{other_bugs} = \%by_product;
+
+        if ($total_other_bugs > 10) {
+            my $total_products = scalar keys %by_product;
+            $vars{other_limit} = ceil(10.0 / $total_products);
+        }
+
+        print $cgi->header;
+        $template->process('trace/possible-duplicate.html.tmpl', \%vars)
+          or ThrowTemplateError($template->error);
+        exit;
+    }
+}
+
+sub _traces_to_bugs {
+    my $traces = shift;
+    my $user = Bugzilla->user;
+
+    my @bugs_in = map { $_->bug } @$traces;
+    my %result_bugs;
+    foreach my $bug (@bugs_in) {
+        $bug = _walk_dup_chain($bug);
+        if ($user->can_see_bug($bug)) {
+            $result_bugs{$bug->id} = $bug;
         }
     }
 
-    my $identical = $trace->identical_traces;
-    my $similar   = $trace->similar_traces;
-    my $product = $bug->product;
-    my @prod_identical = grep { $_->bug->product eq $product } @$identical;
-    my @prod_similar   = grep { $_->bug->product eq $product } @$identical;
+    my @sorted_bugs = sort _cmp_trace_bug (values %result_bugs);
+    return \@sorted_bugs;
+}
+
+sub _walk_dup_chain {
+    my $bug = shift;
+    if (!$bug->dup_id) {
+        return $bug;
+    }
+    return _walk_dup_chain(new Bugzilla::Bug($bug->dup_id));
+}
+
+sub _cmp_trace_bug($$) {
+    my ($a, $b) = @_;
+
+    # $a should sort before $b if it has a resolution of FIXED
+    # and $b does not.
+    if ($a->resolution eq 'FIXED' and $b->resolution ne 'FIXED') {
+        return -1;
+    }
+    elsif ($a->resolution ne 'FIXED' and $b->resolution eq 'FIXED') {
+        return 1;
+    }
+
+    # Otherwise, $a should sort before $b if it is open and $b is not.
+    if ($a->isopened and !$b->isopened) {
+        return -1;
+    }
+    elsif (!$a->isopened and $b->isopened) {
+        return 1;
+    }
+
+    # But sort UNCONFIRMED later than other open statuses
+    if ($a->bug_status eq 'UNCONFIRMED' and $b->bug_status ne 'UNCONFIRMED') {
+        return 1;
+    }
+    elsif ($a->bug_status ne 'UNCONFIRMED' and $b->bug_status eq 'UNCONFIRMED') {
+       return -1;
+    }
+
+    # Otherwise, show older bugs first.
+    return $a->id <=> $b->id;
 }
 
 sub _handle_dup_to {
-    my ($trace, $dup_to, $comment) = @_;
+    my ($trace, $dup_to, $comment, $allow_closed) = @_;
     my $user = Bugzilla->user;
 
-    if ($dup_to->isopened) {
-        $dup_to->add_cc($user);
-
-        # If this trace is higher quality than any other trace on the
-        # bug, then we add the comment. Otherwise we just skip the
-        # comment entirely.
-        my $bug_traces = TraceParser::Trace->traces_on_bug($dup_to);
-        my $higher_quality_traces;
-        foreach my $t (@$bug_traces) {
-            if ($t->quality >= $trace->quality) {
-                $higher_quality_traces = 1;
-                last;
-            }
-        }
-
-        if (!$higher_quality_traces) {
-            $dup_to->add_comment($comment->{thetext}, $comment);
-        }
-
-        $dup_to->update();
-        if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
-            my $template = Bugzilla->template;
-            my $cgi = Bugzilla->cgi;
-            my $vars = {};
-            # Do the various silly things required to display show_bug.cgi
-            # in Bugzilla 3.4.
-            $vars->{use_keywords} = 1 if Bugzilla::Keyword::keyword_count();
-            $vars->{bugs} = [$dup_to];
-            $vars->{bugids} = [$dup_to->id];
-            if ($cgi->cookie("BUGLIST")) {
-                $vars->{bug_list} = [split(/:/, $cgi->cookie("BUGLIST"))];
-            }
-            eval {
-                require PatchReader;
-                $vars->{'patchviewerinstalled'} = 1;
-            };
-            $vars->{added_comment} = !$higher_quality_traces;
-            $vars->{message} = 'traceparser_dup_to';
-            print $cgi->header;
-            $template->process('bug/show.html.tmpl', $vars)
-                or ThrowTemplateError($template->error);
-            exit;
-        }
-        else {
-            ThrowUserError('traceparser_dup_to',
-                           { dup_to => $dup_to, 
-                             comment_added => !$higher_quality_traces });
-        }
+    if (!$user->can_edit_product($dup_to->product_id)
+        or !$user->can_see_bug($dup_to))
+    {
+        ThrowUserError('traceparser_dup_to_hidden',
+                       { dup_to => $dup_to });
     }
-    else {
+
+    if (!$dup_to->isopened and !$allow_closed) {
         ThrowUserError('traceparser_dup_to_closed',
                        { dup_to => $dup_to });
     }
+
+    $dup_to->add_cc($user);
+
+    # If this trace is higher quality than any other trace on the
+    # bug, then we add the comment. Otherwise we just skip the
+    # comment entirely.
+    my $bug_traces = TraceParser::Trace->traces_on_bug($dup_to);
+    my $higher_quality_traces;
+    foreach my $t (@$bug_traces) {
+        if ($t->{quality} >= $trace->{quality}) {
+            $higher_quality_traces = 1;
+            last;
+        }
+    }
+
+    my $comment_added;
+    if (!$higher_quality_traces) {
+        if ($dup_to->check_can_change_field('longdesc', 0, 1)) {
+            my %comment_options = %$comment;
+            my @comment_cols = Bugzilla::Bug::UPDATE_COMMENT_COLUMNS;
+            foreach my $key (keys %comment_options) {
+                if (!grep { $_ eq $key } @comment_cols) {
+                    delete $comment_options{$key};
+                }
+            }
+            $dup_to->add_comment($comment->{body}, \%comment_options);
+            $comment_added = 1;
+        }
+    }
+
+    $dup_to->update();
+    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        my $template = Bugzilla->template;
+        my $cgi = Bugzilla->cgi;
+        my $vars = {};
+        # Do the various silly things required to display show_bug.cgi
+        # in Bugzilla 3.4.
+        $vars->{use_keywords} = 1 if Bugzilla::Keyword::keyword_count();
+        $vars->{bugs} = [$dup_to];
+        $vars->{bugids} = [$dup_to->id];
+        if ($cgi->cookie("BUGLIST")) {
+            $vars->{bug_list} = [split(/:/, $cgi->cookie("BUGLIST"))];
+        }
+        eval {
+            require PatchReader;
+            $vars->{'patchviewerinstalled'} = 1;
+        };
+        $vars->{comment_added} = $comment_added;
+        $vars->{message} = 'traceparser_dup_to';
+        print $cgi->header;
+        $template->process('bug/show.html.tmpl', $vars)
+            or ThrowTemplateError($template->error);
+        exit;
+    }
+
+    # This is what we do for all non-browser usage modes.
+    ThrowUserError('traceparser_dup_to',
+                   { dup_to => $dup_to, 
+                     comment_added => $comment_added });
 }
 
 sub bug_update {
@@ -229,11 +330,14 @@ sub format_comment {
 sub page {
     my %params = @_;
     my ($vars, $page) = @params{qw(vars page_id)};
-    if ($page =~ '^trace\.') {
+    if ($page =~ /^trace\./) {
         _page_trace($vars);
     }
-    elsif ($page =~ '^popular-traces\.') {
+    elsif ($page =~ /^popular-traces\./) {
         _page_popular_traces($vars);
+    }
+    elsif ($page =~ /^post-duplicate-trace/) {
+        _page_post_duplicate_trace($vars);
     }
 }
 
@@ -266,29 +370,26 @@ sub _page_trace {
 
     if ($trace->stack_hash) {
         my $identical_traces = $trace->identical_traces;
-        my $similar_traces = $trace->similar_traces;
-
-        my %ungrouped = ( identical => $identical_traces, 
-                          similar   => $similar_traces );
-        my %by_product = ( identical => {}, similar => {} );
-
-        foreach my $type (qw(identical similar)) {
-            my $traces = $ungrouped{$type};
-            my $grouped = $by_product{$type};
-            foreach my $trace (@$traces) {
-                my $product = $trace->bug->product;
-                next if (!Bugzilla->user->can_see_product($product) 
-                         or $trace->is_hidden);
-                $grouped->{$product} ||= [];
-                push(@{ $grouped->{$product} }, $trace);
-            }
-        }
-
-        $vars->{similar_traces} = $by_product{similar};
-        $vars->{identical_traces} = $by_product{identical};
+        my $similar_traces   = $trace->similar_traces;
+        $vars->{similar_traces}   = _group_by_product($similar_traces);
+        $vars->{identical_traces} = _group_by_product($identical_traces);
     }
 
     $vars->{trace} = $trace;
+}
+
+sub _group_by_product {
+    my $traces = shift;
+
+    my %by_product;
+    foreach my $trace (@$traces) {
+        my $product = $trace->bug->product;
+        next if (!Bugzilla->user->can_see_product($product)
+                 or $trace->is_hidden_comment);
+        $by_product{$product} ||= [];
+        push(@{ $by_product{$product} }, $trace);
+    }
+    return \%by_product;
 }
 
 sub _page_popular_traces {
@@ -318,6 +419,16 @@ sub _page_popular_traces {
                             @$traces;
     $vars->{traces} = $traces;
     $vars->{trace_count} = \%trace_count;
+}
+
+sub _page_post_duplicate_trace {
+    my $cgi = Bugzilla->cgi;
+    my $comment = { body      => scalar $cgi->param('comment'),
+                    isprivate => scalar $cgi->param('isprivate'),
+                  };
+    my $trace = TraceParser::Trace->parse_from_text($comment->{body});
+    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bug_id'));
+    _handle_dup_to($trace, $bug, $comment, 'allow closed');
 }
 
 1;

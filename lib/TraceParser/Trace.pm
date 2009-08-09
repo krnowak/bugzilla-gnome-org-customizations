@@ -103,17 +103,22 @@ sub _do_list_select {
         my %unique_ids = map { $bug_ids{$_} => 1 } (keys %bug_ids);
         my $bugs = Bugzilla::Bug->new_from_list([values %bug_ids]);
 
-        # Populate "product" for each bug.
+        # Populate "product" & dup_id for each bug.
         my %product_ids = map { $_->{product_id} => 1 } @$bugs;
         my %products = @{ $dbh->selectcol_arrayref(
             'SELECT id, name FROM products WHERE id IN(' 
             . join(',', keys %product_ids) . ')', {Columns=>[1,2]}) };
+        my %dup_ids = @{ $dbh->selectcol_arrayref(
+            'SELECT dupe, dupe_of FROM duplicates WHERE dupe IN ('
+            . join(',', map { $_->id } @$bugs) . ')') };
+
         foreach my $bug (@$bugs) {
             $bug->{product} = $products{$bug->{product_id}};
+            $bug->{dup_id} = $dup_ids{$bug->id};
         }
 
         # Pre-initialize the can_see_bug cache for these bugs.
-        Bugzilla->user->visible_bugs($bugs);
+        Bugzilla->user->visible_bugs([@$bugs, values %dup_ids]);
         my %bug_map = map { $_->id => $_ } @$bugs;
 
         # And add them to each trace object.
@@ -249,7 +254,7 @@ sub identical_traces {
     return $self->{identical_traces};
 }
 
-sub is_hidden {
+sub is_hidden_comment {
     my $self = shift;
     if ($self->comment_is_private and !Bugzilla->user->is_insider) {
         return 1;
@@ -257,10 +262,17 @@ sub is_hidden {
     return 0;
 }
 
+sub is_visible {
+    my $self = shift;
+    my $user = Bugzilla->user;
+    return ($user->can_see_bug($self->bug) and !$self->is_hidden_comment)
+           ? 1 : 0;
+}
+
 sub check_is_visible {
     my $self = shift;
     $self->bug->check_is_visible;
-    if ($self->is_hidden) {
+    if ($self->is_hidden_comment) {
         ThrowUserError('traceparser_comment_private',
                        { trace_id => $self->id, bug_id => $self->bug->id });
     }
@@ -269,7 +281,7 @@ sub check_is_visible {
 sub must_dup_to {
     my $self = shift;
     my $id = $self->identical_dup_id || $self->similar_dup_id;
-    return new Bugzilla::Bug($id);
+    return $id ? new Bugzilla::Bug($id) : undef;
 }
 
 sub _important_stack_frames {

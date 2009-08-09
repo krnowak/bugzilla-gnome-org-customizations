@@ -22,7 +22,17 @@
   margin-top: 0;
 }
 
-.frames {
+.trace_bug_list li {
+  margin-top: .3em;
+}
+.trace_bug_list li input {
+  vertical-align: bottom;
+}
+.trace_bug_list li.submit_container {
+  margin-left: 2.3em;
+}
+
+.frames, .trace_bug_list {
   list-style-type: none;
   margin: 0;
   padding: 0;

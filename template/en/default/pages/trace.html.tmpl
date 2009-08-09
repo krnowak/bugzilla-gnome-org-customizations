@@ -56,7 +56,8 @@
   [% PROCESS trace_list list = similar_traces %]
 [% END %]
 
-<h2>Trace [% trace.id FILTER html %]</h2>
+<h2>Trace [% trace.id FILTER html %] 
+  (Quality: [% trace.quality FILTER html %])</h2>
 
 <table border="0" cellpadding="0" cellspacing="0"><tr><td><div class="trace">
 <pre>[% trace.text FILTER html %]
@@ -73,7 +74,7 @@
         <li>
           <a href="page.cgi?id=trace.html&amp;trace_id=
                    [%- this_trace.id FILTER url_quote %]">Trace
-            [% this_trace.id FILTER html %]</a>
+            [%+ this_trace.id FILTER html %]</a>
           (Quality: <strong>[% this_trace.quality FILTER html %]</strong>)
           on
           [%+ "Bug $bug.id" FILTER bug_link(bug) %]:
