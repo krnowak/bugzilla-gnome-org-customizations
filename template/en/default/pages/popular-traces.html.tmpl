@@ -23,6 +23,16 @@
    title = "Most Popular Traces"
 %]
 
+<form action="page.cgi" method="GET">
+<div>
+  <input type="hidden" name="id" value="popular-traces.html">
+  Show the top 
+  <input type="text" size="3" name="limit" value="[% limit FILTER html %]">
+  traces.
+  <input type="submit" value="Go">
+</div>
+</form>
+
 <p>Most popular traces (as determined by comparing their first few
   functions):</p>
 

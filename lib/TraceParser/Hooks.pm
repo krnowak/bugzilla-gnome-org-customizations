@@ -417,6 +417,7 @@ sub _page_popular_traces {
     my $traces = TraceParser::Trace->new_from_list([keys %trace_count]);
     @$traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
                             @$traces;
+    $vars->{limit} = $limit;
     $vars->{traces} = $traces;
     $vars->{trace_count} = \%trace_count;
 }
