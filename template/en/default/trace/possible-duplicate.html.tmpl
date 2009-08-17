@@ -78,14 +78,15 @@
 
 <form id="create" method="POST" action="post_bug.cgi"
   [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
-    <input type="hidden" name="ignore_token" value="[% bugid FILTER html %]">
+  <input type="hidden" name="ignore_token" value="[% bugid FILTER html %]">
+  <input type="hidden" name="traceparser_skip_duplicate" value="1">
 
-    <p>If none of the above [% terms.bugs %] look like the bug
-      you are trying to file, then 
-      <input type="submit" id="file_bug_again" 
-             value="Continue to File This [% terms.Bug %]"></p>
-    [% PROCESS "global/hidden-fields.html.tmpl"
-               exclude="^(Bugzilla_login|Bugzilla_password|ignore_token)$" %]
+  <p>If none of the above [% terms.bugs %] look like the bug
+    you are trying to file, then 
+    <input type="submit" id="file_bug_again" 
+           value="Continue to File This [% terms.Bug %]"></p>
+  [% PROCESS "global/hidden-fields.html.tmpl"
+             exclude="^(Bugzilla_login|Bugzilla_password|ignore_token)$" %]
 </form>
 
 [% PROCESS global/footer.html.tmpl %]

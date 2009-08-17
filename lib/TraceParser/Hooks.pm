@@ -58,7 +58,6 @@ sub bug_create {
 
 sub _check_duplicate_trace {
     my ($trace, $bug, $comment) = @_;
-    my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
     my $user = Bugzilla->user;
@@ -67,6 +66,10 @@ sub _check_duplicate_trace {
         $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
         _handle_dup_to($trace, $dup_to, $comment);
     }
+
+    return if Bugzilla->usage_mode != USAGE_MODE_BROWSER;
+    my $cgi = Bugzilla->cgi;
+    return if $cgi->param('traceparser_skip_duplicate');
 
     my @identical = grep { $_->is_visible } @{ $trace->identical_traces };
     my @similar   = grep { $_->is_visible } @{ $trace->similar_traces };
