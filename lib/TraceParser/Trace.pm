@@ -125,7 +125,7 @@ sub _do_list_select {
             . join(',', keys %product_ids) . ')', {Columns=>[1,2]}) };
         my %dup_ids = @{ $dbh->selectcol_arrayref(
             'SELECT dupe, dupe_of FROM duplicates WHERE dupe IN ('
-            . join(',', map { $_->id } @$bugs) . ')') };
+            . join(',', map { $_->id } @$bugs) . ')', {Columns=>[1,2]}) };
 
         foreach my $bug (@$bugs) {
             $bug->{product} = $products{$bug->{product_id}};
