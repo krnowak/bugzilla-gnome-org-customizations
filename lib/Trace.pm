@@ -19,7 +19,7 @@
 # Contributor(s): 
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
-package TraceParser::Trace;
+package Bugzilla::Extension::TraceParser::Trace;
 use strict;
 use base qw(Bugzilla::Object);
 

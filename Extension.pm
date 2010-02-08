@@ -1,5 +1,3 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
-#
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
 # except in compliance with the License. You may obtain a copy of
@@ -10,50 +8,48 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the Bugzilla Bug Tracking System.
+# The Original Code is the Bugzilla TraceParser Plugin.
 #
 # The Initial Developer of the Original Code is Canonical Ltd.
-# Portions created by the Initial Developer are Copyright (C) 2009
-# the Initial Developer. All Rights Reserved.
+# Portions created by Canonical Ltd. are Copyright (C) 2009
+# Canonical Ltd. All Rights Reserved.
 #
-# Contributor(s): 
+# Contributor(s):
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
-package TraceParser::Hooks;
+package Bugzilla::Extension::TraceParser;
 use strict;
-use base qw(Exporter);
+use base qw(Bugzilla::Extension);
+
 use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Group;
 use Bugzilla::Install::Util qw(indicate_progress);
+use Bugzilla::User::Setting qw(add_setting);
 use Bugzilla::Util qw(detaint_natural);
 
-use TraceParser::Trace;
+use Bugzilla::Extension::TraceParser::Trace;
 
 use List::Util;
 use POSIX qw(ceil);
 
-our @EXPORT = qw(
-    bug_create
-    bug_update
-    install_update_db
-    format_comment
-    page
-);
+our $VERSION = '0.01';
 
 use constant DEFAULT_POPULAR_LIMIT => 20;
 
-sub bug_create {
-    my %params = @_;
-    my $bug = $params{bug};
+sub bug_end_of_create {
+    my ($self, $args) = @_;
+    
+    my $bug = $args->{bug};
     my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest',
         '1970-01-01', $bug->creation_ts, 'raw');
     my $comment = $comments->[0];
-    my $data = TraceParser::Trace->parse_from_text($comment->{body});
+    my $data = Bugzilla::Extension::TraceParser::Trace->parse_from_text($comment->{body});
     return if !$data;
-    my $trace = TraceParser::Trace->create(
+    my $trace = Bugzilla::Extension::TraceParser::Trace->create(
         { %$data, comment_id => $comment->{id} });
-    _check_duplicate_trace($trace, $bug, $comment);
+    _check_duplicate_trace($trace, $bug, $comment);    
 }
 
 sub _check_duplicate_trace {
@@ -186,7 +182,7 @@ sub _handle_dup_to {
     # If this trace is higher quality than any other trace on the
     # bug, then we add the comment. Otherwise we just skip the
     # comment entirely.
-    my $bug_traces = TraceParser::Trace->traces_on_bug($dup_to);
+    my $bug_traces = Bugzilla::Extension::TraceParser::Trace->traces_on_bug($dup_to);
     my $higher_quality_traces;
     foreach my $t (@$bug_traces) {
         if ($t->{quality} >= $trace->{quality}) {
@@ -241,17 +237,112 @@ sub _handle_dup_to {
                      comment_added => $comment_added });
 }
 
-sub bug_update {
-    my %params = @_;
-    my ($bug, $timestamp) = @params{qw(bug timestamp)};
+
+
+sub bug_end_of_update {
+    my ($self, $args) = @_;
+    
+    my ($bug, $timestamp) = @$args{qw(bug timestamp)};
     return if !$bug->{added_comments};
     my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest', 
                                               $bug->delta_ts, $timestamp, 1);
     foreach my $comment (@$comments) {
-        my $data = TraceParser::Trace->parse_from_text($comment->{body});
+        my $data = Bugzilla::Extension::TraceParser::Trace->parse_from_text(
+            $comment->{body});
         next if !$data;
-        TraceParser::Trace->create({ %$data, comment_id => $comment->{id} });
+        Bugzilla::Extension::TraceParser::Trace->create(
+            { %$data, comment_id => $comment->{id} });
+    }    
+}
+
+sub bug_format_comment {
+    my ($self, $args) = @_;
+
+    my ($text, $bug, $regexes, $comment) = @$args{qw(text bug regexes comment)};
+    return if !$comment;
+    my ($trace) = @{ Bugzilla::Extension::TraceParser::Trace->match(
+                         { comment_id => $comment->{id} }) };
+    return if !$trace;
+
+    # $$text contains the wrapped text, and $comment contains the unwrapped
+    # text. To find the trace that we want from the DB, we need to use the
+    # unwrapped text. But to find the text that we need to replace, we
+    # need to use the wrapped text.
+    my $match_text;
+    if ($comment->{already_wrapped}) {
+        $match_text = $trace->text;
     }
+    else {
+        my $stacktrace = Bugzilla::Extension::TraceParser::Trace->stacktrace_from_text($$text);
+        $match_text = $stacktrace->text;
+    }
+
+    $match_text = quotemeta($match_text);
+    my $replacement;
+    my $template = Bugzilla->template_inner;
+    $template->process('trace/format.html.tmpl', { trace => $trace },
+                       \$replacement)
+      || ThrowTemplateError($template->error);
+    # Make sure that replacements don't contain $1, $2, etc.
+    $replacement =~ s{\$}{\\\$};
+    push(@$regexes, { match => qr/$match_text/s, replace => $replacement });
+}
+
+sub db_schema_abstract_schema {
+    my ($self, $args) = @_;
+    
+    
+    
+    my $schema = $args->{schema};
+    $schema->{trace} = {
+        FIELDS => [
+            id          => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1, 
+                            PRIMARYKEY => 1},
+            comment_id  => {TYPE => 'INT3', NOTNULL => 1, 
+                            REFERENCES => {TABLE  => 'longdescs',
+                                           COLUMN => 'comment_id',
+                                           DELETE => 'CASCADE'}},
+            type        => {TYPE => 'varchar(255)', NOTNULL => 1},
+            short_hash  => {TYPE => 'char(22)'},
+            stack_hash  => {TYPE => 'char(22)'},
+            trace_text  => {TYPE => 'LONGTEXT', NOTNULL => 1},
+            quality     => {TYPE => 'real', NOTNULL => 1},
+        ],
+        INDEXES => [
+            trace_short_hash_idx => ['short_hash'],
+            trace_stack_hash_idx => ['stack_hash'],
+            trace_comment_id_idx => {TYPE => 'UNIQUE', FIELDS => ['comment_id']},
+        ],
+    };
+    
+    $schema->{trace_dup} = {
+        FIELDS => [
+            hash      => {TYPE => 'char(22)', NOTNULL => 1},
+            identical => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
+            bug_id    => {TYPE => 'INT3', NOTNULL => 1, 
+                          REFERENCES => {TABLE  => 'bugs',
+                                         COLUMN => 'bug_id'}},
+        ],
+        INDEXES => [
+            trace_dup_hash_idx => {TYPE => 'UNIQUE', 
+                                   FIELDS => [qw(hash identical)]},
+            trace_bug_id_idx   => ['bug_id'],
+        ],
+    };
+}
+
+sub install_before_final_checks {
+    my ($self, $args) = @_;
+    
+    if (!new Bugzilla::Group({ name => 'traceparser_edit' })) {
+        Bugzilla::Group->create({
+            name        => 'traceparser_edit',
+            description => 'Can edit properties of traces',
+            isbuggroup  => 0 });
+    }
+    
+    add_setting('traceparser_show_traces',
+                ['on', 'off'], 'off');
 }
 
 sub install_update_db {
@@ -273,7 +364,7 @@ sub install_update_db {
     my $count = 1;
     my @traces;
     while (my ($comment_id, $text) = $sth->fetchrow_array) {
-        my $trace = TraceParser::Trace->parse_from_text($text);
+        my $trace = Bugzilla::Extension::TraceParser::Trace->parse_from_text($text);
         indicate_progress({ current => $count++, total => $total,
                             every => 100 });
         next if !$trace;
@@ -292,47 +383,17 @@ sub install_update_db {
     $count = 1;
     $dbh->bz_start_transaction();
     while (my $trace = shift @traces) {
-        TraceParser::Trace->create($trace);
+        Bugzilla::Extension::TraceParser::Trace->create($trace);
         indicate_progress({ current => $count++, total => $total_traces,
                             every => 100 });
     }
     $dbh->bz_commit_transaction();
 }
 
-sub format_comment {
-    my %params = @_;
-    my ($text, $bug, $regexes, $comment) = @params{qw(text bug regexes comment)};
-    return if !$comment;
-    my ($trace) = @{ TraceParser::Trace->match({ comment_id => $comment->{id} }) };
-    return if !$trace;
-
-    # $$text contains the wrapped text, and $comment contains the unwrapped
-    # text. To find the trace that we want from the DB, we need to use the
-    # unwrapped text. But to find the text that we need to replace, we
-    # need to use the wrapped text.
-    my $match_text;
-    if ($comment->{already_wrapped}) {
-        $match_text = $trace->text;
-    }
-    else {
-        my $stacktrace = TraceParser::Trace->stacktrace_from_text($$text);
-        $match_text = $stacktrace->text;
-    }
-
-    $match_text = quotemeta($match_text);
-    my $replacement;
-    my $template = Bugzilla->template_inner;
-    $template->process('trace/format.html.tmpl', { trace => $trace },
-                       \$replacement)
-      || ThrowTemplateError($template->error);
-    # Make sure that replacements don't contain $1, $2, etc.
-    $replacement =~ s{\$}{\\\$};
-    push(@$regexes, { match => qr/$match_text/s, replace => $replacement });
-}
-
-sub page {
-    my %params = @_;
-    my ($vars, $page) = @params{qw(vars page_id)};
+sub page_before_template {
+    my ($self, $args) = @_;
+    
+    my ($vars, $page) = @$args{qw(vars page_id)};
     if ($page =~ /^trace\./) {
         _page_trace($vars);
     }
@@ -351,7 +412,7 @@ sub _page_trace {
     my $user = Bugzilla->user;
 
     my $trace_id = $cgi->param('trace_id');
-    my $trace = TraceParser::Trace->check({ id => $trace_id });
+    my $trace = Bugzilla::Extension::TraceParser::Trace->check({ id => $trace_id });
     $trace->check_is_visible;
 
     my $action = $cgi->param('action') || '';
@@ -417,7 +478,7 @@ sub _page_popular_traces {
        GROUP BY short_hash ORDER BY trace_count DESC "
         . $dbh->sql_limit('?'), {Columns=>[1,2]}, $limit) };
  
-    my $traces = TraceParser::Trace->new_from_list([keys %trace_count]);
+    my $traces = Bugzilla::Extension::TraceParser::Trace->new_from_list([keys %trace_count]);
     @$traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
                             @$traces;
     $vars->{limit} = $limit;
@@ -430,9 +491,11 @@ sub _page_post_duplicate_trace {
     my $comment = { body      => scalar $cgi->param('comment'),
                     isprivate => scalar $cgi->param('isprivate'),
                   };
-    my $trace = TraceParser::Trace->parse_from_text($comment->{body});
+    my $trace = Bugzilla::Extension::TraceParser::Trace->parse_from_text($comment->{body});
     my $bug = Bugzilla::Bug->check(scalar $cgi->param('bug_id'));
     _handle_dup_to($trace, $bug, $comment, 'allow closed');
 }
 
 1;
+
+__PACKAGE__->NAME;

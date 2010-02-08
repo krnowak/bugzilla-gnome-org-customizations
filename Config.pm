@@ -1,5 +1,3 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
-#
 # The contents of this file are subject to the Mozilla Public
 # License Version 1.1 (the "License"); you may not use this file
 # except in compliance with the License. You may obtain a copy of
@@ -10,19 +8,24 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the Bugzilla Example Plugin.
+# The Original Code is the Bugzilla TraceParser Plugin.
 #
 # The Initial Developer of the Original Code is Canonical Ltd.
-# Portions created by Canonical Ltd. are Copyright (C) 2009 
+# Portions created by Canonical Ltd. are Copyright (C) 2009
 # Canonical Ltd. All Rights Reserved.
 #
 # Contributor(s):
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
-
+package Bugzilla::Extension::TraceParser;
 use strict;
-use warnings;
-use Bugzilla;
-use TraceParser::Hooks;
+use constant NAME => 'TraceParser';
+use constant REQUIRED_MODULES => [
+    {
+        package => 'Parse-StackTrace',
+        module  => 'Parse::StackTrace',
+        version => 0.08,
+    },
+];
 
-page(%{ Bugzilla->hook_args });
+__PACKAGE__->NAME;

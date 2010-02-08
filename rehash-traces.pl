@@ -2,10 +2,11 @@
 
 use strict;
 use warnings;
-use lib qw(. lib extensions/traceparser/lib);
+use lib qw(. lib);
 use Bugzilla;
+BEGIN { Bugzilla->extensions(); }
 use Bugzilla::Install::Util qw(indicate_progress);
-use TraceParser::Trace;
+use Bugzilla::Extension::TraceParser::Trace;
 
 my $dbh = Bugzilla->dbh;
 
@@ -22,7 +23,7 @@ my $count = 0;
 my @traces;
 while (my ($id, $text) = $sth->fetchrow_array) {
     $count++;
-    my $trace = TraceParser::Trace->parse_from_text($text);
+    my $trace = Bugzilla::Extension::TraceParser::Trace->parse_from_text($text);
     indicate_progress({ current => $count, total => $total, every => 10 });
     $trace->{id} = $id;
     push(@traces, $trace);
