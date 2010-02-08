@@ -261,7 +261,7 @@ sub bug_format_comment {
     my ($text, $bug, $regexes, $comment) = @$args{qw(text bug regexes comment)};
     return if !$comment;
     my ($trace) = @{ Bugzilla::Extension::TraceParser::Trace->match(
-                         { comment_id => $comment->{id} }) };
+                         { comment_id => $comment->id }) };
     return if !$trace;
 
     # $$text contains the wrapped text, and $comment contains the unwrapped
