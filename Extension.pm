@@ -33,8 +33,9 @@ use Bugzilla::Extension::TraceParser::Trace;
 
 use List::Util;
 use POSIX qw(ceil);
+use Scalar::Util qw(blessed);
 
-our $VERSION = '0.01';
+our $VERSION = '0.1';
 
 use constant DEFAULT_POPULAR_LIMIT => 20;
 
@@ -42,13 +43,12 @@ sub bug_end_of_create {
     my ($self, $args) = @_;
     
     my $bug = $args->{bug};
-    my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest',
-        '1970-01-01', $bug->creation_ts, 'raw');
+    my $comments = $bug->comments({ order => 'oldest_to_newest' });
     my $comment = $comments->[0];
-    my $data = Bugzilla::Extension::TraceParser::Trace->parse_from_text($comment->{body});
+    my $data = Bugzilla::Extension::TraceParser::Trace->parse_from_text($comment->body);
     return if !$data;
     my $trace = Bugzilla::Extension::TraceParser::Trace->create(
-        { %$data, comment_id => $comment->{id} });
+        { %$data, comment_id => $comment->id });
     _check_duplicate_trace($trace, $bug, $comment);    
 }
 
@@ -201,7 +201,8 @@ sub _handle_dup_to {
                     delete $comment_options{$key};
                 }
             }
-            $dup_to->add_comment($comment->{body}, \%comment_options);
+            my $body = blessed($comment) ? $comment->body : $comment->{body};
+            $dup_to->add_comment($body, \%comment_options);
             $comment_added = 1;
         }
     }
@@ -211,18 +212,8 @@ sub _handle_dup_to {
         my $template = Bugzilla->template;
         my $cgi = Bugzilla->cgi;
         my $vars = {};
-        # Do the various silly things required to display show_bug.cgi
-        # in Bugzilla 3.4.
-        $vars->{use_keywords} = 1 if Bugzilla::Keyword::keyword_count();
         $vars->{bugs} = [$dup_to];
         $vars->{bugids} = [$dup_to->id];
-        if ($cgi->cookie("BUGLIST")) {
-            $vars->{bug_list} = [split(/:/, $cgi->cookie("BUGLIST"))];
-        }
-        eval {
-            require PatchReader;
-            $vars->{'patchviewerinstalled'} = 1;
-        };
         $vars->{comment_added} = $comment_added;
         $vars->{message} = 'traceparser_dup_to';
         print $cgi->header;
@@ -237,21 +228,22 @@ sub _handle_dup_to {
                      comment_added => $comment_added });
 }
 
-
-
 sub bug_end_of_update {
     my ($self, $args) = @_;
     
     my ($bug, $timestamp) = @$args{qw(bug timestamp)};
     return if !$bug->{added_comments};
-    my $comments = Bugzilla::Bug::GetComments($bug->id, 'oldest_to_newest', 
-                                              $bug->delta_ts, $timestamp, 1);
+    # Delete the cache, because we want to refresh this from the DB.
+    delete $bug->{comments};
+    my $comments = $bug->comments({ order => 'oldest_to_newest',
+                                    after => $bug->delta_ts, to => $timestamp });
+
     foreach my $comment (@$comments) {
         my $data = Bugzilla::Extension::TraceParser::Trace->parse_from_text(
-            $comment->{body});
+            $comment->body);
         next if !$data;
         Bugzilla::Extension::TraceParser::Trace->create(
-            { %$data, comment_id => $comment->{id} });
+            { %$data, comment_id => $comment->id });
     }    
 }
 
@@ -269,7 +261,7 @@ sub bug_format_comment {
     # unwrapped text. But to find the text that we need to replace, we
     # need to use the wrapped text.
     my $match_text;
-    if ($comment->{already_wrapped}) {
+    if ($comment->already_wrapped) {
         $match_text = $trace->text;
     }
     else {

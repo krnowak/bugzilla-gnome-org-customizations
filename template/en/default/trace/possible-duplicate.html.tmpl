@@ -41,7 +41,7 @@
       action="page.cgi?id=post-duplicate-trace.none">
   <input type="hidden" name="comment" value="[% comment.body FILTER html %]">
   <input type="hidden" name="isprivate" 
-         value="[% comment.isprivate FILTER html %]">
+         value="[% comment.is_private FILTER html %]">
   [% SET shown_bugs = 0 %]
   [% IF prod_bugs.size %]
     [% PROCESS trace_bug_list list = prod_bugs limit = 10 %]
