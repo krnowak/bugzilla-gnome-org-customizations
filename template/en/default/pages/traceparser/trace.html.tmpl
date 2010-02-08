@@ -25,7 +25,7 @@
 
 [% IF user.in_group('traceparser_edit') %]
   <h2>Properties of trace [% trace.id FILTER html %]</h2>
-  <form action="page.cgi?id=trace.html&amp;trace_id=
+  <form action="page.cgi?id=traceparser/trace.html&amp;trace_id=
                 [%- trace.id FILTER url_quote %]"
         method="POST">
   <div>
@@ -73,7 +73,7 @@
       [% FOREACH this_trace = list.$product %]
         [% SET bug = this_trace.bug %]
         <li>
-          <a href="page.cgi?id=trace.html&amp;trace_id=
+          <a href="page.cgi?id=traceparser/trace.html&amp;trace_id=
                    [%- this_trace.id FILTER url_quote %]">Trace
             [%+ this_trace.id FILTER html %]</a>
           (Quality: <strong>[% this_trace.quality FILTER html %]</strong>)

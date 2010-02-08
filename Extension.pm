@@ -98,7 +98,7 @@ sub _check_duplicate_trace {
         }
 
         print $cgi->header;
-        $template->process('trace/possible-duplicate.html.tmpl', \%vars)
+        $template->process('traceparser/possible-duplicate.html.tmpl', \%vars)
           or ThrowTemplateError($template->error);
         exit;
     }
@@ -272,7 +272,7 @@ sub bug_format_comment {
     $match_text = quotemeta($match_text);
     my $replacement;
     my $template = Bugzilla->template_inner;
-    $template->process('trace/format.html.tmpl', { trace => $trace },
+    $template->process('traceparser/format.html.tmpl', { trace => $trace },
                        \$replacement)
       || ThrowTemplateError($template->error);
     # Make sure that replacements don't contain $1, $2, etc.
@@ -386,13 +386,13 @@ sub page_before_template {
     my ($self, $args) = @_;
     
     my ($vars, $page) = @$args{qw(vars page_id)};
-    if ($page =~ /^trace\./) {
+    if ($page =~ m{^traceparser/trace\.}) {
         _page_trace($vars);
     }
-    elsif ($page =~ /^popular-traces\./) {
+    elsif ($page =~ m{^traceparser/popular-traces\.}) {
         _page_popular_traces($vars);
     }
-    elsif ($page =~ /^post-duplicate-trace/) {
+    elsif ($page =~ m{^traceparser/post-duplicate-trace\.}) {
         _page_post_duplicate_trace($vars);
     }
 }

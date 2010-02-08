@@ -25,7 +25,7 @@
 
 <form action="page.cgi" method="GET">
 <div>
-  <input type="hidden" name="id" value="popular-traces.html">
+  <input type="hidden" name="id" value="traceparser/popular-traces.html">
   Show the top 
   <input type="text" size="3" name="limit" value="[% limit FILTER html %]">
   traces.
@@ -39,7 +39,7 @@
 <ul class="trace_list">
   [% FOREACH trace = traces %]
     <li>
-      <a href="page.cgi?id=trace.html&amp;trace_id=
+      <a href="page.cgi?id=traceparser/trace.html&amp;trace_id=
                [%- trace.id FILTER url_quote %]">
         [%- trace_count.${trace.id} FILTER html %]</a>:
       [% FOREACH function = trace.short_stack %]

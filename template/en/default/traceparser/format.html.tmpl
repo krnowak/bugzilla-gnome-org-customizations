@@ -26,7 +26,7 @@
      title="Expand/Collapse Trace"
      onclick="traceparser_toggle_trace(this, [% trace.id FILTER html %]); return false;">
     [%~ IF show %]&mdash;[% ELSE %]+[% END %]</a>
-  <a href="page.cgi?id=trace.html&trace_id=
+  <a href="page.cgi?id=traceparser/trace.html&trace_id=
            [%- trace.id FILTER url_quote %]">Trace
     [%+ trace.id FILTER html %]</a></p>
 
