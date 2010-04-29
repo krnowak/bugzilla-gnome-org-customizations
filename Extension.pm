@@ -35,7 +35,7 @@ use List::Util;
 use POSIX qw(ceil);
 use Scalar::Util qw(blessed);
 
-our $VERSION = '0.1';
+our $VERSION = '1.0';
 
 use constant DEFAULT_POPULAR_LIMIT => 20;
 
