@@ -1,0 +1,3 @@
+- Try to have git-bz working. Either by patching git-bz or by fixing
+  it in extension or both.
+- Maybe try adding some attachment related UI in search page.
