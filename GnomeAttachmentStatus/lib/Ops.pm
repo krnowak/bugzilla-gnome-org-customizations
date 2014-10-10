@@ -319,7 +319,7 @@ sub _fill_gnome_attachment_status_table {
                  ['accepted-commit_now', 'The maintainer has given commit permission'],
                  ['needs-work', 'The patch needs work'],
                  ['accepted-commit_after_freeze', 'This patch is acceptable, but can\'t be committed until after the relevant freeze (string, etc.) is lifted.'],
-                 ['commited', 'This patch has already been committed but the bug remains open for other reasons'],
+                 ['committed', 'This patch has already been committed but the bug remains open for other reasons'],
                  ['rejected', 'The patch provides a change that is just not wanted, or the patch can\'t be fixed to be correct without rewriting.  Maintainers should always explain their reasons whenever marking a patch as rejected.'],
                  ['reviewed', 'None of the other states made sense or are quite correct, but the other comments in the bug explain the status of the patch and the patch should be considered to have been reviewed.  If the submitter doesn\'t feel the comments on the patch are clear enough, they can unset this state']);
     foreach my $pair (@pairs) {
