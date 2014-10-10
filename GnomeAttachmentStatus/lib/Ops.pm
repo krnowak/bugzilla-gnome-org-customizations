@@ -23,7 +23,7 @@ use File::Spec;
 our @EXPORT = qw(
     update_choice_class_map
     add_gnome_attachment_status_table_to_schema
-    check_overriden_templates
+    check_overridden_templates
     maybe_add_status_column
     maybe_add_status_update_columns
     maybe_setup_status_validator
@@ -122,10 +122,10 @@ sub _attachment_list_handler {
                 last;
             }
 
-            my $overriden = defined ($complete_path);
+            my $overridden = defined ($complete_path);
 
-            $infos->{$file}{'overriden'} = $overriden;
-            if ($overriden and not exists ($infos->{$file}{'digest'}))
+            $infos->{$file}{'overridden'} = $overridden;
+            if ($overridden and not exists ($infos->{$file}{'digest'}))
             {
                 # If this happens then it is programmer's error.
                 die "No digest of original template file ($complete_path) available";
@@ -146,16 +146,16 @@ sub _attachment_list_handler {
     }
 }
 
-sub check_overriden_templates
+sub check_overridden_templates
 {
-    print "Checking overriden templates...\n";
+    print "Checking overridden templates...\n";
     # template_include_path is from Bugzilla::Install::Util package.
     my @default_paths = grep {!/^\.\/extensions\//} @{Bugzilla::Install::Util::template_include_path()};
     my $infos = _get_template_infos();
 
     for my $file (sort keys (%{$infos}))
     {
-        next unless $infos->{$file}{'overriden'};
+        next unless $infos->{$file}{'overridden'};
 
         my $complete_path = undef;
 
@@ -180,7 +180,7 @@ sub check_overriden_templates
         {
             die "Original $file (at $complete_path) has changed " .
             'since last checksetup. Please check if the changes ' .
-            'should be backported to overriden templates and ' .
+            'should be backported to overridden templates and ' .
             'update the digest in template_infos variable with ' .
             $digest;
         }

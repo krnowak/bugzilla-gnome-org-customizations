@@ -98,13 +98,13 @@ sub template_before_process {
 #
 # In short: argh!
 #
-# Also check if overriden templates didn't change since last
+# Also check if overridden templates didn't change since last
 # time. This check is for us to maybe backport the changes to our
 # overrides.
 sub install_before_final_checks
 {
     perform_migration;
-    check_overriden_templates;
+    check_overridden_templates;
 }
 
 sub enabled {
