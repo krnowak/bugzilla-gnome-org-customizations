@@ -35,16 +35,11 @@ sub new {
 #
 # It would be better to have a hook for adding more enum initial
 # values instead (see Bugzilla::DB::bz_populate_enum_tables).
-#
-# Also check if overriden templates didn't change since last
-# time. This check is for us to maybe backport the changes to our
-# overrides.
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;
     my $schema = $args->{'schema'};
 
     add_gnome_attachment_status_table_to_schema($schema);
-    check_overriden_templates;
 }
 
 sub object_columns {
@@ -102,9 +97,14 @@ sub template_before_process {
 # key removed, we are getting errors when dropping a column.
 #
 # In short: argh!
+#
+# Also check if overriden templates didn't change since last
+# time. This check is for us to maybe backport the changes to our
+# overrides.
 sub install_before_final_checks
 {
-    perform_migration
+    perform_migration;
+    check_overriden_templates;
 }
 
 sub enabled {
