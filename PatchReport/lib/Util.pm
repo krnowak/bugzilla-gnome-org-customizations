@@ -13,6 +13,7 @@
 package Bugzilla::Extension::PatchReport::Util;
 
 use strict;
+use warnings;
 use base qw(Exporter);
 
 use Bugzilla;

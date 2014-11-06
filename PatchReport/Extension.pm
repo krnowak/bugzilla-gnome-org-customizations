@@ -1,5 +1,6 @@
 package Bugzilla::Extension::PatchReport;
 use strict;
+use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Extension::PatchReport::Util;
