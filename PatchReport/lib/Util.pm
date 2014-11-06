@@ -47,7 +47,7 @@ sub _page_patch_report {
     my $max_days = -1;    # (int) Don't show patches older than this (in days)
     my $submitter;        # (int) submitter id
 
-    if (!$dbh->bz_column_info('attachments', 'status')) {
+    if (!$dbh->bz_column_info('attachments', 'gnome_attachment_status')) {
         ThrowCodeError('patchreport_no_attachments_status')
     }
 
@@ -94,8 +94,8 @@ sub _page_patch_report {
         trick_taint($patch_status);
         $type = $dbh->selectrow_array(
                     "SELECT value
-                       FROM attachment_status
-                       WHERE attachment_status.value = ?",
+                       FROM gnome_attachment_status
+                       WHERE gnome_attachment_status.value = ?",
                        undef, $patch_status);
     }
 
@@ -164,7 +164,7 @@ sub get_unreviewed_patches_and_stats {
       $query .= " AND attachments.isobsolete != '1'";
     }
     if ($patch_status ne 'obsolete') {
-        $query .= " AND attachments.status = '" . $patch_status . "'";
+        $query .= " AND attachments.gnome_attachment_status = '" . $patch_status . "'";
     }
     $query .= "   AND (bugs.bug_status = 'UNCONFIRMED'
                        OR bugs.bug_status = 'NEW'
