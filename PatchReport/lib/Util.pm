@@ -111,15 +111,12 @@ sub _page_patch_report {
     $vars->{'stats'} = $stats;
 }
 
-
 sub get_unreviewed_patches_and_stats {
     my ($quoted_product, $quoted_component, $patch_status,
         $min_days, $max_days, $submitter) = (@_);
 
-    my $query;
     my $dbh = Bugzilla->dbh;
-
-    $query = " SELECT attachments.attach_id, attachments.bug_id,
+    my $query = " SELECT attachments.attach_id, attachments.bug_id,
                       (" . $dbh->sql_to_days('LOCALTIMESTAMP(0)') . "-" .
                        $dbh->sql_to_days('attachments.creation_ts') . ") AS age,
                       substring(attachments.description, 1, 70),
@@ -264,4 +261,3 @@ sub get_unreviewed_patches_and_stats {
 
     return $stats;
 }
-

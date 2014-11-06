@@ -8,9 +8,8 @@ our $VERSION = '0.01';
 
 sub page_before_template {
     my ($self, $args) = @_;
-    
+
     page(%{ $args });
-    
 }
 
 sub install_before_final_checks {
