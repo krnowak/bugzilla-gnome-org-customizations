@@ -4,7 +4,7 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Extension::PatchReport::Util;
 
-our $VERSION = '';
+our $VERSION = '0.01';
 
 sub page_before_template {
     my ($self, $args) = @_;
