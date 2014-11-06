@@ -14,10 +14,14 @@ sub page_before_template {
 }
 
 sub install_before_final_checks {
-    my ($self) = @_;
+    my ($self, $params) = @_;
     my $extensions = Bugzilla->extensions();
     my $extension_name = 'Bugzilla::Extension::GnomeAttachmentStatus';
     my $found_attachment_status_extension = undef;
+
+    unless ($params->{'silent'}) {
+        print "Checking if we have $extension_name installed...\n";
+    }
 
     for my $extension (@{$extensions}) {
         if ($extension->isa($extension_name)) {
