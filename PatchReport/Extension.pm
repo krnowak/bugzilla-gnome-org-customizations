@@ -35,4 +35,8 @@ sub install_before_final_checks {
     }
 }
 
+sub enabled {
+    1;
+}
+
 __PACKAGE__->NAME;
