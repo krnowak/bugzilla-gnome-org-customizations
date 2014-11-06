@@ -46,11 +46,6 @@ sub _page_patch_report {
     my $min_days = -1;    # (int) Don't show patches younger than this (in days)
     my $max_days = -1;    # (int) Don't show patches older than this (in days)
     my $submitter;        # (int) submitter id
-
-    if (!$dbh->bz_column_info('attachments', 'gnome_attachment_status')) {
-        ThrowCodeError('patchreport_no_attachments_status')
-    }
-
     my @products = $cgi->param('product');
     my @components = $cgi->param('component');
 
