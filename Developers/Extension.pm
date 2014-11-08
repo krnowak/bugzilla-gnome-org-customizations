@@ -21,6 +21,7 @@
 
 package Bugzilla::Extension::Developers;
 use strict;
+use warnings;
 use base qw(Bugzilla::Extension);
 
 # This code for this is in ./extensions/Developers/lib/Util.pm
