@@ -30,7 +30,7 @@ use Bugzilla::Extension::ProductInterests::Util;
 sub product_interests {
     my $self = shift;
 
-    return $self->{p_i()} if defined $self->{p_i()};
+    return $self->{p_i()} if defined ($self->{p_i()});
     return [] unless $self->id;
 
     my $product_ids = Bugzilla->dbh->selectcol_arrayref(
