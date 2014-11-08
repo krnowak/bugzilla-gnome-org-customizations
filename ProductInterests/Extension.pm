@@ -22,6 +22,7 @@
 package Bugzilla::Extension::ProductInterests;
 use strict;
 use base qw(Bugzilla::Extension);
+use Bugzilla::Extension::ProductInterests::Util;
 
 our $VERSION = '0.01';
 
@@ -33,7 +34,7 @@ BEGIN {
 sub product_interests {
     my $self = shift;
 
-    return $self->{'product_int'} if defined $self->{'product_int'};
+    return $self->{p_i()} if defined $self->{p_i()};
     return [] unless $self->id;
 
     my $product_ids = Bugzilla->dbh->selectcol_arrayref(
@@ -48,9 +49,9 @@ sub product_interests {
          ORDER BY products.name},
     undef, ($self->id, $self->id));
 
-    $self->{'product_int'} = Bugzilla::Product->new_from_list($product_ids);
+    $self->{p_i()} = Bugzilla::Product->new_from_list($product_ids);
 
-    return $self->{'product_int'};
+    return $self->{p_i()};
 }
 
 

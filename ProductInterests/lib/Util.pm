@@ -23,11 +23,16 @@ package Bugzilla::Extension::ProductInterests::Util;
 use strict;
 use base qw(Exporter);
 our @EXPORT = qw(
+    p_i
 );
 
 # This file can be loaded by your extension via
 # "use Bugzilla::Extension::ProductInterests::Util". You can put functions
 # used by your extension in here. (Make sure you also list them in
 # @EXPORT.)
+
+sub p_i {
+    'product_int'
+}
 
 1;
