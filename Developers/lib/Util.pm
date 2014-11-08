@@ -21,13 +21,44 @@
 
 package Bugzilla::Extension::Developers::Util;
 use strict;
+use warnings;
 use base qw(Exporter);
+
 our @EXPORT = qw(
+    b_p
+    dev
+    Dev
+    dev_group_name
+    dev_group_desc
 );
 
 # This file can be loaded by your extension via
 # "use Bugzilla::Extension::Developers::Util". You can put functions
 # used by your extension in here. (Make sure you also list them in
 # @EXPORT.)
+
+sub b_p {
+    'Bugzilla::Product';
+}
+
+sub dev {
+    'developers'
+}
+
+sub Dev {
+    'Developers'
+}
+
+sub dev_group_name {
+    my ($product) = @_;
+
+    $product->{'name'} . '_' . dev();
+}
+
+sub dev_group_desc {
+    my ($product) = @_;
+
+    $product->{'name'} . ' ' . Dev();
+}
 
 1;

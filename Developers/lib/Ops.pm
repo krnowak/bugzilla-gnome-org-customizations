@@ -27,6 +27,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Group;
 use Bugzilla::Product;
+use Bugzilla::Extension::Developers::Util;
 
 our @EXPORT = qw(
     migrate_gnome_developers
@@ -46,8 +47,8 @@ sub _create_developer {
     # "<product_name>_developers".
     # Every developer in the product should be made a member of this group.
     my $new_group = Bugzilla::Group->create({
-        name        => $product->{'name'} . '_developers',
-        description => $product->{'name'} . ' Developers',
+        name        => dev_group_name($product),
+        description => dev_group_desc($product),
         isactive    => 1,
         isbuggroup  => 1,
     });
@@ -72,12 +73,12 @@ sub _create_developer {
 
     # The new <product_name>_developers groups should be automatically
     # made a member of the global developers group
-    my $dev_group = Bugzilla::Group->new({ name => 'developers' });
+    my $dev_group = Bugzilla::Group->new({ name => dev() });
 
     if (!$dev_group) {
         $dev_group = Bugzilla::Group->create({
-            name        => 'developers',
-            description => 'Developers',
+            name        => dev(),
+            description => Dev(),
             isbuggroup  => 1,
             isactive    => 1,
         });
@@ -99,14 +100,14 @@ sub _create_developer {
 sub migrate_gnome_developers {
     my $dbh = Bugzilla->dbh;
     # Create the global developer group if it doesn't yet exist
-    my $dev_group = Bugzilla::Group->new({ name => 'developers' });
+    my $dev_group = Bugzilla::Group->new({ name => dev() });
 
     return 1 if $dev_group;
 
     # Create product specific groups:
     foreach my $product (Bugzilla::Product->get_all) {
         my $group = Bugzilla::Group->new(
-            { name => $product->name . '_developers' });
+            { name => dev_group_name($product) });
 
         if (!$group) {
             _create_developer($product);
@@ -117,7 +118,7 @@ sub migrate_gnome_developers {
 sub maybe_create_developer {
     my ($class, $object) = @_;
 
-    if ($class->isa('Bugzilla::Product')) {
+    if ($class->isa(b_p())) {
         _create_developer($object);
     }
 }
@@ -126,7 +127,7 @@ sub _delete_developer {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
     # Delete this product's developer group and its members
-    my $group = Bugzilla::Group->new({ name => $product->name . '_developers' });
+    my $group = Bugzilla::Group->new({ name => dev_group_name($product) });
 
     if ($group) {
         $dbh->do('DELETE FROM user_group_map WHERE group_id = ?',
@@ -146,7 +147,7 @@ sub _delete_developer {
 sub maybe_remove_developers {
     my ($object) = @_;
 
-    if ($object->isa('Bugzilla::Product')) {
+    if ($object->isa(b_p())) {
         _delete_developer($object);
     }
 }
@@ -154,13 +155,13 @@ sub maybe_remove_developers {
 sub _rename_developer {
     my ($product, $old_product, $changes) = @_;
     my $developer_group = new Bugzilla::Group(
-        { name => $old_product->name . "_developers" });
+        { name => dev_group_name($old_product) });
     my $new_group = new Bugzilla::Group(
-        { name => $product->name . '_developers' });
+        { name => dev_group_name($product) });
 
     if ($developer_group && !$new_group) {
-        $developer_group->set_name($product->name . "_developers");
-        $developer_group->set_description($product->name . " Developers");
+        $developer_group->set_name(dev_group_name($product));
+        $developer_group->set_description(dev_group_desc($product));
         $developer_group->update();
     }
 }
@@ -168,7 +169,7 @@ sub _rename_developer {
 sub maybe_rename_developers_group {
     my ($object, $old_object, $changes) = @_;
 
-    if ($object->isa('Bugzilla::Product')) {
+    if ($object->isa(b_p())) {
         if (defined $changes->{'name'}) {
             _rename_developer($object, $old_object, $changes);
         }

@@ -4,18 +4,19 @@ use strict;
 use warnings;
 use Bugzilla::Group;
 use Bugzilla::Product;
+use Bugzilla::Extension::Developers::Util;
 
 sub developers {
     my ($self) = @_;
 
-    if (!defined $self->{'developers'}) {
-        $self->{'developers'} = [];
+    if (!defined $self->{dev()}) {
+        $self->{dev()} = [];
 
-        my $group = Bugzilla::Group->new({ name => $self->name . '_developers' });
-        $self->{developers} = $group ? $group->members_non_inherited : [];
+        my $group = Bugzilla::Group->new({ name => dev_group_name($self) });
+        $self->{dev()} = $group ? $group->members_non_inherited : [];
     }
 
-    return $self->{'developers'};
+    return $self->{dev()};
 }
 
 BEGIN {
