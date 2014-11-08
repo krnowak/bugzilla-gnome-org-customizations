@@ -34,7 +34,7 @@ BEGIN {
         *Bugzilla::User::is_developer = \&is_developer;
 }
 
-# See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook" 
+# See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook"
 # in the bugzilla directory) for a list of all available hooks.
 sub install_update_db {
     my ($self, $args) = @_;
@@ -61,8 +61,7 @@ sub _migrate_gnome_developers {
 
 sub object_end_of_create {
     my ($self, $args) = @_;
-
-    my $class  = $args->{'class'};
+    my $class = $args->{'class'};
     my $object = $args->{'object'};
 
     if ($class->isa('Bugzilla::Product')) {
@@ -73,8 +72,8 @@ sub object_end_of_create {
 sub _create_developer {
     my $product = shift;
 
-    # For every product in Bugzilla, create a group named like 
-    # "<product_name>_developers". 
+    # For every product in Bugzilla, create a group named like
+    # "<product_name>_developers".
     # Every developer in the product should be made a member of this group.
     my $new_group = Bugzilla::Group->create({
         name        => $product->{'name'} . '_developers',
@@ -82,11 +81,11 @@ sub _create_developer {
         isactive    => 1,
         isbuggroup  => 1,
     });
- 
+
     # The "<product name>_developers" group should be set to
     # "MemberControl: Shown, OtherControl: Shown" in the product's group controls.
     #
-    # The "<product name>_developers" group should also be given editcomponents 
+    # The "<product name>_developers" group should also be given editcomponents
     # for the product.
     my $dbh = Bugzilla->dbh;
     $dbh->do('INSERT INTO group_control_map
@@ -124,26 +123,23 @@ sub _create_developer {
               (group_id, product_id, entry, membercontrol,
                othercontrol, canedit, editcomponents)
               VALUES (?, ?, 0, ?, ?, 0, 0)',
-              undef, ($dev_group->id, $product->id, CONTROLMAPSHOWN, 
+              undef, ($dev_group->id, $product->id, CONTROLMAPSHOWN,
                       CONTROLMAPSHOWN));
 }
 
-
 sub object_before_delete {
     my ($self, $args) = @_;
-
     my $object = $args->{'object'};
 
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::Product')) {
         my $id = $object->id;
         _delete_developer($object);
-    } 
+    }
 }
 
 sub _delete_developer {
     my $product = shift;
-
     my $dbh = Bugzilla->dbh;
 
     # Delete this product's developer group and its members
@@ -151,7 +147,7 @@ sub _delete_developer {
     if ($group) {
         $dbh->do('DELETE FROM user_group_map WHERE group_id = ?',
                   undef, $group->id);
-        $dbh->do('DELETE FROM group_group_map 
+        $dbh->do('DELETE FROM group_group_map
                   WHERE grantor_id = ? OR member_id = ?',
                   undef, ($group->id, $group->id));
         $dbh->do('DELETE FROM bug_group_map WHERE group_id = ?',
@@ -165,7 +161,6 @@ sub _delete_developer {
 
 sub object_end_of_update {
     my ($self, $args) = @_;
-
     my ($object, $old_object, $changes) =
         @$args{qw(object old_object changes)};
 
@@ -180,18 +175,17 @@ sub object_end_of_update {
 
 sub _rename_developer {
     my ($product, $old_product, $changes) = @_;
-
     my $developer_group = new Bugzilla::Group(
         { name => $old_product->name . "_developers" });
     my $new_group = new Bugzilla::Group(
         { name => $product->name . '_developers' });
+
     if ($developer_group && !$new_group) {
         $developer_group->set_name($product->name . "_developers");
         $developer_group->set_description($product->name . " Developers");
         $developer_group->update();
     }
 }
-
 
 sub developers {
     my ($self) = @_;
@@ -205,7 +199,6 @@ sub developers {
 
     return $self->{'developers'};
 }
-
 
 sub is_developer {
     my ($self, $product) = @_;
@@ -221,7 +214,7 @@ sub is_developer {
         return $self->in_group("developers") ? 1 : 0;
     }
 
-    return 0; 
+    return 0;
 }
 
 __PACKAGE__->NAME;
