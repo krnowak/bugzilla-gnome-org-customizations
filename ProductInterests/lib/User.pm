@@ -22,9 +22,36 @@
 package Bugzilla::Extension::ProductInterests;
 use strict;
 use warnings;
-use base qw(Bugzilla::Extension);
-use Bugzilla::Extension::ProductInterests::User;
+use Bugzilla;
+use Bugzilla::Product;
+use Bugzilla::User;
+use Bugzilla::Extension::ProductInterests::Util;
 
-our $VERSION = '0.01';
+sub product_interests {
+    my $self = shift;
 
-__PACKAGE__->NAME;
+    return $self->{p_i()} if defined $self->{p_i()};
+    return [] unless $self->id;
+
+    my $product_ids = Bugzilla->dbh->selectcol_arrayref(
+        qq{SELECT products.id
+             FROM components
+       INNER JOIN products
+               ON components.product_id = products.id
+        LEFT JOIN watch
+               ON components.initialowner = watch.watched
+            WHERE products.isactive = '1'
+              AND (watch.watcher = ? OR components.initialowner = ?)
+         ORDER BY products.name},
+    undef, ($self->id, $self->id));
+
+    $self->{p_i()} = Bugzilla::Product->new_from_list($product_ids);
+
+    return $self->{p_i()};
+}
+
+BEGIN {
+    *Bugzilla::User::product_interests = \&product_interests;
+}
+
+1;
