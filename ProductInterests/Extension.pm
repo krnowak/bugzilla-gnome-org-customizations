@@ -21,6 +21,7 @@
 
 package Bugzilla::Extension::ProductInterests;
 use strict;
+use warnings;
 use base qw(Bugzilla::Extension);
 use Bugzilla::Extension::ProductInterests::Util;
 

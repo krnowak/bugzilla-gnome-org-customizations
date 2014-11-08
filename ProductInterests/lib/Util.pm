@@ -21,6 +21,7 @@
 
 package Bugzilla::Extension::ProductInterests::Util;
 use strict;
+use warnings;
 use base qw(Exporter);
 our @EXPORT = qw(
     p_i
