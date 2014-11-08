@@ -19,7 +19,7 @@ sub is_developer {
 }
 
 BEGIN {
-        *Bugzilla::User::is_developer = \&is_developer;
+    *Bugzilla::User::is_developer = \&is_developer;
 }
 
 1;

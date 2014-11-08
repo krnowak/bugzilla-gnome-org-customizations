@@ -75,7 +75,7 @@ sub _create_developer {
     # made a member of the global developers group
     my $dev_group = Bugzilla::Group->new({ name => dev() });
 
-    if (!$dev_group) {
+    unless ($dev_group) {
         $dev_group = Bugzilla::Group->create({
             name        => dev(),
             description => Dev(),
@@ -109,7 +109,7 @@ sub migrate_gnome_developers {
         my $group = Bugzilla::Group->new(
             { name => dev_group_name($product) });
 
-        if (!$group) {
+        unless ($group) {
             _create_developer($product);
         }
     }
@@ -170,7 +170,7 @@ sub maybe_rename_developers_group {
     my ($object, $old_object, $changes) = @_;
 
     if ($object->isa(b_p())) {
-        if (defined $changes->{'name'}) {
+        if (defined ($changes->{'name'})) {
             _rename_developer($object, $old_object, $changes);
         }
     }

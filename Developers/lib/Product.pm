@@ -9,8 +9,8 @@ use Bugzilla::Extension::Developers::Util;
 sub developers {
     my ($self) = @_;
 
-    if (!defined $self->{dev()}) {
-        my $group = Bugzilla::Group->new({ name => dev_group_name($self) });
+    unless (defined ($self->{dev()})) {
+        my $group = Bugzilla::Group->new({ 'name' => dev_group_name($self) });
 
         $self->{dev()} = $group ? $group->members_non_inherited : [];
     }
@@ -19,7 +19,7 @@ sub developers {
 }
 
 BEGIN {
-        *Bugzilla::Product::developers = \&developers;
+    *Bugzilla::Product::developers = \&developers;
 }
 
 1;
