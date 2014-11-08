@@ -15,3 +15,6 @@ with "bz_comment_user" class by adding the contents of Developer's
 hook.
 
 More sophisticated solution would involve another cache.
+
+Reproducible only when there are attachments. Without attachments the
+titles work correctly.
