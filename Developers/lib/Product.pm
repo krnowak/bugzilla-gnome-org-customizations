@@ -10,9 +10,8 @@ sub developers {
     my ($self) = @_;
 
     if (!defined $self->{dev()}) {
-        $self->{dev()} = [];
-
         my $group = Bugzilla::Group->new({ name => dev_group_name($self) });
+
         $self->{dev()} = $group ? $group->members_non_inherited : [];
     }
 
