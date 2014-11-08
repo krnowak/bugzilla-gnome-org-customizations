@@ -1,0 +1,17 @@
+1. Splinter
+2. Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
+3. Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
+4. Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
+5. Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
+6. Developers:
+Hooking to user won't work - currently the hook requires comment, bug
+and a mode to be defined.  The user templated is cached and then the
+cached version is used in the comments.  Unfortunately, the caching
+for the first time happens in table with attachments.  Here, comment
+and mode are not defined.
+
+Simplest solution would be modifying the template before closing span
+with "bz_comment_user" class by adding the contents of Developer's
+hook.
+
+More sophisticated solution would involve another cache.
