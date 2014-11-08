@@ -26,12 +26,9 @@ use base qw(Bugzilla::Extension);
 # This code for this is in ./extensions/Developers/lib/Util.pm
 use Bugzilla::Extension::Developers::Ops;
 use Bugzilla::Extension::Developers::Product;
+use Bugzilla::Extension::Developers::User;
 
 our $VERSION = '0.01';
-
-BEGIN {
-        *Bugzilla::User::is_developer = \&is_developer;
-}
 
 # See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook"
 # in the bugzilla directory) for a list of all available hooks.
@@ -63,23 +60,6 @@ sub object_end_of_update {
     my $changes = $args->{'changes'};
 
     maybe_rename_developers_group($object, $old_object, $changes);
-}
-
-sub is_developer {
-    my ($self, $product) = @_;
-
-    if ($product) {
-        # Given the only use of this is being passed bug.product_obj,
-        # at the moment the performance of this should be fine.
-        my $devs = $product->developers;
-        my $is_dev = grep { $_->id == $self->id } @$devs;
-        return $is_dev ? 1 : 0;
-    }
-    else {
-        return $self->in_group("developers") ? 1 : 0;
-    }
-
-    return 0;
 }
 
 __PACKAGE__->NAME;
