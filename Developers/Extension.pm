@@ -25,11 +25,11 @@ use base qw(Bugzilla::Extension);
 
 # This code for this is in ./extensions/Developers/lib/Util.pm
 use Bugzilla::Extension::Developers::Ops;
+use Bugzilla::Extension::Developers::Product;
 
 our $VERSION = '0.01';
 
 BEGIN {
-        *Bugzilla::Product::developers = \&developers;
         *Bugzilla::User::is_developer = \&is_developer;
 }
 
@@ -63,19 +63,6 @@ sub object_end_of_update {
     my $changes = $args->{'changes'};
 
     maybe_rename_developers_group($object, $old_object, $changes);
-}
-
-sub developers {
-    my ($self) = @_;
-
-    if (!defined $self->{'developers'}) {
-        $self->{'developers'} = [];
-
-        my $group = Bugzilla::Group->new({ name => $self->name . '_developers' });
-        $self->{developers} = $group ? $group->members_non_inherited : [];
-    }
-
-    return $self->{'developers'};
 }
 
 sub is_developer {
