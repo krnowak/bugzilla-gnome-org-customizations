@@ -5,6 +5,7 @@ use warnings;
 use Bugzilla::User;
 use Bugzilla::Extension::Developers::Util;
 use Bugzilla::Extension::Developers::Product;
+use List::MoreUtils qw{any};
 
 sub is_developer {
     my ($self, $product) = @_;
@@ -12,16 +13,9 @@ sub is_developer {
     if ($product) {
         # Given the only use of this is being passed bug.product_obj,
         # at the moment the performance of this should be fine.
-        my $devs = $product->developers;
-        my $is_dev = grep { $_->id == $self->id } @$devs;
-
-        return $is_dev ? 1 : 0;
+        return any { $_->id == $self->id } @{$product->developers()};
     }
-    else {
-        return $self->in_group(dev()) ? 1 : 0;
-    }
-
-    return 0;
+    return $self->in_group(dev());
 }
 
 BEGIN {
