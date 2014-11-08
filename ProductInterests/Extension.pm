@@ -45,7 +45,7 @@ sub product_interests {
                ON components.initialowner = watch.watched
             WHERE products.isactive = '1'
               AND (watch.watcher = ? OR components.initialowner = ?)
-         ORDER BY products.name}, 
+         ORDER BY products.name},
     undef, ($self->id, $self->id));
 
     $self->{'product_int'} = Bugzilla::Product->new_from_list($product_ids);
