@@ -31,11 +31,6 @@ our $VERSION = '0.01';
 
 # See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook" 
 # in the bugzilla directory) for a list of all available hooks.
-sub install_update_db {
-    my ($self, $args) = @_;
-
-}
-
 sub page_before_template {
     my ($self, $args) = @_;
 
