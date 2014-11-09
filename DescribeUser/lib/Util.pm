@@ -20,6 +20,7 @@
 package Bugzilla::Extension::DescribeUser::Util;
 
 use strict;
+use warnings;
 use base qw(Exporter);
 
 use Bugzilla;
@@ -32,32 +33,40 @@ our @EXPORT = qw(
     page
 );
 
-sub page {
-    my %params = @_;
-    my ($vars, $page) = @params{qw(vars page_id)};
-    if ($page =~ /^describeuser\./) {
-        _page_describeuser($vars);
+sub _developed_products {
+    my $self = shift;
+
+    return [] unless $self->id;
+
+    # Get the list of products
+    my $groups = $self->{'groups'};
+    my @group_membership = ();
+    foreach my $group (@{$groups}) {
+         push (@group_membership,
+               substr($group->name, 0, index($group->name, '_developers')))
+               if $group->name =~ /_developers$/;
     }
+
+    # return it
+    return \@group_membership;
 }
 
 sub _page_describeuser {
     my $vars = shift;
-
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
-
     my $userid = $user->id;
-
     my $r_userid;
     my $r_user;
     my $displayname;
     my $to_be_conjugation;
+    my $login = $cgi->param('login');
 
-    if (defined $cgi->param('login') && (!Bugzilla->user->id || (trim($cgi->param('login')) != Bugzilla->user->login))) {
-        $r_userid = login_to_id(trim($cgi->param('login')));
+    if (defined($login) && (!Bugzilla->user->id || (trim($login) != Bugzilla->user->login))) {
+        $r_userid = login_to_id(trim($login));
         if ($r_userid == 0) {
-                ThrowUserError('invalid_username', { name => $cgi->param('login') });
+            ThrowUserError('invalid_username', { 'name' => $login });
         }
         $r_user = Bugzilla::User->new($r_userid);
         $displayname = $r_user->name || $r_user->login;
@@ -126,13 +135,13 @@ sub _page_describeuser {
            "SELECT COUNT(DISTINCT bug_id)
               FROM bugs
              WHERE bugs.reporter = ?
-               AND NOT (bugs.bug_status = 'RESOLVED' AND 
+               AND NOT (bugs.bug_status = 'RESOLVED' AND
                         bugs.resolution IN ('DUPLICATE','INVALID','NOTABUG',
                                             'NOTGNOME','INCOMPLETE'))",
            undef, $r_userid);
     $vars->{'bugs_reported'} = $bugs_reported;
 
-    $vars->{'developed_products'} = developed_products($r_user);
+    $vars->{'developed_products'} = _developed_products($r_user);
 
     my $sth;
     my @patches;
@@ -257,8 +266,8 @@ sub _page_describeuser {
 
     my @recentlyclosed;
     $sth = $dbh->prepare("
-            SELECT bugs.bug_id, products.name AS product, bugs.bug_status, 
-                   bugs.resolution, bugs.bug_severity, bugs.short_desc 
+            SELECT bugs.bug_id, products.name AS product, bugs.bug_status,
+                   bugs.resolution, bugs.bug_severity, bugs.short_desc
               FROM bugs
                    $sec_join
         INNER JOIN products
@@ -267,7 +276,7 @@ sub _page_describeuser {
                 ON bugs.bug_id = bugs_activity.bug_id
              WHERE bugs.reporter = ?
                AND bugs_activity.added='RESOLVED'
-               AND (bugs.bug_status='RESOLVED' OR bugs.bug_status = 'VERIFIED' 
+               AND (bugs.bug_status='RESOLVED' OR bugs.bug_status = 'VERIFIED'
                     OR bugs.bug_status='CLOSED')
                AND bugs_activity.bug_when >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY')
                  . $sec_where);
@@ -284,9 +293,9 @@ sub _page_describeuser {
             undef, $r_userid);
 
         my @watchers;
-        foreach my $watcher_id (@$watcher_ids) {
-            my $watcher = new Bugzilla::User($watcher_id);
-            push (@watchers, Bugzilla::User::identity($watcher));
+        foreach my $watcher_id (@{$watcher_ids}) {
+            my $watcher = Bugzilla::User->new($watcher_id);
+            push (@watchers, $watcher->identity());
         }
 
         @watchers = sort { lc($a) cmp lc($b) } @watchers;
@@ -296,27 +305,19 @@ sub _page_describeuser {
     # XXX: this is just a temporary measure until points get back in a table, it
     # can be done here at not cost as numbers are already collected.
     my $points = log(1 + $comments) / log(10) +
-                 log(1 + $bugs_closed) / log(2) + 
+                 log(1 + $bugs_closed) / log(2) +
                  log(1 + $bugs_reported) / log(2);
     $vars->{'points'} = int($points + 0.5);
 }
 
-sub developed_products {
-    my $self = shift;
+sub page {
+    my ($params) = @_;
+    my $vars = $params->{'vars'};
+    my $page = $params->{'page_id'};
 
-    return [] unless $self->id;
-
-    # Get the list of products
-    my $groups = $self->{groups};
-    my $group_membership;
-    foreach my $group (@$groups) {
-         push (@$group_membership,
-               substr($group->name, 0, index($group->name, '_developers')))
-               if $group->name =~ /_developers$/;
+    if ($page =~ /^describeuser\./) {
+        _page_describeuser($vars);
     }
-
-    # return it
-    return $group_membership;
 }
 
 1;

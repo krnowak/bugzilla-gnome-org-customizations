@@ -39,7 +39,7 @@
   #   bug_id:      bug where patch is filed against
   #   product:     name of product in which the bug is filed against
   #   description: patch description
-  # 
+  #
   # assignedbugs:
   # needinfoassignedbugs:
   # needinforeporterbugs:
@@ -66,9 +66,9 @@
     [% END %]
 
     [% IF showuser != '' %]
-      for 
+      for
       [% IF user.in_group('editusers') || user.can_bless %]
-        <a href="editusers.cgi?action=edit&userid=[% userinfo.id 
+        <a href="editusers.cgi?action=edit&userid=[% userinfo.id
                 FILTER uri %]">
       [% END %]
       [% showuser FILTER html %]
@@ -120,7 +120,7 @@
 
     <ul>
     [% FOREACH product = developed_products %]
-      <li><a href="browse.cgi?product=[% product.name FILTER uri %]">[% product 
+      <li><a href="browse.cgi?product=[% product.name FILTER uri %]">[% product
           FILTER html %]</a></li>
     [% END %]
     </ul>
@@ -139,7 +139,7 @@
 
   [% IF watchers && watchers.size > 0 %]
     <h3>Watchers</h3>
-    
+
     <ul>
     [% FOREACH watcher = watchers %]
       <li>[% watcher FILTER html %]</li>
@@ -163,13 +163,13 @@
 
 [%### Bugs ###%]
   <p>
-    <h3><span>Open Issues: 
+    <h3><span>Open Issues:
       <a href="
         [% "buglist.cgi?bug_status=UNCONFIRMED&amp;bug_status=NEW" %]
         [% "&amp;bug_status=REOPENED&amp;bug_status=ASSIGNED" %]
         [% "&amp;emailassigned_to1=1&amp;emailtype1=exact&amp;email1=" %]
         [% userinfo.email FILTER uri %]">
-        <b>Assigned to [% displayname FILTER html %]</b></a> 
+        <b>Assigned to [% displayname FILTER html %]</b></a>
       [% "(the issue has been assigned to" %]
       [%+ displayname FILTER html %]
       [%+ "and it is not resolved or closed yet)" %]
@@ -207,7 +207,7 @@
         [% "buglist.cgi?bug_status=NEEDINFO&amp;emailreporter1=1&amp;emailtype1=" %]
         [% "exact&amp;email1=" %] [% userinfo.email FILTER uri %]">
         <b>Needinfo</b></a>
-      ([% displayname FILTER html %] 
+      ([% displayname FILTER html %]
       [%+ "reported this issue, it requires more information and you should " %]
       [% "provide it) " %]
     </span></h3>
@@ -236,13 +236,13 @@
   </p>
 
   <p>
-    <h3><span>Open Issues: 
+    <h3><span>Open Issues:
       <a href="
         [% "buglist.cgi?bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;" %]
         [% "bug_status=REOPENED&amp;emailreporter1=1&amp;emailtype1=exact" %]
         [% "&amp;email1=" %] [% userinfo.email FILTER uri %]">
         <b>New</b></a>
-      ([% displayname FILTER html %] 
+      ([% displayname FILTER html %]
       [%+ "reported it but nobody has accepted it yet)" %]
      </span></h3>
     <table border="0" cellpadding="3" cellspacing="0">
