@@ -3,3 +3,6 @@
 - Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
 - Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
 - Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
+- Describe User:
+  Instead of listing all possible attachment statuses, just get all of
+  them and remove 'committed' from the list.

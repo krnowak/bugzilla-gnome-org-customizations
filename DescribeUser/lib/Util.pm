@@ -143,30 +143,26 @@ sub _page_describeuser {
 
     $vars->{'developed_products'} = _developed_products($r_user);
 
-    my $sth;
-    my @patches;
-    # XXX - relies on attachments.status!
-    if ($dbh->bz_column_info('attachments', 'status')) {
-        $sth = $dbh->prepare("
-                SELECT attachments.bug_id, attachments.status as status,
-                       attachments.attach_id, products.name as product,
-                       attachments.description
-                  FROM attachments, bugs, products
-                 WHERE attachments.bug_id = bugs.bug_id
-                   AND bugs.product_id = products.id
-                   AND bugs.bug_status IN ('UNCONFIRMED','NEW','ASSIGNED','REOPENED')
-                   AND attachments.submitter_id = ?
-                   AND attachments.ispatch='1'
-                   AND attachments.isobsolete != '1'
-                   AND attachments.status IN ('accepted-commit_after_freeze',
-                                          'accepted-commit_now', 'needs-work', 'none',
-                                          'rejected', 'reviewed')
-              ORDER BY attachments.status");
+    my $sth = $dbh->prepare("
+            SELECT attachments.bug_id, attachments.gnome_attachment_status as status,
+                   attachments.attach_id, products.name as product,
+                   attachments.description
+              FROM attachments, bugs, products
+             WHERE attachments.bug_id = bugs.bug_id
+               AND bugs.product_id = products.id
+               AND bugs.bug_status IN ('UNCONFIRMED','NEW','ASSIGNED','REOPENED')
+               AND attachments.submitter_id = ?
+               AND attachments.ispatch='1'
+               AND attachments.isobsolete != '1'
+               AND attachments.gnome_attachment_status IN ('accepted-commit_after_freeze',
+                                      'accepted-commit_now', 'needs-work', 'none',
+                                      'rejected', 'reviewed')
+          ORDER BY attachments.gnome_attachment_status");
 
-        $sth->execute($r_userid);
-        while (my $patch = $sth->fetchrow_hashref) {
-            push(@patches, $patch);
-        }
+    $sth->execute($r_userid);
+    my @patches = ();
+    while (my $patch = $sth->fetchrow_hashref) {
+        push(@patches, $patch);
     }
     $vars->{'patches'} = \@patches;
 
