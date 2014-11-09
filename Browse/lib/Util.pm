@@ -66,8 +66,10 @@ use constant IMPORTANT_PATCH_STATUSES => qw(
 );
 
 sub page {
-    my %params = @_;
-    my ($vars, $page) = @params{qw(vars page_id)};
+    my ($params) = @_;
+    my $vars = $params->{'vars'};
+    my $page = $params->{'page_id'};
+
     if ($page =~ /^browse\./) {
         _page_browse($vars);
     }
