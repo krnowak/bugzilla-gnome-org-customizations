@@ -22,13 +22,6 @@ titles work correctly.
 Idea - replace "user_cache = template_cache.users" with "user_cache =
 {}"
 
-7. New extension - TemplateOverrides
-Create a new extension that will keep all overridden templates and
-will perform the checks like GnomeAttachmentStatus is doing.
-
-The aim to to have a single place where checks are actually performed
-during checksetup.
-
 8. New extension - ExtensionDeps
 Create a new extension that will keep the data about dependencies
 between extensions. For example PatchStatus depends on
