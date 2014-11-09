@@ -1,9 +1,9 @@
-1. Splinter
-2. Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
-3. Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
-4. Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
-5. Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
-8. New extension - ExtensionDeps
+- Splinter
+- Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
+- Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
+- Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
+- Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
+- New extension - ExtensionDeps
 Create a new extension that will keep the data about dependencies
 between extensions. For example PatchStatus depends on
 GnomeAttachmentStatus. In future Browse would depend on DescribeUser
