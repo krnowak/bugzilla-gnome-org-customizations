@@ -309,16 +309,14 @@ sub new_patches {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->bz_column_info('attachments', 'status') ?
-           $dbh->selectrow_array("SELECT COUNT(attach_id)
+    return $dbh->selectrow_array("SELECT COUNT(attach_id)
                                     FROM bugs, attachments
                                    WHERE bugs.bug_id = attachments.bug_id
                                          AND bug_status IN (" . browse_open_states() . ")
                                          AND attachments.ispatch = 1 AND attachments.isobsolete = 0
-                                         AND attachments.status = 'none'
+                                         AND attachments.gnome_attachment_status = 'none'
                                          AND attachments.creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY') . "
-                                         AND product_id = ?", undef, $product->id) :
-          "?";
+                                         AND product_id = ?", undef, $product->id);
 }
 
 sub keyword_bugs {
@@ -381,17 +379,15 @@ sub by_patch_status {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->bz_column_info('attachments', 'status') ?
-           $dbh->selectall_arrayref("SELECT attachments.status, COUNT(attach_id)
+    return $dbh->selectall_arrayref("SELECT attachments.gnome_attachment_status, COUNT(attach_id)
                                        FROM bugs, attachments
                                       WHERE attachments.bug_id = bugs.bug_id
                                             AND bug_status IN (" . browse_open_states() . ")
                                             AND product_id = ?
                                             AND attachments.ispatch = 1
                                             AND attachments.isobsolete != 1
-                                            AND attachments.status IN (" . join(",", map { $dbh->quote($_) } IMPORTANT_PATCH_STATUSES) . ")
-                                            GROUP BY attachments.status", undef, $product->id) :
-           "?";
+                                            AND attachments.gnome_attachment_status IN (" . join(",", map { $dbh->quote($_) } IMPORTANT_PATCH_STATUSES) . ")
+                                            GROUP BY attachments.gnome_attachment_status", undef, $product->id);
 }
 
 sub browse_bug_link {
