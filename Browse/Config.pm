@@ -21,6 +21,7 @@
 
 package Bugzilla::Extension::Browse;
 use strict;
+use warnings;
 
 use constant NAME => 'Browse';
 
