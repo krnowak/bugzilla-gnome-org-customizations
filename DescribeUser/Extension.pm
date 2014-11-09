@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use base qw(Bugzilla::Extension);
 
-use Bugzilla::Extension::DescribeUser::Util qw(page);
+use Bugzilla::Extension::DescribeUser::Util;
 
 our $VERSION = '0.01';
 
