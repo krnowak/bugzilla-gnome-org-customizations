@@ -13,7 +13,7 @@
 <span class="vcard">
   [% FILTER collapse %]
     [% IF user.id %]
-      <a class="email" href="mailto:[% who.email FILTER html %]"
+      <a href="page.cgi?id=describeuser.html&login=[% who.email FILTER uri %]"
          title="[% who.identity FILTER html %]">
     [%- END -%]
     [% IF who.name %]
