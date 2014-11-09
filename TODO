@@ -4,12 +4,13 @@
 - Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
 - Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
 - New extension - ExtensionDeps
-Create a new extension that will keep the data about dependencies
-between extensions. For example PatchStatus depends on
-GnomeAttachmentStatus. In future Browse would depend on DescribeUser
-and DescribeUser would depend on Browse, Splinter would depend on
-GnomeAttachmentStatus, WeeklyStatusPage would depend on Browse and
-DescribeUser and so on.
-
-The aim is to have a single place where dependencies are actually
-checked during checksetup.
+  Create a new extension that will keep the data about dependencies
+  between extensions. For example PatchStatus depends on
+  GnomeAttachmentStatus. In future Browse would depend on DescribeUser
+  and DescribeUser would depend on Browse, Splinter would depend on
+  GnomeAttachmentStatus, WeeklyStatusPage would depend on Browse and
+  DescribeUser and so on.
+  The aim is to have a single place where dependencies are actually
+  checked during checksetup.
+- GnomeAttachmentStatus - shut its migration routine up when running
+  checksetup in silent mode
