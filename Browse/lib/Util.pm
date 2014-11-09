@@ -40,13 +40,13 @@ our @EXPORT = qw(
     by_severity
     by_component
     by_assignee
-    gnome_target_development 
+    gnome_target_development
     gnome_target_stable
     list_blockers
     browse_bug_link
 );
 
-# This file can be loaded by your extension via 
+# This file can be loaded by your extension via
 # "use Bugzilla::Extension::Browse::Util". You can put functions
 # used by your extension in here. (Make sure you also list them in
 # @EXPORT.)
@@ -204,25 +204,25 @@ sub _page_browse {
                       -expires => "Fri, 01-Jan-2038 00:00:00 GMT");
 
     # Create data structures representing each classification
-    my @classifications = (); 
+    my @classifications = ();
     if (scalar @$product_interests) {
-        my %watches = ( 
+        my %watches = (
             'name'     => 'Watched Products',
             'products' => $product_interests
-        );  
+        );
         push @classifications, \%watches;
     }
 
     if (Bugzilla->params->{'useclassification'}) {
         foreach my $c (@{$user->get_selectable_classifications}) {
             # Create hash to hold attributes for each classification.
-            my %classification = ( 
-                'name'       => $c->name, 
+            my %classification = (
+                'name'       => $c->name,
                 'products'   => [ @{$user->get_selectable_products($c->id)} ]
-            );  
+            );
             # Assign hash back to classification array.
             push @classifications, \%classification;
-        }   
+        }
     }
 
     $vars->{'classifications'}  = \@classifications;
@@ -268,7 +268,7 @@ sub _page_browse {
 #    my $format = $template->get_format("browse/main",
 #                                       scalar $cgi->param('format'),
 #                                       scalar $cgi->param('ctype'));
-#     
+#
 #    print $cgi->header($format->{'ctype'});
 #    $template->process($format->{'template'}, $vars)
 #       || ThrowTemplateError($template->error());
@@ -283,9 +283,9 @@ sub total_open_bugs {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->selectrow_array("SELECT COUNT(bug_id) 
-                                    FROM bugs 
-                                   WHERE bug_status IN (" . browse_open_states() . ") 
+    return $dbh->selectrow_array("SELECT COUNT(bug_id)
+                                    FROM bugs
+                                   WHERE bug_status IN (" . browse_open_states() . ")
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -298,10 +298,10 @@ sub new_bugs {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->selectrow_array("SELECT COUNT(bug_id) 
-                                    FROM bugs 
-                                   WHERE bug_status IN (" . browse_open_states() . ") 
-                                         AND creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY') . " 
+    return $dbh->selectrow_array("SELECT COUNT(bug_id)
+                                    FROM bugs
+                                   WHERE bug_status IN (" . browse_open_states() . ")
+                                         AND creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY') . "
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -310,13 +310,13 @@ sub new_patches {
     my $dbh = Bugzilla->dbh;
 
     return $dbh->bz_column_info('attachments', 'status') ?
-           $dbh->selectrow_array("SELECT COUNT(attach_id) 
-                                    FROM bugs, attachments 
+           $dbh->selectrow_array("SELECT COUNT(attach_id)
+                                    FROM bugs, attachments
                                    WHERE bugs.bug_id = attachments.bug_id
-                                         AND bug_status IN (" . browse_open_states() . ") 
+                                         AND bug_status IN (" . browse_open_states() . ")
                                          AND attachments.ispatch = 1 AND attachments.isobsolete = 0
-                                         AND attachments.status = 'none' 
-                                         AND attachments.creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY') . " 
+                                         AND attachments.status = 'none'
+                                         AND attachments.creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 7, 'DAY') . "
                                          AND product_id = ?", undef, $product->id) :
           "?";
 }
@@ -325,11 +325,11 @@ sub keyword_bugs {
     my ($product, $keyword) = @_;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id) 
-                                    FROM bugs, keywords 
-                                   WHERE bugs.bug_id = keywords.bug_id 
-                                         AND bug_status IN (" . browse_open_states() . ") 
-                                         AND keywords.keywordid = ? 
+    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id)
+                                    FROM bugs, keywords
+                                   WHERE bugs.bug_id = keywords.bug_id
+                                         AND bug_status IN (" . browse_open_states() . ")
+                                         AND keywords.keywordid = ?
                                          AND product_id = ?", undef, ($keyword->id, $product->id));
 }
 
@@ -340,12 +340,12 @@ sub no_response_bugs {
 
     if (@developer_ids) {
         return $dbh->selectcol_arrayref("SELECT bugs.bug_id
-                                           FROM bugs INNER JOIN longdescs ON longdescs.bug_id = bugs.bug_id 
-                                          WHERE bug_status IN (" . browse_open_states() . ") 
-                                                AND bug_severity != 'enhancement' 
-                                                AND product_id = ? 
-                                                AND bugs.reporter NOT IN (" . join(",", @developer_ids) . ") 
-                                          GROUP BY bugs.bug_id 
+                                           FROM bugs INNER JOIN longdescs ON longdescs.bug_id = bugs.bug_id
+                                          WHERE bug_status IN (" . browse_open_states() . ")
+                                                AND bug_severity != 'enhancement'
+                                                AND product_id = ?
+                                                AND bugs.reporter NOT IN (" . join(",", @developer_ids) . ")
+                                          GROUP BY bugs.bug_id
                                          HAVING COUNT(distinct longdescs.who) = 1", undef, $product->id);
     }
     else {
@@ -356,24 +356,24 @@ sub no_response_bugs {
 sub critical_warning_bugs {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
- 
-    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id) 
+
+    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id)
                                     FROM bugs INNER JOIN bugs_fulltext ON bugs_fulltext.bug_id = bugs.bug_id 
-                                   WHERE bug_status IN (" . browse_open_states() . ") 
-                                         AND " . $dbh->sql_fulltext_search("bugs_fulltext.comments_noprivate", "'+G_LOG_LEVEL_CRITICAL'") . " 
+                                   WHERE bug_status IN (" . browse_open_states() . ")
+                                         AND " . $dbh->sql_fulltext_search("bugs_fulltext.comments_noprivate", "'+G_LOG_LEVEL_CRITICAL'") . "
                                          AND product_id = ?", undef, $product->id);
 }
 
 sub string_bugs {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
-    
-    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id) 
-                                    FROM bugs, keywords, keyworddefs 
-                                   WHERE bugs.bug_id = keywords.bug_id 
-                                         AND keywords.keywordid = keyworddefs.id 
-                                         AND keyworddefs.name = 'string' 
-                                         AND bug_status IN (" . browse_open_states() . ") 
+
+    return $dbh->selectrow_array("SELECT COUNT(bugs.bug_id)
+                                    FROM bugs, keywords, keyworddefs
+                                   WHERE bugs.bug_id = keywords.bug_id
+                                         AND keywords.keywordid = keyworddefs.id
+                                         AND keyworddefs.name = 'string'
+                                         AND bug_status IN (" . browse_open_states() . ")
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -382,14 +382,14 @@ sub by_patch_status {
     my $dbh = Bugzilla->dbh;
 
     return $dbh->bz_column_info('attachments', 'status') ?
-           $dbh->selectall_arrayref("SELECT attachments.status, COUNT(attach_id) 
+           $dbh->selectall_arrayref("SELECT attachments.status, COUNT(attach_id)
                                        FROM bugs, attachments
-                                      WHERE attachments.bug_id = bugs.bug_id 
-                                            AND bug_status IN (" . browse_open_states() . ") 
-                                            AND product_id = ? 
-                                            AND attachments.ispatch = 1 
-                                            AND attachments.isobsolete != 1 
-                                            AND attachments.status IN (" . join(",", map { $dbh->quote($_) } IMPORTANT_PATCH_STATUSES) . ") 
+                                      WHERE attachments.bug_id = bugs.bug_id
+                                            AND bug_status IN (" . browse_open_states() . ")
+                                            AND product_id = ?
+                                            AND attachments.ispatch = 1
+                                            AND attachments.isobsolete != 1
+                                            AND attachments.status IN (" . join(",", map { $dbh->quote($_) } IMPORTANT_PATCH_STATUSES) . ")
                                             GROUP BY attachments.status", undef, $product->id) :
            "?";
 }
@@ -405,13 +405,13 @@ sub by_version {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    my @result = sort { vers_cmp($a->[0], $b->[0]) } 
-        @{$dbh->selectall_arrayref("SELECT version, COUNT(bug_id) 
-                                      FROM bugs 
-                                     WHERE bug_status IN (" . browse_open_states() . ") 
-                                           AND product_id = ? 
+    my @result = sort { vers_cmp($a->[0], $b->[0]) }
+        @{$dbh->selectall_arrayref("SELECT version, COUNT(bug_id)
+                                      FROM bugs
+                                     WHERE bug_status IN (" . browse_open_states() . ")
+                                           AND product_id = ?
                                      GROUP BY version", undef, $product->id)};
-    
+
     return \@result;
 }
 
@@ -431,10 +431,10 @@ sub needinfo_split {
                               WHEN delta_ts < '$ni_a' THEN 'B'
                               ELSE 'A' END";
 
-    my %results = @{$dbh->selectcol_arrayref("SELECT $needinfo_case age, COUNT(bug_id) 
-                                       FROM bugs 
-                                      WHERE bug_status = 'NEEDINFO' 
-                                            AND product_id = ? 
+    my %results = @{$dbh->selectcol_arrayref("SELECT $needinfo_case age, COUNT(bug_id)
+                                       FROM bugs
+                                      WHERE bug_status = 'NEEDINFO'
+                                            AND product_id = ?
                                       GROUP BY $needinfo_case", { Columns=>[1,2] }, $product->id)};
     return \%results;
 }
@@ -443,14 +443,14 @@ sub by_target {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    my @result = sort { vers_cmp($a->[0], $b->[0]) } 
-        @{$dbh->selectall_arrayref("SELECT target_milestone, COUNT(bug_id) 
-                                      FROM bugs 
-                                     WHERE bug_status IN (" . browse_open_states() . ") 
-                                           AND target_milestone != '---' 
-                                           AND product_id = ? 
+    my @result = sort { vers_cmp($a->[0], $b->[0]) }
+        @{$dbh->selectall_arrayref("SELECT target_milestone, COUNT(bug_id)
+                                      FROM bugs
+                                     WHERE bug_status IN (" . browse_open_states() . ")
+                                           AND target_milestone != '---'
+                                           AND product_id = ?
                                      GROUP BY target_milestone", undef, $product->id)};
-    
+
     return \@result;
 }
 
@@ -460,12 +460,12 @@ sub by_priority {
 
     my $i = 0;
     my %order_priority = map { $_ => $i++  } @{get_legal_field_values('priority')};
-    
-    my @result = sort { $order_priority{$a->[0]} <=> $order_priority{$b->[0]} } 
-        @{$dbh->selectall_arrayref("SELECT priority, COUNT(bug_id) 
-                                      FROM bugs 
-                                     WHERE bug_status IN (" . browse_open_states() . ") 
-                                           AND product_id = ? 
+
+    my @result = sort { $order_priority{$a->[0]} <=> $order_priority{$b->[0]} }
+        @{$dbh->selectall_arrayref("SELECT priority, COUNT(bug_id)
+                                      FROM bugs
+                                     WHERE bug_status IN (" . browse_open_states() . ")
+                                           AND product_id = ?
                                      GROUP BY priority", undef, $product->id)};
 
     return \@result;
@@ -478,11 +478,11 @@ sub by_severity {
     my $i = 0;
     my %order_severity = map { $_ => $i++  } @{get_legal_field_values('bug_severity')};
 
-    my @result = sort { $order_severity{$a->[0]} <=> $order_severity{$b->[0]} } 
-        @{$dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id) 
-                                      FROM bugs 
-                                     WHERE bug_status IN (" . browse_open_states() . ") 
-                                           AND product_id = ? 
+    my @result = sort { $order_severity{$a->[0]} <=> $order_severity{$b->[0]} }
+        @{$dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id)
+                                      FROM bugs
+                                     WHERE bug_status IN (" . browse_open_states() . ")
+                                           AND product_id = ?
                                      GROUP BY bug_severity", undef, $product->id)};
 
     return \@result;
@@ -492,10 +492,10 @@ sub by_component {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    return $dbh->selectall_arrayref("SELECT components.name, COUNT(bugs.bug_id) 
-                                       FROM bugs INNER JOIN components ON bugs.component_id = components.id 
-                                      WHERE bug_status IN (" . browse_open_states() . ") 
-                                            AND bugs.product_id = ? 
+    return $dbh->selectall_arrayref("SELECT components.name, COUNT(bugs.bug_id)
+                                       FROM bugs INNER JOIN components ON bugs.component_id = components.id
+                                      WHERE bug_status IN (" . browse_open_states() . ")
+                                            AND bugs.product_id = ?
                                       GROUP BY components.name", undef, $product->id);
 }
 
@@ -503,17 +503,17 @@ sub by_assignee {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    my @result = map { Bugzilla::User->new($_) } 
-        @{$dbh->selectall_arrayref("SELECT bugs.assignee AS userid, COUNT(bugs.bug_id) 
-                                      FROM bugs 
-                                     WHERE bug_status IN (" . browse_open_states() . ") 
-                                           AND bugs.product_id = ? 
+    my @result = map { Bugzilla::User->new($_) }
+        @{$dbh->selectall_arrayref("SELECT bugs.assignee AS userid, COUNT(bugs.bug_id)
+                                      FROM bugs
+                                     WHERE bug_status IN (" . browse_open_states() . ")
+                                           AND bugs.product_id = ?
                                      GROUP BY components.name", undef, $product->id)};
-    
+
     return \@result;
 }
 
-sub gnome_target_development { 
+sub gnome_target_development {
     my @legal_gnome_target = @{get_legal_field_values('cf_gnome_target')};
     return $legal_gnome_target[(scalar @legal_gnome_target) -1];
 }
@@ -527,12 +527,12 @@ sub list_blockers {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    my $sth = $dbh->prepare("SELECT bugs.bug_id, products.name AS product, bugs.bug_status, 
-                                        bugs.resolution, bugs.bug_severity, bugs.short_desc 
+    my $sth = $dbh->prepare("SELECT bugs.bug_id, products.name AS product, bugs.bug_status,
+                                        bugs.resolution, bugs.bug_severity, bugs.short_desc
                                    FROM bugs INNER JOIN products ON bugs.product_id = products.id
-                                  WHERE product_id = ? 
-                                        AND bugs.cf_gnome_target = ? 
-                                        AND bug_status IN (" . browse_open_states() . ") 
+                                  WHERE product_id = ?
+                                        AND bugs.cf_gnome_target = ?
+                                        AND bug_status IN (" . browse_open_states() . ")
                                   ORDER BY bug_id DESC");
 
     my @list_blockers_development;
@@ -540,13 +540,13 @@ sub list_blockers {
     while (my $bug = $sth->fetchrow_hashref) {
         push(@list_blockers_development, $bug);
     }
-    
+
     my @list_blockers_stable;
     $sth->execute($product->id, gnome_target_stable());
     while (my $bug = $sth->fetchrow_hashref) {
         push(@list_blockers_stable, $bug);
     }
-    
+
     return (\@list_blockers_stable, \@list_blockers_development);
 }
 

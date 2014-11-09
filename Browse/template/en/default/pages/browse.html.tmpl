@@ -48,7 +48,7 @@
   </tr>
 
   <tr>
-    <td>New [% terms.Bugs %]</td> 
+    <td>New [% terms.Bugs %]</td>
     <td align="right"><a href="[% buglink FILTER html %]&amp;chfield=[% "[Bug creation]" FILTER uri %]&amp;chfieldfrom=[% what_new_means FILTER html %]">
     [% new_bugs FILTER html %]</a></li></td>
   </tr>
@@ -64,8 +64,8 @@
 
   <tr>
     <td>
-      <a class="boogle_edit" 
-         href="javascript:addText('keywords:gnome-love')">GNOME-love 
+      <a class="boogle_edit"
+         href="javascript:addText('keywords:gnome-love')">GNOME-love
         [%= terms.bugs %]</a>
     </td>
     <td align="right">
@@ -97,8 +97,8 @@
    %]
   <tr>
     <td>
-      <em><a class="boogle_edit" 
-             href="javascript:addText('+G_LOG_LEVEL_CRITICAL')">Critical 
+      <em><a class="boogle_edit"
+             href="javascript:addText('+G_LOG_LEVEL_CRITICAL')">Critical
         warning [% terms.bugs %]</a></em>
     </td>
     <td align="right">
@@ -106,7 +106,7 @@
         [%- critical_warning_bugs FILTER html %]</a></em>
     </td>
   </tr>
-  <!-- 
+  <!--
   <tr>
     <td><a class="boogle_edit" href="javascript:addText('keyword:string')">String [% terms.bugs %]</a></td>
     <td align="right"><a href="[% buglink FILTER html %]&amp;keywords=string">[% string_bugs FILTER html %]</a></td>
@@ -117,7 +117,7 @@
     ######################################################################
    %]
   </table>
-  
+
   [% IF by_patch_status.size %]
     <h3>Patch Status</h3>
     <table border="0" cellpadding="0" cellspacing="0" class="figures">
@@ -125,7 +125,7 @@
       <tr>
         <td>
           <!--
-          <a class="boogle_edit" 
+          <a class="boogle_edit"
              href="javascript:addText('patch-status:[% col.0 FILTER js %]')"> -->
           [% col.0 FILTER html %] <!-- </a> -->
           [% IF col.0 == 'none' %] (unreviewed)[% END %]
@@ -139,14 +139,14 @@
     [% END %]
     </table>
   [% END %]
-  
+
   [% IF by_priority.size %]
     <h3>Priority</h3>
     <table border="0" cellpadding="0" cellspacing="0" class="figures">
     [% FOREACH col = by_priority %]
       <tr>
         <td>
-          <a class="boogle_edit" 
+          <a class="boogle_edit"
              href="javascript:addText('priority:[% col.0 FILTER js %]')">
             [%- col.0 FILTER html %]</a>
         </td>
@@ -158,14 +158,14 @@
     [% END %]
     </table>
   [% END %]
-  
+
   [% IF by_severity.size %]
     <h3>Severity</h3>
     <table border="0" cellpadding="0" cellspacing="0" class="figures">
     [% FOREACH col = by_severity %]
       <tr>
         <td>
-          <a class="boogle_edit" 
+          <a class="boogle_edit"
              href="javascript:addText('severity:[% col.0 FILTER js %]')">
             [%- col.0 FILTER html %]</a>
         </td>
@@ -177,7 +177,7 @@
     [% END %]
     </table>
   [% END %]
-  
+
   <h3>Useful links</h3>
   <ul>
     <li>
@@ -199,10 +199,10 @@
           <li>
             <!--
             <a href="simple-bug-guide.cgi?product=
-                     [%- product.name FILTER uri %]">File a 
+                     [%- product.name FILTER uri %]">File a
               [%= terms.bug %]</a> -->
             <a href="enter_bug.cgi?product=
-                     [%- product.name FILTER uri %]">File a 
+                     [%- product.name FILTER uri %]">File a
               [%= terms.bug %]</a>
           </li>
         [% END %]
@@ -246,7 +246,7 @@ Browse:
     [% FOREACH c = classifications %]
       <optgroup label="[% c.name FILTER html %]">
         [% FOREACH p = c.products %]
-          <option value="[% p.name FILTER html %]" 
+          <option value="[% p.name FILTER html %]"
             [% IF p.name == product.name && seen != 1 %]selected="selected"[% seen = 1 %]
             [% END %]>
           [% p.name FILTER html %]</option>
@@ -259,16 +259,16 @@ Browse:
 
 <p><i>[% product.description FILTER none %]</i></p>
 
-[% PROCESS gnomeblocker list = blockers_development  
+[% PROCESS gnomeblocker list = blockers_development
                         target = target_development %]
 [% PROCESS gnomeblocker list = blockers_stable
                         target = target_stable %]
 
-<form class="boogleform" id="boogle_search" action="buglist.cgi" 
+<form class="boogleform" id="boogle_search" action="buglist.cgi"
       method="get">
 <div>
   <p>Search for [% terms.bugs %] in [% product.name FILTER html %]: <br />
-  <input id="boogle_search_box" name="quicksearch" type="text" 
+  <input id="boogle_search_box" name="quicksearch" type="text"
          value="product:&quot;[% product.name.replace('\\[', '\[').replace('\\]', '\]').replace(':','\:') FILTER none %]&quot; "
          size="50">
   <input id="show" type="submit" value="Show">
@@ -442,7 +442,7 @@ Browse:
     <table border="0" class="gnomeblocker" cellpadding="0" cellspacing="0">
       <thead>
       <tr>
-        <td colspan="5">Blocker [% terms.bugs %]: 
+        <td colspan="5">Blocker [% terms.bugs %]:
           <b> <a class="boogle_edit"
           href="javascript:addText('cf_gnome_target:
                [%- target FILTER js %]')">

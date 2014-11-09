@@ -19,7 +19,7 @@ function addText(text) {
 
   if (colonloc != -1)
     querytype = text.substring(0,colonloc);
-  else { 
+  else {
     /* comment or +critical_warning */
     var oldvalue = searchBox.value;
     var location = oldvalue.indexOf(text);
@@ -62,14 +62,14 @@ function addText(text) {
 
     if (oldvalue.search(value) == -1) {
       /* prepend the new value */
-      searchBox.value = oldvalue.substring(0,location) + text + "," 
+      searchBox.value = oldvalue.substring(0,location) + text + ","
                         + oldvalue.substring(location + querytype.length + 1);
 
     } else {
 
       /* value is already in list, remove it */
       var vlocation = oldvalue.indexOf(value);
-    
+
       /* how many values are there for the current querytype? */
       var queryvalues = oldvalue.substring(location + querytype.length + 1);
       if (queryvalues.indexOf(":") >= 0) {
@@ -91,14 +91,14 @@ function addText(text) {
       } else {
         /* only remove one value */
 
-        /* last of all value in querytype? 
+        /* last of all value in querytype?
            then do not remove the trailing but the preceding character */
 
         if ( (vlocation + value.length == oldvalue.length) /*last in string? */
             ||
              (oldvalue.substring(vlocation + value.length, /*trailing space? */
-              vlocation + value.length + 1) == ' ')   
-           ) 
+              vlocation + value.length + 1) == ' ')
+           )
         {
           searchBox.value = oldvalue.substring(0,vlocation-1)
                             + oldvalue.substring(vlocation + value.length);
@@ -113,4 +113,3 @@ function addText(text) {
 
   } /* if (location == -1) */
 }
-

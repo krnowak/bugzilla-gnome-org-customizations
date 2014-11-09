@@ -1,14 +1,14 @@
 #product_summary {
-    float: right; 
+    float: right;
     -moz-border-radius-topleft: 20px;
-    -moz-border-radius-bottomleft: 20px; 
+    -moz-border-radius-bottomleft: 20px;
     margin: 0;
-    background-color: #ffeafd; 
-    padding: 0 1em 1em 1em; 
+    background-color: #ffeafd;
+    padding: 0 1em 1em 1em;
 }
 
 #product_summary h3 {
-    padding: 1em 0 0 0; 
+    padding: 1em 0 0 0;
 }
 
 #product_summary ul {

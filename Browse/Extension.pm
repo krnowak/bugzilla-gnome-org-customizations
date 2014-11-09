@@ -29,12 +29,11 @@ use Bugzilla::Extension::Browse::Util;
 
 our $VERSION = '0.01';
 
-# See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook" 
+# See the documentation of Bugzilla::Hook ("perldoc Bugzilla::Hook"
 # in the bugzilla directory) for a list of all available hooks.
 sub page_before_template {
     my ($self, $args) = @_;
 
     page($args);
-
 }
 __PACKAGE__->NAME;
