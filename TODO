@@ -3,5 +3,3 @@
 - Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
 - Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
 - Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
-- GnomeAttachmentStatus - shut its migration routine up when running
-  checksetup in silent mode

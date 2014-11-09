@@ -204,31 +204,32 @@ sub maybe_run_template_handler
 
 # Checks whether we have a vanilla instance.
 sub _fresh {
+    my ($silent) = @_;
     my $dbh = Bugzilla->dbh;
     my $column = $dbh->bz_column_info(a(), st());
 
     return undef if (defined $column);
-    print "fresh: no status column\n";
+    print "fresh: no status column\n" unless $silent;
 
     $column = $dbh->bz_column_info(a(), g_a_s());
     return undef if (defined $column);
-    print "fresh: no gnome attachment status column\n";
+    print "fresh: no gnome attachment status column\n" unless $silent;
 
     $column = $dbh->bz_column_info(a_s(), 'id');
     return undef if defined ($column);
-    print "fresh: no attachment status table\n";
+    print "fresh: no attachment status table\n" unless $silent;
 
     $column = $dbh->bz_column_info(g_a_s(), 'id');
     # gnome attachment status table has to exist now - it was created
     # in db_schema_abstract_schema hook.
     return undef if not defined $column;
-    print "fresh: gnome attachment status exists\n";
+    print "fresh: gnome attachment status exists\n" unless $silent;
 
     my $value = $dbh->selectrow_arrayref('SELECT COUNT(*) FROM ' . g_a_s());
     return undef unless defined $value and $value->[0] == 0;
 
-    print "fresh: gnome attachment status table empty\n";
-    print "fresh: it is a fresh install\n";
+    print "fresh: gnome attachment status table empty\n" unless $silent;
+    print "fresh: it is a fresh install\n" unless $silent;
     1;
 }
 
@@ -283,16 +284,17 @@ sub _install_gnome_attachment_status {
 # Checks whether we are updating from old attachment status. This is
 # very specific to the setup of GNOME database.
 sub _updating {
+    my ($silent) = @_;
     my $dbh = Bugzilla->dbh;
     my $column = $dbh->bz_column_info(a(), st());
 
     return undef unless (defined $column);
-    print "updating: status column exists\n";
+    print "updating: status column exists\n" unless $silent;
 
     $column = $dbh->bz_column_info(a_s(), 'id');
     return undef unless defined $column;
-    print "updating: attachment status table exists\n";
-    print "updating: it is an update\n";
+    print "updating: attachment status table exists\n" unless $silent;
+    print "updating: it is an update\n" unless $silent;
     1;
 }
 
@@ -370,12 +372,14 @@ sub _update_gnome_attachment_status {
 
 sub perform_migration
 {
-    if (_fresh) {
+    my ($silent) = @_;
+
+    if (_fresh($silent)) {
         _install_gnome_attachment_status;
-    } elsif (_updating) {
+    } elsif (_updating($silent)) {
         _update_gnome_attachment_status;
     } else {
-        print "install_update_db: we are already updated\n";
+        print "install_update_db: we are already updated\n" unless $silent;
         # Do nothing, we are already updated.
     }
 }

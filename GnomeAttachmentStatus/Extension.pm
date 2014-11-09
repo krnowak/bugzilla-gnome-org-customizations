@@ -97,7 +97,10 @@ sub template_before_process {
 # In short: argh!
 sub install_before_final_checks
 {
-    perform_migration;
+    my ($self, $params) = @_;
+    my $silent = $params->{'silent'};
+
+    perform_migration($silent);
 }
 
 sub enabled {
