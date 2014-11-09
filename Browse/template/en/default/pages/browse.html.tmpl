@@ -421,14 +421,7 @@ Browse:
   [% FOREACH developer = product.developers.sort('name') %]
     <tr>
       <td>
-        [% IF user.id %]
-          [%# XXX - describeuser.cgi will come eventually so commenting out for now %]
-          <!-- <a href="describeuser.cgi?login=[% developer.login FILTER uri %]"> -->
-        [% END %]
         [% PROCESS "global/user.html.tmpl" who = developer %]
-        [% IF user.id %]
-          <!-- </a> -->
-        [% END %]
       </td>
     </tr>
   [% END %]
