@@ -23,4 +23,11 @@ sub config_modify_panels {
     $mybugstemplate->{'default'} = 'page.cgi?id=describeuser.html&login=%userid%';
 }
 
+sub gnome_deps {
+    ('Browse',
+     'Developers',
+     'GnomeAttachmentStatus',
+     'ProductInterests');
+}
+
 __PACKAGE__->NAME;
