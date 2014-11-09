@@ -36,4 +36,13 @@ sub page_before_template {
 
     page($args);
 }
+
+sub gnome_deps {
+    ('DescribeUser',
+     'Developers',
+     'GnomeAttachmentStatus',
+     'PatchReport',
+     'ProductInterests');
+}
+
 __PACKAGE__->NAME;
