@@ -120,7 +120,7 @@
 
     <ul>
     [% FOREACH product = developed_products %]
-      <li><a href="browse.cgi?product=[% product.name FILTER uri %]">[% product
+      <li><a href="page.cgi?id=browse.html&amp;product=[% product.name FILTER uri %]">[% product
           FILTER html %]</a></li>
     [% END %]
     </ul>
@@ -131,7 +131,7 @@
 
     <ul>
     [% FOREACH product = userinfo.product_interests %]
-      <li><a href="browse.cgi?product=[% product.name FILTER uri %]">[% product.name
+      <li><a href="page.cgi?id=browse.html&amp;product=[% product.name FILTER uri %]">[% product.name
            FILTER html %]</a></li>
     [% END %]
     </ul>
@@ -186,7 +186,7 @@
           [% bug.bug_id FILTER uri%]">
           [% bug.bug_id FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="[% "browse.cgi?product=" %]
+          [% %]<a href="[% "page.cgi?id=browse.html&amp;product=" %]
           [% bug.product FILTER uri %]">
           [% bug.product FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 4ex" align="center">
@@ -222,7 +222,7 @@
           [% %]<a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
           [% bug.bug_id FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="browse.cgi?product=[% bug.product FILTER uri %]">
+          [% %]<a href="page.cgi?id=browse.html&amp;product=[% bug.product FILTER uri %]">
           [% bug.product FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 4ex" align="center">
           [% bug.bug_status.truncate(4) FILTER html %]</td>
@@ -256,7 +256,7 @@
           [% %]<a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
           [% bug.bug_id FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 12ex" >
-          [% %]<a href="browse.cgi?product=[% bug.product FILTER uri %]">
+          [% %]<a href="page.cgi?id=browse.html&amp;product=[% bug.product FILTER uri %]">
           [% bug.product FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 4ex" align="center">
           [% bug.bug_status.truncate(4) FILTER html %]</td>
@@ -292,7 +292,7 @@
           [% %]<a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
           [% bug.bug_id FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="browse.cgi?product=[% bug.product FILTER uri %]">
+          [% %]<a href="page.cgi?id=browse.html&amp;product=[% bug.product FILTER uri %]">
           [% bug.product FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 4ex" align="center">
           [% bug.bug_status.truncate(4) FILTER html %]</td>
@@ -319,7 +319,7 @@
           [% %]<a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
           [% bug.bug_id FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="browse.cgi?product=[% bug.product FILTER uri %]">
+          [% %]<a href="page.cgi?id=browse.html&amp;product=[% bug.product FILTER uri %]">
           [% bug.product FILTER html %]</a></td>
         <td nowrap="nowrap" style="width: 4ex" align="center">
           [% bug.resolution.truncate(4) FILTER html %]</td>
@@ -361,7 +361,7 @@
                      [% "&amp;action=diff" %]">(#
                      [% patch.attach_id FILTER html %])</a></td>
         <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="[% "browse.cgi?product=" %]
+          [% %]<a href="[% "page.cgi?id=browse.html&amp;product=" %]
                         [% patch.product FILTER uri %]
                         [% "\">" %]
                         [% patch.product FILTER html %]</a></td>
