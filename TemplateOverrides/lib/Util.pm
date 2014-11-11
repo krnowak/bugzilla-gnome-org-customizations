@@ -102,6 +102,7 @@ sub check_overridden_templates {
         'attachment/list.html.tmpl' => 'b0c5edd84b8cc31666d0d0b4bf36cdb981ee322995dad891cf05f0f40b2d0392',
         'bug/comments.html.tmpl' => 'd68e98b67eac9cd74ec7b0b663734f7a14953788864135be076a8cb03d648f09',
         'global/user.html.tmpl' => 'ca16e2a988436109612b7b249e536f49669d4c5a9161911e3c14906a5f6d041d',
+        'global/choose-classification.html.tmpl' => 'da8b876b1a79fb40b5ec2e46e6706b63aa0d6ec15a6a41c80ebc1ad889e6e0d4',
     );
 
     print "Checking overridden templates...\n" unless $silent;
