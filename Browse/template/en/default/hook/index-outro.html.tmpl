@@ -3,7 +3,7 @@
 
     <ul>
     [% FOREACH product = user.product_interests %]
-      <li><a href="browse.cgi?product=[% product.name FILTER uri %]">[% product.name
+      <li><a href="page.cgi?id=browse.html&amp;product=[% product.name FILTER uri %]">[% product.name
            FILTER html %]</a></li>
     [% END %]
     </ul>

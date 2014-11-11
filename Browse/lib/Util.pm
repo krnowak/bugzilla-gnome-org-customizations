@@ -145,7 +145,7 @@ sub _page_browse {
                 # We only need classification objects.
                 $vars->{'classifications'} = [map {$_->{'object'}} @classifications];
 
-                $vars->{'target'} = "browse.cgi";
+                $vars->{'parameterized_target'} = "page.cgi?id=browse.html";
                 $vars->{'format'} = $cgi->param('format');
 
                 print $cgi->header();
@@ -176,7 +176,7 @@ sub _page_browse {
         }
         elsif (scalar(@enterable_products) > 1) {
             $vars->{'classifications'} = \@classifications;
-            $vars->{'target'} = "browse.cgi";
+            $vars->{'parameterized_target'} = "page.cgi?id=browse.html";
             $vars->{'format'} = $cgi->param('format');
 
             print $cgi->header();
