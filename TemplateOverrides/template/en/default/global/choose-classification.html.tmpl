@@ -11,9 +11,11 @@
   #                  at least one product accessible by the user.
   #%]
 
+[% UNLESS parameterized_target.defined %]
 [% IF target == "enter_bug.cgi" %]
   [% title = "Select Classification" %]
   [% subheader = "Please select the classification." %]
+[% END %]
 [% END %]
 
 [% DEFAULT title = "Choose the classification" %]
@@ -22,9 +24,15 @@
 <table>
   <tr>
     <th align="right">
+      [% IF parameterized_target.defined %]
+      <a href="[% parameterized_target FILTER uri %]&amp;classification=__all
+            [% IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+            [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+      [% ELSE %]
       <a href="[% target FILTER uri %]?classification=__all
             [% IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%] 
             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+      [% END %]
       All</a>:
     </th>
 
@@ -37,9 +45,15 @@
 [% FOREACH class = classifications %]
   <tr>
     <th align="right">
+      [% IF parameterized_target.defined %]
+      <a href="[% parameterized_target FILTER uri %]&amp;classification=[% class.name FILTER uri -%]
+            [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+            [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+      [% ELSE %]
       <a href="[% target FILTER uri %]?classification=[% class.name FILTER uri -%]
             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%] 
             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+      [% END %]
       [% class.name FILTER html %]</a>:
     </th>
 
