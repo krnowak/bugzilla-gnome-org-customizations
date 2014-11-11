@@ -6,3 +6,7 @@
 - Describe User:
   Instead of listing all possible attachment statuses, just get all of
   them and remove 'committed' from the list.
+- Template Overrides:
+  Maybe move digests hash into separate perl module, so we have
+  prominent place for them instead of somewhere in the middle of
+  Util.pm.
