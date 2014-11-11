@@ -103,6 +103,7 @@ sub check_overridden_templates {
         'bug/comments.html.tmpl' => 'd68e98b67eac9cd74ec7b0b663734f7a14953788864135be076a8cb03d648f09',
         'global/user.html.tmpl' => 'ca16e2a988436109612b7b249e536f49669d4c5a9161911e3c14906a5f6d041d',
         'global/choose-classification.html.tmpl' => 'da8b876b1a79fb40b5ec2e46e6706b63aa0d6ec15a6a41c80ebc1ad889e6e0d4',
+        'global/choose-product.html.tmpl' => 'ab607993022411e13f6cfa51d3c6c32e9309b4c54640347e67742baee8a5e941',
     );
 
     print "Checking overridden templates...\n" unless $silent;
