@@ -59,8 +59,8 @@
 <tr><th>Product</th><th>Open [% terms.bugs %]</th><th>Opened in last [% days FILTER html %] days</th><th>Closed in last [% days FILTER html %] days</th><th>Change</th></tr>
 [% FOREACH row = productlist %]
 <tr class="[%+ IF loop.count() % 2 == 0 %]bz_row_even[% ELSE %]bz_row_odd[% END %]">
-  <td><a href="browse.cgi?product=[% row.1 FILTER uri %]">[% row.1 FILTER html %]</a></td>
-  <td><a href="buglist.cgi?product=[% row.1 FILTER uri %]&amp;bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_severity=blocker&amp;bug_severity=critical&amp;bug_severity=major&amp;bug_severity=normal&amp;bug_severity=minor&amp;bug_severity=trivial&amp;gnome_version=[% version FILTER uri %]">[% row.2 FILTER html %]</a></td>
+  <td><a href="page.cgi?id=browse.html&amp;product=[% row.1 FILTER uri %]">[% row.1 FILTER html %]</a></td>
+  <td><a href="buglist.cgi?product=[% row.1 FILTER uri %]&amp;bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;bug_severity=blocker&amp;bug_severity=critical&amp;bug_severity=major&amp;bug_severity=normal&amp;bug_severity=minor&amp;bug_severity=trivial&amp;cf_gnome_version=[% version FILTER uri %]">[% row.2 FILTER html %]</a></td>
   <td><a href="[% row.4 FILTER html %]">+[% row.3 FILTER html %]</a></td>
   <td><a href="[% row.6 FILTER html %]">-[% row.5 FILTER html %]</a></td>
   [% IF row.7 > 0 %]
