@@ -1,6 +1,5 @@
 - Port extension - Splinter
 - Port extension - Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
-- Port extension - Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
 - Describe User:
   Instead of listing all possible attachment statuses, just get all of
   them and remove 'committed' from the list.
