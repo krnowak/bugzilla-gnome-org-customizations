@@ -41,6 +41,7 @@ sub gnome_deps {
     ('DescribeUser',
      'Developers',
      'GnomeAttachmentStatus',
+     'GNOME',
      'PatchReport',
      'ProductInterests');
 }
