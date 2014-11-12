@@ -13,4 +13,11 @@ sub page_before_template {
     page($args);
 }
 
+sub gnome_deps {
+    'Browse',
+    'DescribeUser',
+    'GnomeAttachmentStatus',
+    'GNOME'
+}
+
 __PACKAGE__->NAME;
