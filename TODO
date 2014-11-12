@@ -1,8 +1,6 @@
-- Splinter
-- Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
-- Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
-- Browse page (https://bugzilla.gnome.org/browse.cgi?product=Evolution)
-- Describe user page (https://bugzilla.gnome.org/page.cgi?id=describeuser.html)
+- Port extension - Splinter
+- Port extension - Traceparser (https://launchpad.net/+branch/bugzilla-traceparser)
+- Port extension - Weekly status page (https://bugzilla.gnome.org/page.cgi?id=weekly-bug-summary.html)
 - Describe User:
   Instead of listing all possible attachment statuses, just get all of
   them and remove 'committed' from the list.
@@ -10,3 +8,7 @@
   Maybe move digests hash into separate perl module, so we have
   prominent place for them instead of somewhere in the middle of
   Util.pm.
+- New extension - CfGnomeFields
+  This one would probably create cf_gnome_target field if it does not
+  exist and remove cf_gnome_version if it exists. Browse extension
+  would depend on it.
