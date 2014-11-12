@@ -37,14 +37,14 @@
    [% %], covering the last [% days FILTER html %] days.</p>
 
 
-  Total Reports: [% totalbugs FILTER html %] 
+  Total Reports: [% totalbugs FILTER html %]
   [% IF links == "yes" %]
     (<a href="[% openbuglist FILTER html %]">[% openbugs FILTER html %]</a>
   [% ELSE %]
     ([% openbugs FILTER html %]
   [% END %]
-  reports opened and 
-  
+  reports opened and
+
   [% IF links == "yes" %]
     <a href="[% closedbuglist FILTER html %]">[% closedbugs FILTER html %]</a>
   [% ELSE %]

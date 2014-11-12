@@ -20,6 +20,7 @@
 package Bugzilla::Extension::WeeklyBugSummary::Util;
 
 use strict;
+use warnings;
 use base qw(Exporter);
 
 use Bugzilla;
@@ -34,8 +35,10 @@ our @EXPORT = qw(
 );
 
 sub page {
-    my %params = @_;
-    my ($vars, $page) = @params{qw(vars page_id)};
+    my ($params) = @_;
+    my $vars = $params->{'vars'};
+    my $page = $params->{'page_id'};
+
     if ($page =~ /^weekly-bug-summary\./) {
         _page_weekly_bug_summary($vars);
     }
@@ -52,7 +55,7 @@ sub _page_weekly_bug_summary {
     my $version = undef;               # Don't limit to "2.7/2.8" or "2.5/2.6", etc.
     my $days = 7;           # Change this if defn of week changes.
     my $products = 15;      # Show the top 15 products.
-    my $hunters = 15;       # Show the top 15 hunters 
+    my $hunters = 15;       # Show the top 15 hunters
     my $reporters = 15;     # Show the top 15 reporters
     my $patchers = 10;      # Show the top 10 patchers
     my $reviewers = 10;     # Show the top 10 reviewers
@@ -119,7 +122,7 @@ sub _page_weekly_bug_summary {
         $links = 'no';
     }
 
-    my $totalbugs = &get_total_bugs_on_bugzilla($keyword, $version, 
+    my $totalbugs = &get_total_bugs_on_bugzilla($keyword, $version,
                                                 $classification, $product);
 
     my ($bugs_opened, $opened_buglist) = &bugs_opened($days, $keyword, $version,
@@ -137,19 +140,19 @@ sub _page_weekly_bug_summary {
         &get_product_bug_lists($products, $days, $keyword, $links, $version,
                                $classification);
 
-    my ($hunterlist) = 
-        &get_bug_hunters_list($hunters, $days, $keyword, 
+    my ($hunterlist) =
+        &get_bug_hunters_list($hunters, $days, $keyword,
                               $links, $version, $classification, $product);
 
     my ($reporterlist) =
-        &get_bug_reporters_list($reporters, $days, $keyword, 
+        &get_bug_reporters_list($reporters, $days, $keyword,
                                 $links, $version, $classification, $product);
 
-    my ($patchsubmitterlist) = 
+    my ($patchsubmitterlist) =
         &get_patch_submitters_list($patchers, $days, $keyword,
                                    $links, $version, $classification, $product);
 
-    my ($patchreviewerlist) = 
+    my ($patchreviewerlist) =
         &get_patch_reviewers_list($reviewers, $days, $keyword,
                                   $links, $version, $classification, $product);
 
@@ -301,7 +304,7 @@ sub bugs_opened {
     my $query = "
      SELECT bugs.bug_id
        FROM bugs";
-    
+
     if ($classification_id) {
         $query .= "
  INNER JOIN products
@@ -354,11 +357,11 @@ sub get_product_bug_lists {
 
     # We are going to build a long SQL query.
     my $query = "
-        SELECT bugs.product_id, products.name AS product, COUNT(bugs.bug_id) AS n 
+        SELECT bugs.product_id, products.name AS product, COUNT(bugs.bug_id) AS n
           FROM bugs
     INNER JOIN products
             ON bugs.product_id = products.id
-         WHERE (bugs.bug_status = 'NEW' OR bugs.bug_status = 'ASSIGNED' 
+         WHERE (bugs.bug_status = 'NEW' OR bugs.bug_status = 'ASSIGNED'
                 OR bugs.bug_status = 'REOPENED'
                 OR bugs.bug_status = 'UNCONFIRMED')
            AND bugs.bug_severity != 'enhancement'";
@@ -410,7 +413,7 @@ sub get_bug_hunters_list {
 
     # We are going to build a long SQL query.
     my $query = "
-        SELECT bugs_activity.who AS userid, COUNT(bugs.bug_id) as n 
+        SELECT bugs_activity.who AS userid, COUNT(bugs.bug_id) as n
           FROM bugs
     INNER JOIN bugs_activity
             ON bugs.bug_id = bugs_activity.bug_id";
@@ -465,7 +468,7 @@ sub get_bug_hunters_list {
 
     foreach my $rowRef (@$hunterlist) {
         my($userid, $count) = @$rowRef;
-        
+
         push(@$rowRef, new Bugzilla::User($userid));
         if ($links eq "yes") {
             my $buglist = &get_hunter_bugs($userid, $days, $keyword, $version,
@@ -550,7 +553,7 @@ sub get_bug_reporters_list {
 
     # We are going to build a long SQL query.
     my $query = "
-        SELECT bugs.reporter AS userid, COUNT(DISTINCT bugs.bug_id) AS n 
+        SELECT bugs.reporter AS userid, COUNT(DISTINCT bugs.bug_id) AS n
           FROM bugs";
 
     if ($classification_id) {
@@ -561,7 +564,7 @@ sub get_bug_reporters_list {
 
     $query .= "
          WHERE bugs.creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '?', 'DAY') . "
-           AND NOT (bugs.bug_status = 'RESOLVED' AND 
+           AND NOT (bugs.bug_status = 'RESOLVED' AND
                     bugs.resolution IN ('DUPLICATE','INVALID','NOTABUG',
                                         'NOTGNOME','INCOMPLETE'))";
 
@@ -587,7 +590,7 @@ sub get_bug_reporters_list {
         $query .= "
            AND bugs.product_id = ?";
     }
-    
+
     $query .= "
       GROUP BY bugs.reporter
       ORDER BY n DESC " . Bugzilla->dbh->sql_limit($number);
@@ -629,12 +632,12 @@ sub get_reporter_bugs() {
     $query .= "
       WHERE bugs.creation_ts >= " . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '?', 'DAY') . "
         AND bugs.reporter = ?
-        AND NOT (bugs.bug_status = 'RESOLVED' AND 
+        AND NOT (bugs.bug_status = 'RESOLVED' AND
                  bugs.resolution IN ('DUPLICATE','INVALID','NOTABUG',
                                      'NOTGNOME','INCOMPLETE'))";
-    
+
     push(@args, $days, $userid);
-    
+
     if ($keyword) {
         push(@args, lc($keyword));
         $query .= "
@@ -672,8 +675,8 @@ sub get_patch_submitters_list {
     my @args;
 
     # We are going to build a long SQL query.
-    my $query = "      SELECT attachments.submitter_id AS userid, 
-                              COUNT(DISTINCT attachments.attach_id) AS n 
+    my $query = "      SELECT attachments.submitter_id AS userid,
+                              COUNT(DISTINCT attachments.attach_id) AS n
                          FROM attachments ";
     if ($keyword || $version || $classification_id || $product_id) {
         $query .=" INNER JOIN bugs
@@ -709,7 +712,7 @@ sub get_patch_submitters_list {
         $query .= "
        AND bugs.product_id = ?";
     }
-    
+
     $query .= "      GROUP BY attachments.submitter_id
                      ORDER BY n DESC " . Bugzilla->dbh->sql_limit($number);
 
@@ -737,7 +740,7 @@ sub get_patch_reviewers_list {
 
     # We are going to build a long SQL query.
     my $query = "
-        SELECT bugs_activity.who AS userid, COUNT(DISTINCT bugs_activity.attach_id) as n 
+        SELECT bugs_activity.who AS userid, COUNT(DISTINCT bugs_activity.attach_id) as n
           FROM bugs_activity ";
     if ($keyword || $version || $classification_id || $product_id) {
         $query .= "
@@ -787,7 +790,7 @@ sub get_patch_reviewers_list {
 
     foreach my $rowRef (@$hunterlist) {
         my($userid, $count) = @$rowRef;
-        
+
         push(@$rowRef, new Bugzilla::User($userid));
 #        if ($links eq "yes") {
 #            my $buglist = &get_hunter_bugs($userid, $days, $keyword, $version);
