@@ -16,7 +16,7 @@
 # Portions created by the Initial Developer are Copyright (C) 2009
 # the Initial Developer. All Rights Reserved.
 #
-# Contributor(s): 
+# Contributor(s):
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::Extension::TraceParser::Trace;
@@ -106,22 +106,22 @@ sub _do_list_select {
         my $dbh = Bugzilla->dbh;
         my @trace_ids = map { $_->id } @$objects;
         my $comment_info = $dbh->selectall_arrayref(
-            'SELECT trace.id AS id, longdescs.bug_id AS bug_id, 
+            'SELECT trace.id AS id, longdescs.bug_id AS bug_id,
                     longdescs.isprivate AS isprivate
-               FROM trace INNER JOIN longdescs 
+               FROM trace INNER JOIN longdescs
                           ON trace.comment_id = longdescs.comment_id
               WHERE trace.id IN(' . join(',', @trace_ids) . ')', {Slice=>{}});
 
         my %bug_ids = map { $_->{id} => $_->{bug_id} } @$comment_info;
         my %private = map { $_->{id} => $_->{isprivate} } @$comment_info;
-        
+
         my %unique_ids = map { $bug_ids{$_} => 1 } (keys %bug_ids);
         my $bugs = Bugzilla::Bug->new_from_list([values %bug_ids]);
 
         # Populate "product" & dup_id for each bug.
         my %product_ids = map { $_->{product_id} => 1 } @$bugs;
         my %products = @{ $dbh->selectcol_arrayref(
-            'SELECT id, name FROM products WHERE id IN(' 
+            'SELECT id, name FROM products WHERE id IN('
             . join(',', keys %product_ids) . ')', {Columns=>[1,2]}) };
         my %dup_ids = @{ $dbh->selectcol_arrayref(
             'SELECT dupe, dupe_of FROM duplicates WHERE dupe IN ('
@@ -372,7 +372,6 @@ sub _relevant_functions {
             $file =~ s/.py$//i;
             $function = ".$function" if $function;
             $function = "$file$function";
-            
         }
         if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
             $function =~ s/^IA__//;
@@ -464,8 +463,8 @@ sub _update_dup {
         'SELECT 1 FROM trace_dup WHERE hash = ? AND identical = ?',
         undef, $hash, $identical);
     if ($exists) {
-        $dbh->do('UPDATE trace_dup SET bug_id = ? 
-                   WHERE hash = ? AND identical = ?', 
+        $dbh->do('UPDATE trace_dup SET bug_id = ?
+                   WHERE hash = ? AND identical = ?',
                  undef, $bug_id, $hash, $identical);
     }
     else {

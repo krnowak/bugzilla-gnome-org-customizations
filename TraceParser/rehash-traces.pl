@@ -12,11 +12,11 @@ my $dbh = Bugzilla->dbh;
 
 print "Re-parsing traces...\n";
 my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM trace');
-    
+
 if ($dbh->isa('Bugzilla::DB::Mysql')) {
     $dbh->{'mysql_use_result'} = 1;
 }
-    
+
 my $sth = $dbh->prepare('SELECT id,trace_text FROM trace ORDER BY id');
 $sth->execute();
 my $count = 0;
@@ -37,9 +37,9 @@ $dbh->bz_start_transaction();
 print "Updating trace hashes...\n";
 $count = 1;
 foreach my $trace (@traces) {
-    $dbh->do("UPDATE trace SET stack_hash = ?, short_hash = ?, quality = ? 
+    $dbh->do("UPDATE trace SET stack_hash = ?, short_hash = ?, quality = ?
                WHERE id = ?",
-             undef, $trace->{stack_hash}, $trace->{short_hash}, 
+             undef, $trace->{stack_hash}, $trace->{short_hash},
              $trace->{quality}, $trace->{id});
     indicate_progress({ current => $count, total => $total, every => 10 });
 }

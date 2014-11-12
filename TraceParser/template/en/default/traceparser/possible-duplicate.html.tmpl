@@ -37,10 +37,10 @@
 
 <h2>Similar [% terms.Bugs %]</h2>
 
-<form id="submit_dup" method="POST" 
+<form id="submit_dup" method="POST"
       action="page.cgi?id=traceparser/post-duplicate-trace.none">
   <input type="hidden" name="comment" value="[% comment.body FILTER html %]">
-  <input type="hidden" name="isprivate" 
+  <input type="hidden" name="isprivate"
          value="[% comment.is_private FILTER html %]">
   [% SET shown_bugs = 0 %]
   [% IF prod_bugs.size %]
@@ -82,8 +82,8 @@
   <input type="hidden" name="traceparser_skip_duplicate" value="1">
 
   <p>If none of the above [% terms.bugs %] look like the bug
-    you are trying to file, then 
-    <input type="submit" id="file_bug_again" 
+    you are trying to file, then
+    <input type="submit" id="file_bug_again"
            value="Continue to File This [% terms.Bug %]"></p>
   [% PROCESS "global/hidden-fields.html.tmpl"
              exclude="^(Bugzilla_login|Bugzilla_password|ignore_token)$" %]

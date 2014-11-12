@@ -31,7 +31,7 @@
     [%+ trace.id FILTER html %]</a></p>
 
 <table border="0" cellpadding="0" cellspacing="0"><tr><td>
-<div class="trace [% ' bz_default_hidden' IF !show %]" 
+<div class="trace [% ' bz_default_hidden' IF !show %]"
      id="trace_[% trace.id FILTER html %]">
   [% IF trace.type.match('Python') %]
     <ul class="frames">
@@ -60,10 +60,10 @@
     [% ELSE %]
       [% threads = trace.stack.threads %]
     [% END %]
-    
+
     [% FOREACH thread = threads %]
       [% IF thread.number || thread.description %]
-        <p class="thread_description">Thread [% thread.number FILTER html %] 
+        <p class="thread_description">Thread [% thread.number FILTER html %]
           ([% thread.description FILTER html %])</p>
       [% END %]
 
@@ -76,7 +76,7 @@
             <span class="frame_function">[% frame.function FILTER html %]</span>
             [% IF frame.library %]
               <div class="frame_library_container">
-                from 
+                from
                 <span class="frame_library">[% frame.library FILTER html %]</span>
               </div>
             [% END %]
@@ -84,7 +84,7 @@
               <div class="frame_file_container">
                 at <span class="frame_file">[% frame.file FILTER html %]</span>
                 [% IF frame.line %]
-                  line 
+                  line
                   <span class="frame_line">[% frame.line FILTER html %]</span>
                 [% END %]
               </div>

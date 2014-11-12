@@ -20,7 +20,7 @@
   #%]
 
 [% PROCESS global/header.html.tmpl
-   title = "Trace $trace.id From Bug $trace.bug.id" 
+   title = "Trace $trace.id From Bug $trace.bug.id"
 %]
 
 [% IF user.in_group('traceparser_edit') %]
@@ -56,8 +56,8 @@
   [% PROCESS trace_list list = similar_traces %]
 [% END %]
 
-<h2>Trace [% trace.id FILTER html %] 
-  (Quality: [% trace.quality FILTER html %]) on 
+<h2>Trace [% trace.id FILTER html %]
+  (Quality: [% trace.quality FILTER html %]) on
   [%+ "$terms.Bug $trace.bug.id" FILTER bug_link(trace.bug) %]</h2>
 
 <table border="0" cellpadding="0" cellspacing="0"><tr><td><div class="trace">

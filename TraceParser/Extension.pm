@@ -41,7 +41,7 @@ use constant DEFAULT_POPULAR_LIMIT => 20;
 
 sub bug_end_of_create {
     my ($self, $args) = @_;
-    
+
     my $bug = $args->{bug};
     my $comments = $bug->comments({ order => 'oldest_to_newest' });
     my $comment = $comments->[0];
@@ -49,7 +49,7 @@ sub bug_end_of_create {
     return if !$data;
     my $trace = Bugzilla::Extension::TraceParser::Trace->create(
         { %$data, comment_id => $comment->id });
-    _check_duplicate_trace($trace, $bug, $comment);    
+    _check_duplicate_trace($trace, $bug, $comment);
 }
 
 sub _check_duplicate_trace {
@@ -72,9 +72,9 @@ sub _check_duplicate_trace {
     if (@identical or @similar) {
         $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
         my $product = $bug->product;
-        my @prod_traces  = grep { $_->bug->product eq $product } 
+        my @prod_traces  = grep { $_->bug->product eq $product }
                                 (@identical, @similar);
-        my @other_traces = grep { $_->bug->product ne $product } 
+        my @other_traces = grep { $_->bug->product ne $product }
                                 (@identical, @similar);
 
         my %vars = (
@@ -224,13 +224,13 @@ sub _handle_dup_to {
 
     # This is what we do for all non-browser usage modes.
     ThrowUserError('traceparser_dup_to',
-                   { dup_to => $dup_to, 
+                   { dup_to => $dup_to,
                      comment_added => $comment_added });
 }
 
 sub bug_end_of_update {
     my ($self, $args) = @_;
-    
+
     my ($bug, $timestamp) = @$args{qw(bug timestamp)};
     return if !$bug->{added_comments};
     # Delete the cache, because we want to refresh this from the DB.
@@ -244,7 +244,7 @@ sub bug_end_of_update {
         next if !$data;
         Bugzilla::Extension::TraceParser::Trace->create(
             { %$data, comment_id => $comment->id });
-    }    
+    }
 }
 
 sub bug_format_comment {
@@ -282,15 +282,13 @@ sub bug_format_comment {
 
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;
-    
-    
-    
+
     my $schema = $args->{schema};
     $schema->{trace} = {
         FIELDS => [
-            id          => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1, 
+            id          => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1,
                             PRIMARYKEY => 1},
-            comment_id  => {TYPE => 'INT3', NOTNULL => 1, 
+            comment_id  => {TYPE => 'INT3', NOTNULL => 1,
                             REFERENCES => {TABLE  => 'longdescs',
                                            COLUMN => 'comment_id',
                                            DELETE => 'CASCADE'}},
@@ -306,17 +304,17 @@ sub db_schema_abstract_schema {
             trace_comment_id_idx => {TYPE => 'UNIQUE', FIELDS => ['comment_id']},
         ],
     };
-    
+
     $schema->{trace_dup} = {
         FIELDS => [
             hash      => {TYPE => 'char(22)', NOTNULL => 1},
             identical => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
-            bug_id    => {TYPE => 'INT3', NOTNULL => 1, 
+            bug_id    => {TYPE => 'INT3', NOTNULL => 1,
                           REFERENCES => {TABLE  => 'bugs',
                                          COLUMN => 'bug_id'}},
         ],
         INDEXES => [
-            trace_dup_hash_idx => {TYPE => 'UNIQUE', 
+            trace_dup_hash_idx => {TYPE => 'UNIQUE',
                                    FIELDS => [qw(hash identical)]},
             trace_bug_id_idx   => ['bug_id'],
         ],
@@ -325,14 +323,14 @@ sub db_schema_abstract_schema {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
-    
+
     if (!new Bugzilla::Group({ name => 'traceparser_edit' })) {
         Bugzilla::Group->create({
             name        => 'traceparser_edit',
             description => 'Can edit properties of traces',
             isbuggroup  => 0 });
     }
-    
+
     add_setting('traceparser_show_traces',
                 ['on', 'off'], 'off');
 }
@@ -350,7 +348,7 @@ sub install_update_db {
         $dbh->{'mysql_use_result'} = 1;
     }
 
-    my $sth = $dbh->prepare('SELECT comment_id, thetext FROM longdescs 
+    my $sth = $dbh->prepare('SELECT comment_id, thetext FROM longdescs
                            ORDER BY comment_id');
     $sth->execute();
     my $count = 1;
@@ -384,7 +382,7 @@ sub install_update_db {
 
 sub page_before_template {
     my ($self, $args) = @_;
-    
+
     my ($vars, $page) = @$args{qw(vars page_id)};
     if ($page =~ m{^traceparser/trace\.}) {
         _page_trace($vars);
@@ -410,7 +408,7 @@ sub _page_trace {
     my $action = $cgi->param('action') || '';
     if ($action eq 'update') {
         $user->in_group('traceparser_edit')
-          or ThrowUserError('auth_failure', 
+          or ThrowUserError('auth_failure',
                  { action => 'modify', group => 'traceparser_edit',
                    object => 'settings' });
         if (!$trace->stack_hash) {
@@ -469,9 +467,9 @@ sub _page_popular_traces {
           WHERE short_hash IS NOT NULL $extra_where
        GROUP BY short_hash ORDER BY trace_count DESC "
         . $dbh->sql_limit('?'), {Columns=>[1,2]}, $limit) };
- 
+
     my $traces = Bugzilla::Extension::TraceParser::Trace->new_from_list([keys %trace_count]);
-    @$traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} } 
+    @$traces = reverse sort { $trace_count{$a->id} <=> $trace_count{$b->id} }
                             @$traces;
     $vars->{limit} = $limit;
     $vars->{traces} = $traces;

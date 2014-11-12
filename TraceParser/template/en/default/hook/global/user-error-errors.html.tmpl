@@ -15,7 +15,7 @@
 
 [% ELSIF error == "traceparser_dup_to_closed" %]
     [% title = "Stack Trace Is a Duplicate" %]
-    The crash you submitted appears to be a duplicate of 
+    The crash you submitted appears to be a duplicate of
     [%+ "$terms.bug $dup_to.id" FILTER bug_link(dup_to) %].
 
     [% IF dup_to.resolution == 'FIXED' %]
