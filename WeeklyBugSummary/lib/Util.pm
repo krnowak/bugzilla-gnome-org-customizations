@@ -758,8 +758,7 @@ sub get_patch_reviewers_list {
            AND bugs_activity.bug_when >= " .
                    $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '?', 'DAY');
 
-    # XXX  - relies on attachments.status
-    push(@args, get_field_id('attachments.status'), $days);
+    push(@args, get_field_id('attachments.gnome_attachment_status'), $days);
 
     if ($keyword) {
         push(@args, lc($keyword));
