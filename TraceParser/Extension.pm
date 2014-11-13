@@ -196,7 +196,7 @@ sub _handle_dup_to {
     if (!$higher_quality_traces) {
         if ($dup_to->check_can_change_field('longdesc', 0, 1)) {
             my %comment_options = %$comment;
-            my @comment_cols = Bugzilla::Bug::UPDATE_COMMENT_COLUMNS;
+            my @comment_cols = Bugzilla::Comment::UPDATE_COLUMNS;
             foreach my $key (keys %comment_options) {
                 if (!grep { $_ eq $key } @comment_cols) {
                     delete $comment_options{$key};
@@ -289,7 +289,7 @@ sub db_schema_abstract_schema {
         FIELDS => [
             id          => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1,
                             PRIMARYKEY => 1},
-            comment_id  => {TYPE => 'INT3', NOTNULL => 1,
+            comment_id  => {TYPE => 'INT4', NOTNULL => 1,
                             REFERENCES => {TABLE  => 'longdescs',
                                            COLUMN => 'comment_id',
                                            DELETE => 'CASCADE'}},

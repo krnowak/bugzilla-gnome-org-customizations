@@ -57,12 +57,6 @@ use constant VALIDATORS => {
     type        => \&_check_type,
 };
 
-use constant REQUIRED_CREATE_FIELDS => qw(
-    comment_id
-    trace_text
-    type
-);
-
 # This is how long a Base64 MD5 Hash is.
 use constant HASH_SIZE => 22;
 
