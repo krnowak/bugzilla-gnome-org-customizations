@@ -31,6 +31,7 @@ use Scalar::Util qw(blessed);
 use File::Basename qw(basename dirname);
 use Parse::StackTrace;
 use Digest::MD5 qw(md5_base64);
+use List::MoreUtils qw(any);
 
 ###############################
 ####    Initialization     ####
@@ -270,7 +271,7 @@ sub interesting_threads {
     # "signal" or "segv" in the name.
     my @threads;
     foreach my $t (@{ $st->threads }) {
-        if (grep { $_->function =~ POSSIBLE_CRASH_FUNCTION } @{ $t->frames }) {
+        if (any { $_->function =~ POSSIBLE_CRASH_FUNCTION } @{ $t->frames }) {
             push(@threads, $t);
         }
     }
@@ -283,7 +284,7 @@ sub interesting_threads {
         my $function = $t->frames->[0]->function;
         if (($function !~ WAIT_FUNCTION
              or $function =~ INTERESTING_WAIT_FUNCTION)
-            and !grep { $_ eq $function } IGNORE_FUNCTIONS)
+            and !any { $_ eq $function } IGNORE_FUNCTIONS)
         {
             push(@threads, $t);
         }
@@ -373,7 +374,7 @@ sub _relevant_functions {
             $function = ".$function" if $function;
             $function = "$file$function";
         }
-        if (!grep($_ eq $function, IGNORE_FUNCTIONS)) {
+        if (!any { $_ eq $function } IGNORE_FUNCTIONS) {
             $function =~ s/^IA__//;
             push(@relevant, $function);
         }

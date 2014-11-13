@@ -32,6 +32,7 @@ use Bugzilla::Util qw(detaint_natural);
 use Bugzilla::Extension::TraceParser::Trace;
 
 use List::Util;
+use List::MoreUtils qw(any part);
 use POSIX qw(ceil);
 use Scalar::Util qw(blessed);
 
@@ -72,15 +73,15 @@ sub _check_duplicate_trace {
     if (@identical or @similar) {
         $dbh->bz_rollback_transaction if $dbh->bz_in_transaction;
         my $product = $bug->product;
-        my @prod_traces  = grep { $_->bug->product eq $product }
-                                (@identical, @similar);
-        my @other_traces = grep { $_->bug->product ne $product }
-                                (@identical, @similar);
+        my @parted_traces = part { $_->bug->product ne $product }
+                                 (@identical, @similar);
+        my $prod_traces = $parted_traces[0];
+        my $other_traces = $parted_traces[1];
 
         my %vars = (
             comment    => $comment,
-            prod_bugs  => _traces_to_bugs(\@prod_traces),
-            other_bugs => _traces_to_bugs(\@other_traces),
+            prod_bugs  => _traces_to_bugs($prod_traces),
+            other_bugs => _traces_to_bugs($other_traces),
             product    => $product,
         );
         my $total_other_bugs = scalar(@{ $vars{other_bugs} });
