@@ -6,3 +6,9 @@
 - TraceParser:
   Check if GNOME Bugzilla uses mediumint for comment_id column in
   trace table. If so, add a code porting it to use integer.
+- StockAnswers:
+  Put stock responses in database. Maybe add an editor for stock
+  responses. Validate stock responses whether they change the bug
+  status (or it is resolution?) according to bug status workflow. Make
+  it possible to specify for which products the stock answer is
+  available.
