@@ -52,7 +52,7 @@ sub install_update_db {
     }
 
     # Don't want Platform in GNOME Bugzilla
-    my $platform = new Bugzilla::Field({'name' => 'rep_platform'});
+    my $platform = Bugzilla::Field->new({'name' => 'rep_platform'});
     if (!$platform->obsolete || $platform->in_new_bugmail) {
 
         $platform->set_obsolete(1);
@@ -67,7 +67,7 @@ sub install_before_final_checks {
     # 2009-05-06 bbaetz@everythingsolved.com - add GNOME version and GNOME target fields
     my $classification_id = get_field_id("classification");
 
-    my $gnome_version = new Bugzilla::Field({'name' => 'cf_gnome_version'});
+    my $gnome_version = Bugzilla::Field->new({'name' => 'cf_gnome_version'});
     if (!$gnome_version) {
         $gnome_version = Bugzilla::Field->create({
             name        => 'cf_gnome_version',
@@ -83,7 +83,7 @@ sub install_before_final_checks {
         });
     }
 
-    my $gnome_target = new Bugzilla::Field({'name' => 'cf_gnome_target'});
+    my $gnome_target = Bugzilla::Field->new({'name' => 'cf_gnome_target'});
     if (!$gnome_target) {
         $gnome_target = Bugzilla::Field->create({
             name        => 'cf_gnome_target',
@@ -211,8 +211,8 @@ sub _update_gnome_cf_visibility_values {
 
     my $dbh = Bugzilla->dbh;
 
-    my $gnome_version = new Bugzilla::Field({'name' => 'cf_gnome_version'});
-    my $gnome_target = new Bugzilla::Field({'name' => 'cf_gnome_target'});
+    my $gnome_version = Bugzilla::Field->new({'name' => 'cf_gnome_version'});
+    my $gnome_target = Bugzilla::Field->new({'name' => 'cf_gnome_target'});
 
     # Paranoia; these should have been added by checksetup.pl
     return unless $gnome_version || $gnome_target;
@@ -292,7 +292,7 @@ sub bugmail_recipients {
     # Don't email to @gnome.bugs and related
 
     foreach my $user_id (keys %{$recipients}) {
-        $users->{$user_id} ||= new Bugzilla::User($user_id);
+        $users->{$user_id} ||= Bugzilla::User->new($user_id);
         my $user = $users->{$user_id};
 
         delete $recipients->{$user_id} if $user->email =~ /\.bugs$/;

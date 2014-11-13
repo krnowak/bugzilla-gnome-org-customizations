@@ -50,7 +50,7 @@ sub addversionx {
     my $product = Bugzilla::Product->check($product_name);
 
     # If the full version already exists, we don't create a .x version.
-    my $version = new Bugzilla::Version({ product => $product, name => $new_version });
+    my $version = Bugzilla::Version->new({ product => $product, name => $new_version });
     if ($version) {
         return ", exists (", $product->name, ")";
     }
@@ -68,7 +68,7 @@ sub addversionx {
     # Check if the higher v.x versions exist.
     my $last_version_x;
     while (1) {
-        my $version = new Bugzilla::Version({ product => $product, name => $version_x });
+        my $version = Bugzilla::Version->new({ product => $product, name => $version_x });
         if ($version) {
             return ", exists (", $product->name, ")";
         }
