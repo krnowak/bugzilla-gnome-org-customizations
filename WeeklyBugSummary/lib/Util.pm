@@ -469,7 +469,7 @@ sub get_bug_hunters_list {
     foreach my $rowRef (@$hunterlist) {
         my($userid, $count) = @$rowRef;
 
-        push(@$rowRef, new Bugzilla::User($userid));
+        push(@$rowRef, Bugzilla::User->new($userid));
         if ($links eq "yes") {
             my $buglist = &get_hunter_bugs($userid, $days, $keyword, $version,
                                            $classification_id, $product_id);
@@ -600,7 +600,7 @@ sub get_bug_reporters_list {
     foreach my $rowRef (@$reporterlist) {
         my ($userid, $count) = @$rowRef;
 
-        push(@$rowRef, new Bugzilla::User($userid));
+        push(@$rowRef, Bugzilla::User->new($userid));
         if ($links eq "yes") {
             my $buglist = &get_reporter_bugs($userid, $days, $keyword,
                                              $version, $classification_id,
@@ -721,7 +721,7 @@ sub get_patch_submitters_list {
     foreach my $rowRef (@$submitterlist) {
         my ($userid, $count) = @$rowRef;
 
-        push(@$rowRef, new Bugzilla::User($userid));
+        push(@$rowRef, Bugzilla::User->new($userid));
 #        if ($links eq "yes") {
 #            my $buglist = &get_reporter_bugs($userid, $days, $keyword, $version);
 #            push(@$rowRef, $buglist);
@@ -790,7 +790,7 @@ sub get_patch_reviewers_list {
     foreach my $rowRef (@$hunterlist) {
         my($userid, $count) = @$rowRef;
 
-        push(@$rowRef, new Bugzilla::User($userid));
+        push(@$rowRef, Bugzilla::User->new($userid));
 #        if ($links eq "yes") {
 #            my $buglist = &get_hunter_bugs($userid, $days, $keyword, $version);
 #            push(@$rowRef, $buglist);
