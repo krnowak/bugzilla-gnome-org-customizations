@@ -235,7 +235,7 @@ sub bug {
     my $bug_id = Bugzilla->dbh->selectrow_array(
         'SELECT bug_id FROM longdescs WHERE comment_id = ?', undef, 
         $self->comment_id);
-    $self->{bug} = new Bugzilla::Bug($bug_id);
+    $self->{bug} = Bugzilla::Bug->new($bug_id);
     return $self->{bug};
 }
 
@@ -323,7 +323,7 @@ sub check_is_visible {
 sub must_dup_to {
     my $self = shift;
     my $id = $self->identical_dup_id || $self->similar_dup_id;
-    return $id ? new Bugzilla::Bug($id) : undef;
+    return $id ? Bugzilla::Bug->new($id) : undef;
 }
 
 sub _important_stack_frames {

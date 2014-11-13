@@ -127,7 +127,7 @@ sub _walk_dup_chain {
     if (!$bug->dup_id) {
         return $bug;
     }
-    return _walk_dup_chain(new Bugzilla::Bug($bug->dup_id));
+    return _walk_dup_chain(Bugzilla::Bug->new($bug->dup_id));
 }
 
 sub _cmp_trace_bug($$) {
@@ -325,7 +325,7 @@ sub db_schema_abstract_schema {
 sub install_before_final_checks {
     my ($self, $args) = @_;
 
-    if (!new Bugzilla::Group({ name => 'traceparser_edit' })) {
+    if (!Bugzilla::Group->new({ name => 'traceparser_edit' })) {
         Bugzilla::Group->create({
             name        => 'traceparser_edit',
             description => 'Can edit properties of traces',
