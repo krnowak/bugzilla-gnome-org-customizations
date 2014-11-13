@@ -154,9 +154,9 @@ sub maybe_remove_developers {
 
 sub _rename_developer {
     my ($product, $old_product, $changes) = @_;
-    my $developer_group = new Bugzilla::Group(
+    my $developer_group = Bugzilla::Group->new(
         { name => dev_group_name($old_product) });
-    my $new_group = new Bugzilla::Group(
+    my $new_group = Bugzilla::Group->new(
         { name => dev_group_name($product) });
 
     if ($developer_group && !$new_group) {
