@@ -124,7 +124,7 @@ sub _page_browse {
                 # Get all classifications with at least one enterable product.
                 foreach my $product (@enterable_products) {
                     $class->{$product->classification_id}->{'object'} ||=
-                        new Bugzilla::Classification($product->classification_id);
+                        Bugzilla::Classification->new($product->classification_id);
                     # Nice way to group products per classification, without querying
                     # the DB again.
                     push(@{$class->{$product->classification_id}->{'products'}}, $product);
@@ -159,7 +159,7 @@ sub _page_browse {
 
         # Keep only enterable products which are in the specified classification.
         if ($classification ne "__all") {
-            my $class = new Bugzilla::Classification({'name' => $classification});
+            my $class = Bugzilla::Classification->new({'name' => $classification});
             # If the classification doesn't exist, then there is no product in it.
             if ($class) {
                 @enterable_products
@@ -191,7 +191,7 @@ sub _page_browse {
     else {
         # Do not use Bugzilla::Product::check_product() here, else the user
         # could know whether the product doesn't exist or is not accessible.
-        $product = new Bugzilla::Product({'name' => $product_name});
+        $product = Bugzilla::Product->new({'name' => $product_name});
     }
 
     # We need to check and make sure that the user has permission
