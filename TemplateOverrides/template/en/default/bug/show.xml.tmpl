@@ -87,6 +87,7 @@
             [% END %]
 
             [% PROCESS section_flags obj => a %]
+            [% Hook.process("attachment_fields") %]
           </attachment>
         [% END %]
       [% END %]
