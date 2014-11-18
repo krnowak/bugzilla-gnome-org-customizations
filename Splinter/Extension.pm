@@ -73,4 +73,8 @@ sub webservice {
     add_dispatch($dispatches);
 }
 
+sub gnome_deps {
+    ('GnomeAttachmentStatus');
+}
+
 __PACKAGE__->NAME;

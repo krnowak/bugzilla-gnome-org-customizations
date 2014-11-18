@@ -59,9 +59,9 @@ sub publish_review {
 
     my $attachment_status = $params->{'attachment_status'};
     if (defined($attachment_status)) {
-        my $field_object = Bugzilla::Field->new({ name => 'attachments.status' });
+        my $field_object = Bugzilla::Field->new({ name => 'attachments.gnome_attachment_status' });
         my @legal_values = map { $_->name } @{ $field_object->legal_values() };
-        check_field('attachments.status', $attachment_status, \@legal_values);
+        check_field('attachments.gnome_attachment_status', $attachment_status, \@legal_values);
     }
 
     my $attachment = Bugzilla::Attachment->new($params->{'attachment_id'});
@@ -90,32 +90,9 @@ sub publish_review {
     $bug->add_comment($comment);
     $dbh->bz_start_transaction();
 
-    if (defined($attachment_status) && $attachment->status() ne $attachment_status) {
-        # Note that this file needs to load properly even if the installation
-        # doesn't have attachment statuses (a bugzilla.gnome.org addition), so,
-        # for example, we wouldn't want an explicit 'use Bugzilla::AttachmentStatus'
-
-        # Update the attachment record in the database.
-        $dbh->do("UPDATE  attachments
-                  SET     status      = ?,
-                          modification_time = ?
-                  WHERE   attach_id   = ?",
-                  undef, ($attachment_status, $timestamp, $attachment->id()));
-
-        my $updated_attachment = Bugzilla::Attachment->new($attachment->id());
-
-        if ($attachment->status() ne $updated_attachment->status()) {
-            my $fieldid = get_field_id('attachments.status');
-
-            $dbh->do('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
-                                               fieldid, removed, added)
-                           VALUES (?, ?, ?, ?, ?, ?, ?)',
-                     undef, ($bug->id(), $attachment->id, $user->id(),
-                             $timestamp, $fieldid,
-                             $attachment->status(), $updated_attachment->status()));
-
-            # Adding the comment will update the bug's delta_ts, so we don't need to do it here
-        }
+    if (defined($attachment_status) && $attachment->gnome_attachment_status() ne $attachment_status) {
+        $attachment->set_gnome_attachment_status($attachment_status);
+        $attachment->update();
     }
 
     # This actually adds the comment

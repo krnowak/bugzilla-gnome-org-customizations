@@ -212,6 +212,7 @@ Bug.Bug.fromDOM = function(xml) {
             attachment.isPatch = $(this).attr('ispatch') == "1";
             attachment.isObsolete = $(this).attr('isobsolete') == "1";
             attachment.isPrivate = $(this).attr('isprivate') == "1";
+            attachment.status = Utils.strip($(this).children('gnome_attachment_status').text());
 
             bug.attachments.push(attachment);
         });
@@ -1542,7 +1543,7 @@ function updateAttachmentStatus(attachment, newStatus, success, failure) {
         ispatch: attachment.isPatch ? 1 : 0,
         isobsolete: attachment.isObsolete ? 1 : 0,
         isprivate: attachment.isPrivate ? 1 : 0,
-        'attachments.status': newStatus
+        'attachments.gnome_attachment_status': newStatus
     };
 
     if (attachment.token)

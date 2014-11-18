@@ -169,15 +169,9 @@ sub maybe_setup_vars_for_page {
     my ($page, $vars) = @_;
 
     if ($page eq 'splinter.html') {
-        # We do this in a way that is safe if the Bugzilla instance doesn't
-        # have an attachments.status field (which is a bugzilla.gnome.org
-        # addition)
-        my $field_object = Bugzilla::Field->new({ name => 'attachments.status' });
-        my @statuses = ();
+        my $field_object = Bugzilla::Field->new({ name => 'attachments.gnome_attachment_status' });
+        my @statuses = map { $_->name } @{ $field_object->legal_values() };
 
-        if ($field_object) {
-            @statuses = map { $_->name } @{ $field_object->legal_values };
-        }
         $vars->{'attachment_statuses'} = \@statuses;
         $vars->{'urlbase'} = correct_urlbase();
     }
