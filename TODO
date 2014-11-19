@@ -1,13 +1,39 @@
-- Port extension - Splinter
 - Describe User:
+
   Instead of listing all possible attachment statuses, just get all of
   them and remove 'committed' from the list.
-- TraceParser:
-  Check if GNOME Bugzilla uses mediumint for comment_id column in
-  trace table. If so, add a code porting it to use integer.
+
+
+- GNOME:
+
+  Add GNOME specific bug statues and resolutions and setup
+  transitions. StockAnswers could then have a dep on GNOME.
+
+
+- Splinter:
+
+  Figure out the email format for Ops::add_review_links_to_email,
+  because I am not really sure if it is correct, especially the one
+  with "Created attachment..."
+
+
 - StockAnswers:
+
   Put stock responses in database. Maybe add an editor for stock
   responses. Validate stock responses whether they change the bug
   status (or it is resolution?) according to bug status workflow. Make
   it possible to specify for which products the stock answer is
   available.
+
+
+- TraceParser:
+
+  Check if GNOME Bugzilla uses mediumint for comment_id column in
+  trace table. If so, add a code porting it to use integer.
+
+
+- WeeklyBugSummary:
+
+  Some products have way too many bugs. Break it down via component.
+
+  Use percentages for the diff figures.
