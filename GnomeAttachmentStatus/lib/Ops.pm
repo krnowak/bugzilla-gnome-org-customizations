@@ -23,7 +23,6 @@ use File::Spec;
 our @EXPORT = qw(
     update_choice_class_map
     add_gnome_attachment_status_table_to_schema
-    check_overridden_templates
     maybe_add_status_column
     maybe_add_status_update_columns
     maybe_setup_status_validator
@@ -70,121 +69,6 @@ sub add_gnome_attachment_status_table_to_schema
     # Create the table unconditionally. If we are updating from old
     # setup, we will just remove the attachment_status table.
     $schema->{g_a_s()} = $definition;
-}
-
-sub _attachment_edit_handler {
-    my ($file, $vars, $context) = @_;
-    my $var_name = 'all_' . g_a_s() . '_values';
-    my @values = Bugzilla::Field::Choice->type(fd_a_g_a_s())->get_all();
-
-    $vars->set($var_name, \@values);
-}
-
-sub _attachment_list_handler {
-    my ($file, $vars, $context) = @_;
-    my $bug_id = $vars->get('bugid');
-
-    if ($bug_id) {
-        my $bug = Bugzilla::Bug->new($bug_id);
-        my $show_status = $bug->show_gnome_attachment_status();
-
-        $vars->set('show_gnome_attachment_status', $show_status);
-    }
-}
-
-# This block is to make template_infos a private static variable, so
-# it is initialized only once.
-{
-    sub _init_template_infos {
-        my $infos = {
-            'attachment/edit.html.tmpl' => {
-                'handler' => \&_attachment_edit_handler,
-                'digest' => '426ceeb820cefad35cbbf10ab053c1fc9f53fa71a63dd455418bff3221a46a0e'
-            },
-            'attachment/list.html.tmpl' => {
-                'handler' => \&_attachment_list_handler,
-                'digest' => 'b0c5edd84b8cc31666d0d0b4bf36cdb981ee322995dad891cf05f0f40b2d0392'
-            }
-        };
-
-        my @extension_paths = grep {/^\.\/extensions\/GnomeAttachmentStatus\//} @{Bugzilla::Install::Util::template_include_path()};
-
-        for my $file (sort keys (%{$infos}))
-        {
-            my $complete_path = undef;
-
-            for my $path (@extension_paths)
-            {
-                my $potential_path = File::Spec->catfile($path, $file);
-
-                next unless (-r $potential_path);
-                $complete_path = $potential_path;
-                last;
-            }
-
-            my $overridden = defined ($complete_path);
-
-            $infos->{$file}{'overridden'} = $overridden;
-            if ($overridden and not exists ($infos->{$file}{'digest'}))
-            {
-                # If this happens then it is programmer's error.
-                die "No digest of original template file ($complete_path) available";
-            }
-        }
-        $infos;
-    }
-
-    my $template_infos = undef;
-
-    sub _get_template_infos
-    {
-        unless (defined ($template_infos))
-        {
-            $template_infos = _init_template_infos();
-        }
-        $template_infos;
-    }
-}
-
-sub check_overridden_templates
-{
-    print "Checking overridden templates...\n";
-    # template_include_path is from Bugzilla::Install::Util package.
-    my @default_paths = grep {!/^\.\/extensions\//} @{Bugzilla::Install::Util::template_include_path()};
-    my $infos = _get_template_infos();
-
-    for my $file (sort keys (%{$infos}))
-    {
-        next unless $infos->{$file}{'overridden'};
-
-        my $complete_path = undef;
-
-        for my $path (@default_paths)
-        {
-            my $potential_path = File::Spec->catfile($path, $file);
-
-            next unless (-r $potential_path);
-            $complete_path = $potential_path;
-            last;
-        }
-        unless ($complete_path)
-        {
-            print "Original template for $file not found\n";
-            next;
-        }
-
-        my $sha = Digest::SHA->new(256);
-        $sha->addfile($complete_path);
-        my $digest = $sha->hexdigest();
-        if ($digest ne $infos->{$file}{'digest'})
-        {
-            die "Original $file (at $complete_path) has changed " .
-            'since last checksetup. Please check if the changes ' .
-            'should be backported to overridden templates and ' .
-            'update the digest in template_infos variable with ' .
-            $digest;
-        }
-    }
 }
 
 sub maybe_add_status_column
@@ -270,13 +154,51 @@ sub maybe_fixup_final_status_param
     }
 }
 
+sub _attachment_edit_handler {
+    my ($file, $vars, $context) = @_;
+    my $var_name = 'all_' . g_a_s() . '_values';
+    my @values = Bugzilla::Field::Choice->type(fd_a_g_a_s())->get_all();
+
+    $vars->set($var_name, \@values);
+}
+
+sub _attachment_list_handler {
+    my ($file, $vars, $context) = @_;
+    my $bug_id = $vars->get('bugid');
+
+    if ($bug_id) {
+        my $bug = Bugzilla::Bug->new($bug_id);
+        my $show_status = $bug->show_gnome_attachment_status();
+
+        $vars->set('show_gnome_attachment_status', $show_status);
+    }
+}
+
+# This block is to make handlers a private static variable, so it is
+# initialized only once.
+{
+    my $handlers = undef;
+
+    sub _get_handlers
+    {
+        unless (defined ($handlers))
+        {
+            $handlers = {
+                'attachment/edit.html.tmpl' => \&_attachment_edit_handler,
+                'attachment/list.html.tmpl' => \&_attachment_list_handler
+            };
+        }
+        $handlers;
+    }
+}
+
 sub maybe_run_template_handler
 {
     my ($file, $vars, $context) = @_;
-    my $infos = _get_template_infos;
+    my $handlers = _get_handlers();
 
-    if (exists ($infos->{$file})) {
-        $infos->{$file}{'handler'}($file, $vars, $context);
+    if (exists ($handlers->{$file})) {
+        $handlers->{$file}($file, $vars, $context);
     }
 }
 

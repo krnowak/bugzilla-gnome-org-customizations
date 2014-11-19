@@ -95,14 +95,9 @@ sub template_before_process {
 # key removed, we are getting errors when dropping a column.
 #
 # In short: argh!
-#
-# Also check if overridden templates didn't change since last
-# time. This check is for us to maybe backport the changes to our
-# overrides.
 sub install_before_final_checks
 {
     perform_migration;
-    check_overridden_templates;
 }
 
 sub enabled {
