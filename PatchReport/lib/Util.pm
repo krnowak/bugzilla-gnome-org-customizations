@@ -21,6 +21,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::User;
+use Bugzilla::Extension::PatchReport::Status;
 
 our @EXPORT = qw(
     page
@@ -112,6 +113,12 @@ sub _page_patch_report {
     $vars->{'stats'} = $stats;
 }
 
+sub browse_open_states {
+    my $dbh = Bugzilla->dbh;
+
+    return join(',', map { $dbh->quote($_) } Bugzilla::Status->gnome_open_statuses());
+}
+
 sub get_unreviewed_patches_and_stats {
     my ($quoted_product, $quoted_component, $patch_status,
         $min_days, $max_days, $submitter) = (@_);
@@ -159,10 +166,7 @@ sub get_unreviewed_patches_and_stats {
     if ($patch_status ne 'obsolete') {
         $query .= " AND attachments.gnome_attachment_status = '" . $patch_status . "'";
     }
-    $query .= "   AND (bugs.bug_status = 'UNCONFIRMED'
-                       OR bugs.bug_status = 'NEW'
-                       OR bugs.bug_status = 'ASSIGNED'
-                       OR bugs.bug_status = 'REOPENED')
+    $quert .= "   AND (bugs.bug_status IN (" . browse_open_states() . ")
              ORDER BY products.name, components.name, attachments.bug_id, attachments.attach_id";
 
     my $sth = $dbh->prepare($query);
