@@ -98,6 +98,8 @@ sub _check_overrides {
 sub check_overridden_templates {
     my ($silent) = @_;
     my %digests = (
+        'attachment/edit.html.tmpl' => '426ceeb820cefad35cbbf10ab053c1fc9f53fa71a63dd455418bff3221a46a0e',
+        'attachment/list.html.tmpl' => 'b0c5edd84b8cc31666d0d0b4bf36cdb981ee322995dad891cf05f0f40b2d0392',
     );
 
     print "Checking overridden templates...\n" unless $silent;
