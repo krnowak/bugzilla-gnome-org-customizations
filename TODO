@@ -9,6 +9,18 @@
   Add GNOME specific bug statues and resolutions and setup
   transitions. StockAnswers could then have a dep on GNOME.
 
+  Is there a way to bump comment length limit? Not sure if we can
+  override it in extension since it is defined in
+  Bugzilla::Constants. Making the limit larger than 65535 could be
+  useful for large stacktraces. In old bugzilla it is bumped to
+  131072.
+
+
+- PatchReport:
+
+  The GNOME specific bug open statuses probably should be in GNOME
+  extension.
+
 
 - Splinter:
 
@@ -37,3 +49,7 @@
   Some products have way too many bugs. Break it down via component.
 
   Use percentages for the diff figures.
+
+  Do we really want to exclude enhancement bugs from top N products?
+  If so, maybe we should be consistent in excluding it from the rest
+  of reports in this extension. Check it.
