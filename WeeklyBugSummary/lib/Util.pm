@@ -12,10 +12,6 @@
 #
 # It was later ported to be a Bugzilla extension by Frederic Peters
 # (fpeters@0d.be), Sep 2009.
-#
-# TODO
-#   - Some products have way too many bugs. Break it down via component.
-#   - Use percentages for the diff figures.
 
 package Bugzilla::Extension::WeeklyBugSummary::Util;
 
