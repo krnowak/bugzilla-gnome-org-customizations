@@ -144,12 +144,12 @@ sub get_unreviewed_patches_and_stats {
       $query .= " AND attachments.submitter_id = $submitter";
     }
     if ($min_days && $min_days != -1) {
-      $query .= " AND attachments.creation_ts <= LOCALTIMESTAMP(0) - " .
-          $dbh->sql_interval($min_days, 'DAY');
+      $query .= " AND attachments.creation_ts <= " .
+          $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', $min_days, 'DAY');
     }
     if ($max_days && $max_days != -1) {
-      $query .= " AND attachments.creation_ts >= LOCALTIMESTAMP(0) - " .
-          $dbh->sql_interval($max_days, 'DAY');
+      $query .= " AND attachments.creation_ts >= " .
+          $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', $max_days, 'DAY');
     }
     if ($patch_status eq 'obsolete') {
       $query .= " AND attachments.isobsolete  = '1'";
