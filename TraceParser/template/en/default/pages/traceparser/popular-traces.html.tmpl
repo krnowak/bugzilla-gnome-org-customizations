@@ -40,7 +40,7 @@
   [% FOREACH trace = traces %]
     <li>
       <a href="page.cgi?id=traceparser/trace.html&amp;trace_id=
-               [%- trace.id FILTER url_quote %]">
+               [%- trace.id FILTER url %]">
         [%- trace_count.${trace.id} FILTER html %]</a>:
       [% FOREACH function = trace.short_stack %]
         [% function FILTER html %]
