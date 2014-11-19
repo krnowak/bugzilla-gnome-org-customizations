@@ -14,10 +14,11 @@ sub page_before_template {
 }
 
 sub gnome_deps {
-    'Browse',
-    'DescribeUser',
-    'GnomeAttachmentStatus',
-    'GNOME'
+    ('Browse',
+     'DescribeUser',
+     'GnomeAttachmentStatus',
+     'GNOME',
+     'PatchReport');
 }
 
 __PACKAGE__->NAME;

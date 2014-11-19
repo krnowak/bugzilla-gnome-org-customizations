@@ -179,6 +179,12 @@ sub _page_weekly_bug_summary {
     $vars->{'reviewerlist'} = $patchreviewerlist;
 }
 
+sub browse_open_states {
+    my $dbh = Bugzilla->dbh;
+
+    return join(',', map { $dbh->quote($_) } Bugzilla::Status->gnome_open_statuses());
+}
+
 sub get_total_bugs_on_bugzilla {
     my($keyword, $version, $classification_id, $product_id) = @_;
 
@@ -195,9 +201,7 @@ sub get_total_bugs_on_bugzilla {
     }
 
     $query .= "
-      WHERE (bugs.bug_status = 'NEW' OR bugs.bug_status = 'ASSIGNED'
-             OR bugs.bug_status = 'REOPENED'
-             OR bugs.bug_status = 'UNCONFIRMED')";
+      WHERE bugs.bug_status IN (" . browse_open_states() . ")";
 
     if ($keyword) {
         push(@args, lc($keyword));
@@ -357,9 +361,7 @@ sub get_product_bug_lists {
           FROM bugs
     INNER JOIN products
             ON bugs.product_id = products.id
-         WHERE (bugs.bug_status = 'NEW' OR bugs.bug_status = 'ASSIGNED'
-                OR bugs.bug_status = 'REOPENED'
-                OR bugs.bug_status = 'UNCONFIRMED')
+         WHERE bugs.bug_status IN (" . browse_open_states() . ")
            AND bugs.bug_severity != 'enhancement'";
 
     if ($keyword) {
