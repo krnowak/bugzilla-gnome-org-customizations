@@ -166,7 +166,7 @@ sub get_unreviewed_patches_and_stats {
     if ($patch_status ne 'obsolete') {
         $query .= " AND attachments.gnome_attachment_status = '" . $patch_status . "'";
     }
-    $quert .= "   AND (bugs.bug_status IN (" . browse_open_states() . ")
+    $query .= "   AND bugs.bug_status IN (" . browse_open_states() . ")
              ORDER BY products.name, components.name, attachments.bug_id, attachments.attach_id";
 
     my $sth = $dbh->prepare($query);

@@ -276,7 +276,8 @@ sub _page_browse {
 
 sub browse_open_states {
     my $dbh = Bugzilla->dbh;
-    return join(",", map { $dbh->quote($_) } grep($_ ne "NEEDINFO", BUG_STATE_OPEN));
+
+    return join(',', map { $dbh->quote($_) } Bugzilla::Status->gnome_open_statuses());
 }
 
 sub total_open_bugs {
