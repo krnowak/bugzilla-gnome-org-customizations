@@ -38,12 +38,6 @@
   available.
 
 
-- TraceParser:
-
-  Check if GNOME Bugzilla uses mediumint for comment_id column in
-  trace table. If so, add a code porting it to use integer.
-
-
 - WeeklyBugSummary:
 
   Some products have way too many bugs. Break it down via component.
