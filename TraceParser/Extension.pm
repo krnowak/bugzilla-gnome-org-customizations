@@ -332,12 +332,13 @@ sub add_traceparser_edit_group {
 }
 
 sub insert_traces_if_there_are_none_in_db {
+    my ($silent) = @_;
     my $dbh = Bugzilla->dbh;
     my $has_traces = $dbh->selectrow_array('SELECT 1 FROM trace '
                                            . $dbh->sql_limit('1'));
     return if $has_traces;
 
-    print "Parsing traces from comments...\n";
+    print "Parsing traces from comments...\n" unless $silent;
     my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs');
 
     if ($dbh->isa('Bugzilla::DB::Mysql')) {
@@ -352,20 +353,20 @@ sub insert_traces_if_there_are_none_in_db {
     while (my ($comment_id, $text) = $sth->fetchrow_array) {
         my $trace = Bugzilla::Extension::TraceParser::Trace->parse_from_text($text);
         indicate_progress({ current => $count++, total => $total,
-                            every => 100 });
+                            every => 100 }) unless $silent;
         next if !$trace;
         $trace->{comment_id} = $comment_id;
         push(@traces, $trace);
     }
 
     my $total_traces = scalar(@traces);
-    print "Parsed $total_traces traces.\n";
+    print "Parsed $total_traces traces.\n" unless $silent;
 
     if ($dbh->isa('Bugzilla::DB::Mysql')) {
         $dbh->{'mysql_use_result'} = 0;
     }
 
-    print "Inserting parsed traces into DB...\n";
+    print "Inserting parsed traces into DB...\n" unless $silent;
     $count = 1;
     $dbh->bz_start_transaction();
     while (my $trace = shift @traces) {
@@ -378,11 +379,12 @@ sub insert_traces_if_there_are_none_in_db {
 
 sub install_before_final_checks {
     my ($self, $args) = @_;
+    my $silent = $args->{'silent'};
 
     add_traceparser_edit_group();
     add_setting('traceparser_show_traces',
                 ['on', 'off'], 'off');
-    insert_traces_if_there_are_none_in_db();
+    insert_traces_if_there_are_none_in_db($silent);
 }
 
 sub install_update_db {
