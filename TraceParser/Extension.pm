@@ -385,6 +385,25 @@ sub install_before_final_checks {
     insert_traces_if_there_are_none_in_db();
 }
 
+sub install_update_db {
+    my $dbh = Bugzilla->dbh();
+
+    # The comment_id column has changed between 3.6 and 4.4 from
+    # MEDIUMSERIAL to INTSERIAL. Reflect that change in trace table
+    # too as it has a column referencing this one.
+    if ($dbh->bz_column_info('trace', 'comment_id')->{'TYPE'} ne 'INT4') {
+        # For the record - it drops all related foreign keys, but they
+        # are recreated at later stage of checksetup.pl, so no worries
+        # here.
+        $dbh->bz_drop_related_fks('longdescs', 'comment_id');
+        $dbh->bz_alter_column('trace', 'comment_id',
+                              {TYPE => 'INT4', NOTNULL => 1,
+                               REFERENCES => {TABLE  => 'longdescs',
+                                              COLUMN => 'comment_id',
+                                              DELETE => 'CASCADE'}});
+    }
+}
+
 sub page_before_template {
     my ($self, $args) = @_;
 
