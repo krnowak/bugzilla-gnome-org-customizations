@@ -322,21 +322,16 @@ sub db_schema_abstract_schema {
     };
 }
 
-sub install_before_final_checks {
-    my ($self, $args) = @_;
-
+sub add_traceparser_edit_group {
     if (!Bugzilla::Group->new({ name => 'traceparser_edit' })) {
         Bugzilla::Group->create({
             name        => 'traceparser_edit',
             description => 'Can edit properties of traces',
             isbuggroup  => 0 });
     }
-
-    add_setting('traceparser_show_traces',
-                ['on', 'off'], 'off');
 }
 
-sub install_update_db {
+sub insert_traces_if_there_are_none_in_db {
     my $dbh = Bugzilla->dbh;
     my $has_traces = $dbh->selectrow_array('SELECT 1 FROM trace '
                                            . $dbh->sql_limit('1'));
@@ -379,6 +374,15 @@ sub install_update_db {
                             every => 100 });
     }
     $dbh->bz_commit_transaction();
+}
+
+sub install_before_final_checks {
+    my ($self, $args) = @_;
+
+    add_traceparser_edit_group();
+    add_setting('traceparser_show_traces',
+                ['on', 'off'], 'off');
+    insert_traces_if_there_are_none_in_db();
 }
 
 sub page_before_template {
