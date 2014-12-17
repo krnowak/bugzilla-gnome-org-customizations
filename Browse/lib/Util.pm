@@ -393,9 +393,10 @@ sub by_patch_status {
 
 sub browse_bug_link {
     my $product = shift;
+    my @statuses = map { '&bug_status=' . url_quote($_) } Bugzilla::Status->gnome_open_statuses();
 
     return correct_urlbase() . 'buglist.cgi?product=' . url_quote($product->name) .
-           '&bug_status=' . join(',' ,map { url_quote($_) } grep ($_ ne "NEEDINFO", BUG_STATE_OPEN));
+           join('', @statuses);
 }
 
 sub by_version {
