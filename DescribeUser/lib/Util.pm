@@ -63,7 +63,7 @@ sub _page_describeuser {
     my $to_be_conjugation;
     my $login = $cgi->param('login');
 
-    if (defined($login) && (!Bugzilla->user->id || (trim($login) != Bugzilla->user->login))) {
+    if (defined($login) && (!$userid || (trim($login) ne $user->login))) {
         $r_userid = login_to_id(trim($login));
         if ($r_userid == 0) {
             ThrowUserError('invalid_username', { 'name' => $login });
