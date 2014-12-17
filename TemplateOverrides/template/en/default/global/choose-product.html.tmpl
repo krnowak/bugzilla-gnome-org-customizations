@@ -44,7 +44,7 @@
     <tr>
       <th align="right" valign="top">
         [% IF parameterized_target.defined %]
-        <a href="[% target %]&amp;product=[% p.name FILTER uri -%]
+        <a href="[% parameterized_target FILTER url %]&amp;product=[% p.name FILTER uri -%]
               [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
               [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
         [% ELSE %]
