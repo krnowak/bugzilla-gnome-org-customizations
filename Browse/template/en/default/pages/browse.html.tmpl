@@ -69,11 +69,9 @@
         [%= terms.bugs %]</a>
     </td>
     <td align="right">
-      <!--
-      <a href="reports/keyword-search.cgi?product=
-               [%- product.name FILTER uri %]&amp;keyword=gnome-love">
-      -->
-        [%- gnome_love_bugs FILTER html %] <!-- </a> -->
+      <a href="[% buglink FILTER html %]&amp;keywords=gnome-love&amp;resolution=---">
+        [%- gnome_love_bugs FILTER html %]
+      </a>
     </td>
   </tr>
   <tr>
