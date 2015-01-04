@@ -59,9 +59,9 @@
   <div style="display: block" id="stocklinks" name="stocklinks">
     <script type="text/javascript">
       addStockLink("Closing this [% terms.bug %] report as no further information has been provided. Please feel free to reopen this [% terms.bug %] if you can provide the information asked for.\nThanks!", 'incomplete', '', 'INCOMPLETE', '')
-      addStockLink("Thanks for the [% terms.bug %] report. This particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but please feel free to report any further [% terms.bugs %] you find.", 'duplicate', 'duplicate', '', '');
-      addStockLink("Thanks for taking the time to report this [% terms.bug %].\nThis particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but the maintainers need more information to fix the [% terms.bug %]. Could you please answer the questions in the other report in order to help the developers?", 'dupe+needinfo', 'duplicate', '', '');
-      addStockLink("Thanks for taking the time to report this [% terms.bug %].\nThis particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but we are happy to tell you that the problem has already been fixed. It should be solved in the next software version. You may want to check for a software upgrade.", 'dupe+fixed', 'duplicate', '', '');
+      addStockLink("Thanks for the [% terms.bug %] report. This particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but please feel free to report any further [% terms.bugs %] you find.", 'duplicate', '', 'DUPLICATE', '');
+      addStockLink("Thanks for taking the time to report this [% terms.bug %].\nThis particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but the maintainers need more information to fix the [% terms.bug %]. Could you please answer the questions in the other report in order to help the developers?", 'dupe+needinfo', '', 'DUPLICATE', '');
+      addStockLink("Thanks for taking the time to report this [% terms.bug %].\nThis particular [% terms.bug %] has already been reported into our [% terms.bug %] tracking system, but we are happy to tell you that the problem has already been fixed. It should be solved in the next software version. You may want to check for a software upgrade.", 'dupe+fixed', '', 'DUPLICATE', '');
     </script>
   </div>
   [% ELSIF bug.isopened %]
