@@ -182,7 +182,7 @@
       <a href="http://www.gnome.org/start/unstable">Development schedule</a>
     </li>
     <li>
-      <a href="http://live.gnome.org/MaintainersCorner">Maintainers corner</a>
+      <a href="https://wiki.gnome.org/MaintainersCorner">Maintainers corner</a>
     </li>
     <li> [% terms.Bugzilla %]
       <ul>
@@ -216,19 +216,19 @@
               descriptions</a>
           </li>
         [% END %]
-        <li> <a href="http://live.gnome.org/Bugsquad/TriageGuide/ProductSpecificGuidelines">Triaging guidelines</a></li>
-        <li> <a href="http://live.gnome.org/Bugsquad/ForMaintainers">Contacting bugmasters</a></li>
+        <li> <a href="https://wiki.gnome.org/Bugsquad/TriageGuide/ProductSpecificGuidelines">Triaging guidelines</a></li>
+        <li> <a href="https://wiki.gnome.org/Bugsquad/ForMaintainers">Contacting bugmasters</a></li>
       </ul>
     </li>
     <li> Product Info
       <ul>
-        <li><a href="http://git.gnome.org/cgit/
+        <li><a href="https://git.gnome.org/browse/
                      [%- product.name FILTER lower FILTER uri %]">GNOME Git</a></li>
         <li>
           [% IF product.milestone_url %]
             <a href="[% product.milestone_url FILTER html %]">
           [% ELSE %]
-            <a href="http://bugzilla.gnome.org/">
+            <a href="https://bugzilla.gnome.org/">
           [% END %]
           [% product.name FILTER html %] homepage</a>
         </li>
