@@ -170,7 +170,7 @@
         [% "&amp;emailassigned_to1=1&amp;emailtype1=exact&amp;email1=" %]
         [% userinfo.email FILTER uri %]">
         <b>Assigned to [% displayname FILTER html %]</b></a>
-      [% "(the issue has been assigned to" %]
+      [%+ "(the issue has been assigned to" %]
       [%+ displayname FILTER html %]
       [%+ "and it is not resolved or closed yet)" %]
     </span></h3>
