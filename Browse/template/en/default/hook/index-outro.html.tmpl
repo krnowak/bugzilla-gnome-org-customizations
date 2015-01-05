@@ -1,10 +1,20 @@
-  [% IF user.product_interests.size > 0 %]
-    <h3>Interested products</h3>
+  <div class="intro">This is GNOME Bugzilla which collects wishes, bugs and crashes
+  reported by users and developers. For participating you need a personal account
+  which allows you to create reports, add comments, and observe development by
+  subscribing to updates. This requires enabling cookies in your browser.</div>
 
-    <ul>
-    [% FOREACH product = user.product_interests %]
-      <li><a href="page.cgi?id=browse.html&amp;product=[% product.name FILTER uri %]">[% product.name
-           FILTER html %]</a></li>
+  <h2>Common links</h2>
+
+  <ul>
+    [% IF user.id %]
+      <li>
+        <a href="page.cgi?id=describeuser.html">Reported by and assigned to me</a>
+      </li>
     [% END %]
-    </ul>
-  [% END %]
+    <li>
+      <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=5d">Created in last 5 days</a>
+    </li>
+    <li>
+      <a href="buglist.cgi?chfieldfrom=5d">Changed in last 5 days</a>
+    </li>
+  </ul>
