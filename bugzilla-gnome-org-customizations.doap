@@ -4,9 +4,9 @@
          xmlns:gnome="http://api.gnome.org/doap-extensions#"
          xmlns="http://usefulinc.com/ns/doap#">
 
-  <name xml:lang="en">bugzilla-gnome-org-extensions</name>
-  <shortdesc xml:lang="en">GNOME specific Bugzilla extensions used at bugzilla-new.gnome.org</shortdesc>
-  <description xml:lang="en">GNOME specific Bugzilla extensions used at bugzilla-new.gnome.org</description>
+  <name xml:lang="en">bugzilla-gnome-org-customizations</name>
+  <shortdesc xml:lang="en">GNOME specific Bugzilla extensions and customizations</shortdesc>
+  <description xml:lang="en">GNOME specific Bugzilla extensions and customizations</description>
   <homepage rdf:resource="https://wiki.gnome.org/Sysadmin" />
   <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnome-infrastructure" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#infrastructure" />
