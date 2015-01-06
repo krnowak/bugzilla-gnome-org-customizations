@@ -28,6 +28,7 @@ use Bugzilla::Extension::GNOME::Util;
 use Bugzilla::Constants;
 use Bugzilla::Field;
 use Bugzilla::Object;
+use Bugzilla::Util;
 
 our $VERSION = '0.01';
 
@@ -306,5 +307,26 @@ sub webservice {
     my $dispatch = $args->{dispatch};
     $dispatch->{GNOME} = "Bugzilla::Extension::GNOME::WebService";
 }
+
+sub bug_format_comment {
+   my ($self, $args) = @_;
+   my $regexes = $args->{'regexes'};
+   my $text = $args->{'text'};
+   if (defined $args->{'bug'}) {
+     my $replacerGitCommit = {
+         match => qr{(\scommit\s|\spushed as\s)\#?([a-f0-9]{8,40})}i,
+         replace => sub { _createGitCommitLink($self, $args); }
+     };
+     push( @$regexes, $replacerGitCommit );
+   }
+}
+
+sub _createGitCommitLink {
+
+   my ($self, $args) = @_;
+   my $productname = $args->{'bug'}->product;
+   my $commit_link = join("", $1, '<a href="https://git.gnome.org/browse/', url_quote($productname), '/commit/?id=', $2, '">', $2, '</a>');
+   return $commit_link;
+};
 
 __PACKAGE__->NAME;
