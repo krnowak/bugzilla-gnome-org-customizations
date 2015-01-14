@@ -179,7 +179,7 @@
   <h3>Useful links</h3>
   <ul>
     <li>
-      <a href="http://www.gnome.org/start/unstable">Development schedule</a>
+      <a href="http://www.gnome.org/start/unstable">GNOME development schedule</a>
     </li>
     <li>
       <a href="https://wiki.gnome.org/MaintainersCorner">Maintainers corner</a>
@@ -190,7 +190,7 @@
           <li>
             <a href="enter_bug.cgi?product=
                      [%- product.name FILTER uri %]">File a
-              [%= terms.bug %]</a>
+              [%= terms.bug %] in this product</a>
             <!-- (<a href="simple-bug-guide.cgi?product=[% product.name FILTER uri %]">simple form</a>) -->
           </li>
         [% ELSE %]
@@ -198,10 +198,10 @@
             <!--
             <a href="simple-bug-guide.cgi?product=
                      [%- product.name FILTER uri %]">File a
-              [%= terms.bug %]</a> -->
+              [%= terms.bug %] in this product</a> -->
             <a href="enter_bug.cgi?product=
                      [%- product.name FILTER uri %]">File a
-              [%= terms.bug %]</a>
+              [%= terms.bug %] in this product</a>
           </li>
         [% END %]
         [% IF user.in_group('editcomponents', product.id) %]
@@ -223,7 +223,7 @@
     <li> Product Info
       <ul>
         <li><a href="https://git.gnome.org/browse/
-                     [%- product.name FILTER lower FILTER uri %]">GNOME Git</a></li>
+                     [%- product.name FILTER lower FILTER uri %]">Git code repository</a></li>
         <li>
           [% IF product.milestone_url %]
             <a href="[% product.milestone_url FILTER html %]">
