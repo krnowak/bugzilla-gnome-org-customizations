@@ -193,12 +193,12 @@
             <a href="enter_bug.cgi?product=
                      [%- product.name FILTER uri %]">File a
               [%= terms.bug %] in this product</a>
-            <!-- (<a href="simple-bug-guide.cgi?product=[% product.name FILTER uri %]">simple form</a>) -->
+            <!-- (<a href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]">simple form</a>) -->
           </li>
         [% ELSE %]
           <li>
             <!--
-            <a href="simple-bug-guide.cgi?product=
+            <a href="enter_bug.cgi?format=guided&amp;product=
                      [%- product.name FILTER uri %]">File a
               [%= terms.bug %] in this product</a> -->
             <a href="enter_bug.cgi?product=
