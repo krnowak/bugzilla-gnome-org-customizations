@@ -79,11 +79,13 @@
       <!-- <a class="boogle_edit"
                href="javascript:addText('severity!=enhancement');addText('responders:0');addText('reporter!=developer')"> -->
       [% terms.Bugs %] without a response <!-- </a> -->
+
     </td>
     <td align="right">
       <!-- <a href="buglist.cgi?quicksearch=product:
               [%- product.name FILTER uri %]+responders:0+severity!=enhancement+reporter!=developer"> -->
-        [% no_response_bugs FILTER html %] <!-- </a> -->
+      <a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;resolution=---&amp;f1=longdescs.count&amp;o1=equals&amp;v1=1">
+        [% no_response_bugs FILTER html %]</a>
     </td>
   </tr>
   [%######################################################################
