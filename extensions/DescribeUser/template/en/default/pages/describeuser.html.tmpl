@@ -369,6 +369,10 @@
                      [% patch.attach_id FILTER uri %]
                      [% "&amp;action=diff" %]">
                      [% patch.description FILTER html %]</a></td>
+        <td><a href="[% "show_bug.cgi?id=" %]
+                     [% patch.bug_id FILTER uri%]">
+                     [% patch.bug_title FILTER html %]</a></td>
+
       </tr>
     [% END %]
     [% "    </table>\n  </p>" %]

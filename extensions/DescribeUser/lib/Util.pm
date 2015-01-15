@@ -146,7 +146,7 @@ sub _page_describeuser {
     my $sth = $dbh->prepare("
             SELECT attachments.bug_id, attachments.gnome_attachment_status as status,
                    attachments.attach_id, products.name as product,
-                   attachments.description
+                   attachments.description, bugs.short_desc as bug_title
               FROM attachments, bugs, products
              WHERE attachments.bug_id = bugs.bug_id
                AND bugs.product_id = products.id
