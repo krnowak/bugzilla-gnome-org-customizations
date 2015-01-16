@@ -28,15 +28,6 @@
     title = "Reports" %]
 
 
-<h3>Categories</h3>
-  <ul>
-    <li> <a href="[% self_url FILTER html %]#generic">Generic GNOME reports</a> </li>
-    <!-- 
-   <li> <a href="[% self_url FILTER html %]#byversion">Reports organized
-      by version</a> </li> -->
-    <li> <a href="[% self_url FILTER html %]#explain">Explanation of [% terms.bugzilla %] terms and fields</a></li>
-  </ul>
-
 <h2>Generic GNOME reports<a name="generic"></a></h2>
   <ul>
     <li>
@@ -44,8 +35,30 @@
       terms.bug %] activity for the last week</a>.
     </li>
     <li>
+      <a href="query.cgi?format=report-table">Generic tabular reports</a>
+    </li>
+    <li>
+      <a href="query.cgi?format=report-graph">Generic graphical reports</a>
+    </li>
+    <li>Change Over Time
+      <ul>
+        <li id="old_charts">
+          <a href="reports.cgi">Old Charts</a> - 
+          plot the status and/or resolution of bugs against
+          time, for each product in your database.
+        </li>
+        <li id="new_charts">
+          <a href="chart.cgi">New Charts</a> - 
+          plot any arbitrary search against future time. Far more powerful.
+        </li>
+      </ul>
+    </li>
+    <li>
       <a href="duplicates.cgi">Frequently (and recently)
       duplicated [% terms.bugs %]</a>
+    </li>
+    <li>
+      <a href="page.cgi?id=patchreport.html">Unreviewed patches</a>
     </li>
     <li>
       <a href="page.cgi?id=traceparser/popular-traces.html">Frequently Duplicated Stack 
@@ -67,17 +80,11 @@
       </ul>
     </li>
   -->
-    <li>
-      <a href="query.cgi?format=report-table">Generic tabular reports</a>
-    </li>
-    <li>
-      <a href="query.cgi?format=report-graph">Generic graphical reports</a>
-    </li>
   </ul>
 
-<h2>Reports for Potential Contributors<a name="contributors"></a></h2>
+<h2>For Potential Contributors<a name="contributors"></a></h2>
   <ul>
-    <li>[% terms.Bugs %] to <a href="https://wiki.gnome.org/Bugsquad/TriageGuide">triage</a></li>
+    <li><a href="https://wiki.gnome.org/Bugsquad/TriageGuide">Triage guide</a></li>
       <!--
       <ul>
         <li>
@@ -110,7 +117,7 @@
           good tasks for new developers</a>
         </li>
         <li>
-          Looking at <a href="browse.cgi">product overviews</a>
+          Looking at links on <a href="page.cgi?id=browse.html">product overviews</a>
         </li>
         <li>
           <a href="https://www.gnome.org/get-involved/">Other ways to help
