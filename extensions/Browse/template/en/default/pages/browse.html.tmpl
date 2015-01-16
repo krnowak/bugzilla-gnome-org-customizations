@@ -228,13 +228,6 @@
                      [%- product.name FILTER lower FILTER uri %]">Git repository</a>
             (<a href="https://git.gnome.org/browse/
                      [%- product.name FILTER lower FILTER uri %]/stats/?period=y&amp;ofs=10">activity</a>)</li>
-        <li>
-          [% IF product.milestone_url %]
-            <a href="[% product.milestone_url FILTER html %]">
-          [% ELSE %]
-            <a href="https://bugzilla.gnome.org/">
-          [% END %]
-          [% product.name FILTER html %] homepage</a>
         </li>
       </ul>
     </li>
