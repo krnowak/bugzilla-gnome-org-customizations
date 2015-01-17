@@ -42,9 +42,10 @@
       <ul>
 
       [% FOREACH patch = bug.patch_list %]
-        <li><i>Attachment [% patch.id FILTER html %]</i> ([% patch.age FILTER html %] days)
+        <li><i>[% patch.age FILTER html %] days old, [% patch.datasize FILTER unitconvert %]:</i>
         <a href="attachment.cgi?id=[% patch.id FILTER uri %]&amp;action=diff">
           [% patch.description FILTER html %]</a>
+          <i>by [% patch.author FILTER email FILTER html %]</i>
         </li>
       [% END %]
 

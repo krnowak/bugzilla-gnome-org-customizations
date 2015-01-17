@@ -128,14 +128,20 @@ sub get_unreviewed_patches_and_stats {
                       (" . $dbh->sql_to_days('LOCALTIMESTAMP(0)') . "-" .
                        $dbh->sql_to_days('attachments.creation_ts') . ") AS age,
                       substring(attachments.description, 1, 70),
-                      products.name AS product, components.name AS component
+                      products.name AS product, components.name AS component,
+                      LENGTH(attach_data.thedata) AS datasize,
+                      profiles.login_name AS author
                  FROM attachments
+           INNER JOIN attach_data
+                   ON attachments.attach_id = attach_data.id
            INNER JOIN bugs
                    ON attachments.bug_id = bugs.bug_id
            INNER JOIN products
                    ON bugs.product_id = products.id
            INNER JOIN components
                    ON bugs.component_id = components.id
+           INNER JOIN profiles
+                   ON attachments.submitter_id = profiles.userid
                 WHERE attachments.ispatch = '1'";
 
     if ($quoted_product && $quoted_product ne "'%'") {
@@ -188,7 +194,7 @@ sub get_unreviewed_patches_and_stats {
     };
 
     $prod_list = $stats->{product_list};
-    while (my ($attach_id, $bug_id, $age, $desc, $prod, $comp) = $sth->fetchrow_array) {
+    while (my ($attach_id, $bug_id, $age, $desc, $prod, $comp, $datasize, $author) = $sth->fetchrow_array) {
 
         # Check if we've moved on to a new product
         if ($cur_product ne $prod) {
@@ -248,7 +254,9 @@ sub get_unreviewed_patches_and_stats {
         my $new_patch = {
             'id' => $attach_id,
             'age' => $age,
-            'description' => $desc
+            'description' => $desc,
+            'datasize' => $datasize,
+            'author' => $author
         };
         push @{$patch_list}, $new_patch;
 
