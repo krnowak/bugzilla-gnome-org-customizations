@@ -51,6 +51,7 @@
           bz_fireEvent(document.getElementById('ispatch'), 'change');
       });
     </script>
+    [% Hook.process("attachment_is_patch") %]
 
     <em>Otherwise, choose a method for determining the content type.</em><br>
     <input type="radio" id="autodetect"
