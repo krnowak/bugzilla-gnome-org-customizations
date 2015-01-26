@@ -17,6 +17,7 @@ our @EXPORT = qw(
 
 sub overrides_digests {
     my %digests = (
+        'attachment/createformcontents.html.tmpl' => '8b13c491bd55ec3d63230a38d5e8ce6fce9e59ee94cc33599ee3fae5e31516ac',
         'attachment/edit.html.tmpl' => '426ceeb820cefad35cbbf10ab053c1fc9f53fa71a63dd455418bff3221a46a0e',
         'attachment/list.html.tmpl' => 'b0c5edd84b8cc31666d0d0b4bf36cdb981ee322995dad891cf05f0f40b2d0392',
         'bug/comments.html.tmpl' => 'd68e98b67eac9cd74ec7b0b663734f7a14953788864135be076a8cb03d648f09',
