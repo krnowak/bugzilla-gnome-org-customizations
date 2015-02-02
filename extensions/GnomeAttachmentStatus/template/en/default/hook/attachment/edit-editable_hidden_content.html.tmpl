@@ -1,16 +1,5 @@
-[% gnome_attachment_js_url = 'extensions/GnomeAttachmentStatus/web/gnome_attachment_status.js' -%]
-<script type="text/javascript" src="[% gnome_attachment_js_url FILTER mtime FILTER html %]"></script>
-<div id="attachment_gnome_attachment_status_combo">
-  <input type="hidden" value="none" id="gnome_attachment_status_hidden" name="gnome_attachment_status" [% IF attachment.ispatch %] disabled [% END %]/>
-  <b><label for="gnome_attachment_status">Status</label>:</b>
-  <select id="gnome_attachment_status_combo" name="gnome_attachment_status"
-            [% UNLESS attachment.ispatch %] disabled [% END %]>
-    [%- FOREACH gnome_attachment_status = all_gnome_attachment_status_values %]
-    <option value="[% gnome_attachment_status.value FILTER html %]"
-      [%= IF attachment.gnome_attachment_status == gnome_attachment_status.value ~%]
-            selected
-      [%~ END ~%]
-    >[% display_value("attachments.gnome_attachment_status", gnome_attachment_status.value) %]</option>
-    [%- END %]
-  </select>
-</div>
+[% INCLUDE gnomeattachmentstatus/combo.html.tmpl
+    enabled = attachment.ispatch
+    current_status = attachment.gnome_attachment_status
+    statuses = all_gnome_attachment_status_values
+%]

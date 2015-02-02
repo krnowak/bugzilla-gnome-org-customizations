@@ -1,0 +1,24 @@
+[%
+# enabled - whether the combo is initially enabled
+# current_status - current attachment status
+# statuses - list of all statuses
+#
+# it expects that a "is patch" checkbox has an "ispatch" id
+%]
+
+[% gnome_attachment_js_url = 'extensions/GnomeAttachmentStatus/web/gnome_attachment_status.js' -%]
+<script type="text/javascript" src="[% gnome_attachment_js_url FILTER mtime FILTER html %]"></script>
+<div id="attachment_gnome_attachment_status_combo">
+  <input type="hidden" value="none" id="gnome_attachment_status_hidden" name="gnome_attachment_status" [% IF enabled %] disabled [% END %]/>
+  <b><label for="gnome_attachment_status">Status</label>:</b>
+  <select id="gnome_attachment_status_combo" name="gnome_attachment_status"
+            [% UNLESS enabled %] disabled [% END %]>
+    [%- FOREACH gnome_attachment_status = statuses %]
+    <option value="[% gnome_attachment_status.value FILTER html %]"
+      [%= IF current_status == gnome_attachment_status.value ~%]
+            selected
+      [%~ END ~%]
+    >[% display_value("attachments.gnome_attachment_status", gnome_attachment_status.value) %]</option>
+    [%- END %]
+  </select>
+</div>
