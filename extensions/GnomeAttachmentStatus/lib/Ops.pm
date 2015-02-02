@@ -89,7 +89,8 @@ sub _cgi_hack_update {
     my $status = $cgi->param(g_a_s());
     my $action = $cgi->param('action');
 
-    if (defined($status) && defined($action) && $action eq 'update') {
+    if (defined($status) && defined($action) &&
+        ($action eq 'update' || $action eq 'insert')) {
         $attachment->set_gnome_attachment_status($status);
     }
 }
@@ -154,12 +155,22 @@ sub maybe_fixup_final_status_param
     }
 }
 
-sub _attachment_edit_handler {
-    my ($file, $vars, $context) = @_;
+sub _set_all_status_values {
+    my ($vars) = @_;
     my $var_name = 'all_' . g_a_s() . '_values';
     my @values = Bugzilla::Field::Choice->type(fd_a_g_a_s())->get_all();
 
     $vars->set($var_name, \@values);
+}
+
+sub _attachment_create_handler {
+    my ($file, $vars, $context) = @_;
+    _set_all_status_values($vars);
+}
+
+sub _attachment_edit_handler {
+    my ($file, $vars, $context) = @_;
+    _set_all_status_values($vars);
 }
 
 sub _attachment_list_handler {
@@ -184,6 +195,7 @@ sub _attachment_list_handler {
         unless (defined ($handlers))
         {
             $handlers = {
+                'attachment/create.html.tmpl' => \&_attachment_create_handler,
                 'attachment/edit.html.tmpl' => \&_attachment_edit_handler,
                 'attachment/list.html.tmpl' => \&_attachment_list_handler
             };
