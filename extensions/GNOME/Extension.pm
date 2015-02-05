@@ -318,15 +318,27 @@ sub bug_format_comment {
          replace => sub { _createGitCommitLink($self, $args); }
      };
      push( @$regexes, $replacerGitCommit );
+
+     my $replacerGitBranch = {
+         match => qr{(\sbranch\s)(wip/[\w\-\/]+)}i,
+         replace => sub { _createGitBranchLink($self, $args); }
+     };
+     push( @$regexes, $replacerGitBranch );
    }
 }
 
 sub _createGitCommitLink {
-
    my ($self, $args) = @_;
    my $productname = $args->{'bug'}->product;
    my $commit_link = join("", $1, '<a href="https://git.gnome.org/browse/', url_quote($productname), '/commit/?id=', $2, '">', $2, '</a>');
    return $commit_link;
+};
+
+sub _createGitBranchLink {
+   my ($self, $args) = @_;
+   my $productname = $args->{'bug'}->product;
+   my $branch_link = join("", $1, '<a href="https://git.gnome.org/browse/', url_quote($productname), '/log/?h=', $2, '">', $2, '</a>');
+   return $branch_link;
 };
 
 __PACKAGE__->NAME;
