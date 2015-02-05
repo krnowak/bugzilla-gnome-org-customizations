@@ -235,6 +235,54 @@
     </table>
   </p>
 
+[%### Patches ###%]
+  [% IF patches.size %]
+    [% status = '' %]
+    [% FOREACH patch = patches %]
+      [% IF patch.status != status %]
+        [% IF status != '' %]
+          [% "\n    </table>\n  </p>\n\n" %]
+        [% END %]
+        [% status = patch.status %]
+        [% "  <p>\n" _
+           "    <h3><span>Patches written by" %]
+        [%+ displayname FILTER html %]
+        [%+ "and with status: %]
+        [% status.replace('none','unreviewed') FILTER html %]
+        [% "</span></h3>\n" %]
+        [% "    <table border=\"0\" cellpadding=\"2\" cellspacing=\"0\">" %]
+      [% END %]
+      <tr class="[%+ IF loop.count() % 2 == 0 %]
+                   [% "bz_row_even" %]
+                 [% ELSE %]
+                   [% "bz_row_odd" %]
+                 [% END %]">
+        <td><a href="[% "show_bug.cgi?id=" %]
+                     [% patch.bug_id FILTER uri%]">
+                     [% patch.bug_id FILTER html %]</a></td>
+        <td><a href="[% "attachment.cgi?id=" %]
+                     [% patch.attach_id FILTER uri %]
+                     [% "&amp;action=diff" %]">(#
+                     [% patch.attach_id FILTER html %])</a></td>
+        <td nowrap="nowrap" style="width: 12ex">
+          [% %]<a href="[% "page.cgi?id=browse.html&amp;product=" %]
+                        [% patch.product FILTER uri %]
+                        [% "\">" %]
+                        [% patch.product FILTER html %]</a></td>
+        <td><a href="[% "attachment.cgi?id=" %]
+                     [% patch.attach_id FILTER uri %]
+                     [% "&amp;action=diff" %]">
+                     [% patch.description FILTER html %]</a></td>
+        <td><a href="[% "show_bug.cgi?id=" %]
+                     [% patch.bug_id FILTER uri%]">
+                     [% patch.bug_title FILTER html %]</a></td>
+
+      </tr>
+    [% END %]
+    [% "    </table>\n  </p>" %]
+  [% END %]
+
+[%### Bugs again ###%]
   <p>
     <h3><span>Open Issues:
       <a href="
@@ -332,52 +380,5 @@
     [% END %]
     </table>
   </p>
-
-[%### Patches ###%]
-  [% IF patches.size %]
-    [% status = '' %]
-    [% FOREACH patch = patches %]
-      [% IF patch.status != status %]
-        [% IF status != '' %]
-          [% "\n    </table>\n  </p>\n\n" %]
-        [% END %]
-        [% status = patch.status %]
-        [% "  <p>\n" _
-           "    <h3><span>Patches written by" %]
-        [%+ displayname FILTER html %]
-        [%+ "and with status: %]
-        [% status.replace('none','unreviewed') FILTER html %]
-        [% "</span></h3>\n" %]
-        [% "    <table border=\"0\" cellpadding=\"2\" cellspacing=\"0\">" %]
-      [% END %]
-      <tr class="[%+ IF loop.count() % 2 == 0 %]
-                   [% "bz_row_even" %]
-                 [% ELSE %]
-                   [% "bz_row_odd" %]
-                 [% END %]">
-        <td><a href="[% "show_bug.cgi?id=" %]
-                     [% patch.bug_id FILTER uri%]">
-                     [% patch.bug_id FILTER html %]</a></td>
-        <td><a href="[% "attachment.cgi?id=" %]
-                     [% patch.attach_id FILTER uri %]
-                     [% "&amp;action=diff" %]">(#
-                     [% patch.attach_id FILTER html %])</a></td>
-        <td nowrap="nowrap" style="width: 12ex">
-          [% %]<a href="[% "page.cgi?id=browse.html&amp;product=" %]
-                        [% patch.product FILTER uri %]
-                        [% "\">" %]
-                        [% patch.product FILTER html %]</a></td>
-        <td><a href="[% "attachment.cgi?id=" %]
-                     [% patch.attach_id FILTER uri %]
-                     [% "&amp;action=diff" %]">
-                     [% patch.description FILTER html %]</a></td>
-        <td><a href="[% "show_bug.cgi?id=" %]
-                     [% patch.bug_id FILTER uri%]">
-                     [% patch.bug_title FILTER html %]</a></td>
-
-      </tr>
-    [% END %]
-    [% "    </table>\n  </p>" %]
-  [% END %]
 
 [% PROCESS global/footer.html.tmpl %]
