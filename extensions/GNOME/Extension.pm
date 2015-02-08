@@ -314,7 +314,7 @@ sub bug_format_comment {
    my $text = $args->{'text'};
    if (defined $args->{'bug'}) {
      my $replacerGitCommit = {
-         match => qr{(\scommit\s|\spushed as\s)\#?([a-f0-9]{7,40})}i,
+         match => qr{\b(commit\s|pushed as\s)\#?([a-f0-9]{7,40})}i,
          replace => sub { _createGitCommitLink($self, $args); }
      };
      push( @$regexes, $replacerGitCommit );
