@@ -8,22 +8,22 @@ checksetup will fail.
 TERMS
 =====
 
-Template override - it is our version of a template
-Overridden template - it is original version of a template we are
-overriding
+Template override - it is our version of a template.
+Overridden template - it is an original version of a template we are
+overriding.
 
 ADDING NEW TEMPLATE OVERRIDE
 ============================
 
-Follow these steps to add new template override:
+Let's assume we have a bugzilla-gnome-org-upstream repo in <BGOU>
+directory and a bugzilla-gnome-org-customizations repo in <BGOC>
+directory. Also let's assume that we want to override a
+bug/edit.html.tmpl file.
 
-(Lets assume we have bugzilla-gnome-org-upstream repo in <BGOU>
-directory and bugzilla-gnome-org-customizations repo in <BGOC>
-directory. Also lets assume that we want to override a
-bug/edit.html.tmpl file)
+Follow these steps to add a new template override:
 
-1. Locate the bug/edit.html.tmpl file in <BGOU> (it it in
-   <BGOU>/templates/en/default/bug/edit.html.tmpl).
+1. Locate the bug/edit.html.tmpl file in <BGOU>. It is in
+   <BGOU>/templates/en/default/bug/edit.html.tmpl.
 
 2. Compute its sha256 (with i.e. sha256sum).
 
@@ -33,21 +33,21 @@ bug/edit.html.tmpl file)
 
    'bug/edit.html.tmpl' => '<SHA256SUM>',
 
-   Please ensure that new entry is put in alphabetic order.
+   Please ensure that the new entry is put in an alphabetic order.
 
 4. Copy the file <BGOU>/templates/en/default/bug/edit.html.tmpl to
    <BGOC>/extensions/TemplateOverrides/templates/en/default/bug/edit.html.tmpl.
 
-5. Add new file and changes in Digests.pm to git, commit.
+5. Add the new file and changes in Digests.pm to git, commit.
 
-6. Make changes in template override, add changes to git, commit.
+6. Make changes in the template override, add changes to git, commit.
 
-I separated steps 5. and 6., so we can clearly see our changes in
+I separated steps 5. and 6., so we can clearly see our changes in the
 template override with git log -p.
 
 Also, I recommend keeping changes in overrides as minimal as
 possible. It would be best if the changes were limited to just adding
-a hook. That could be even upstreamed at some point, so we would be
+a hook. That could be even upstreamed at some point so we would be
 able to remove an override.
 
 TRACKING CHANGES
@@ -57,16 +57,17 @@ Tracking changes is implemented by basically comparing sha256
 checksums during checksetup. Checksetup looks for overridden template
 files, computes their sha256 checksums and compares them with relevant
 entries stored in Digests.pm. If the checksums are different then it
-means that (barring any mistakes) overridden template has changed
-since we added an override and this has to be acknowledged. Checksetup
-fails at this point.
+means that (barring any mistakes) the overridden template has changed
+since we added an override and this fact has to be acknowledged.
+Checksetup fails at this point.
 
 ACKNOWLEDGING THE CHANGES IN OVERRIDDEN TEMPLATES
 =================================================
 
 It is usually done in two steps:
 
-1. Backport the changes in overridden template to template override.
+1. Backport the changes in the overridden template to template
+override.
 
 2. Compute the sha256 sum of the overridden template and update the
 relevant entry in Digests.pm.
