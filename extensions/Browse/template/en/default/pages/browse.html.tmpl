@@ -54,15 +54,6 @@
   </tr>
 
   <tr>
-    <td>New Patches</td>
-    <td align="right">
-      <a href="page.cgi?id=patchreport.html&amp;product=[%- product.name FILTER uri %]&amp;max_days=7">
-        [% new_patches FILTER html %]
-      </a>
-    </td>
-  </tr>
-
-  <tr>
     <td>
       <a class="boogle_edit"
          href="javascript:addText('keywords:gnome-love')">GNOME-love
@@ -118,9 +109,18 @@
    %]
   </table>
 
-  [% IF by_patch_status.size %]
+
     <h3>Patches</h3>
     <table border="0" cellpadding="0" cellspacing="0" class="figures">
+      <tr>
+        <td>New and unreviewed</td>
+        <td align="right">
+          <a href="page.cgi?id=patchreport.html&amp;product=[%- product.name FILTER uri %]&amp;max_days=7">
+            [% new_patches FILTER html %]
+          </a>
+        </td>
+      </tr>
+    [% IF by_patch_status.size %]
     [% FOREACH col = by_patch_status %]
       <tr>
         <td>
@@ -128,7 +128,7 @@
           <a class="boogle_edit"
              href="javascript:addText('patch-status:[% col.0 FILTER js %]')"> -->
           [% col.0 FILTER html %] <!-- </a> -->
-          [% IF col.0 == 'none' %] (unreviewed)[% END %]
+          [% IF col.0 == 'none' %] (total unreviewed)[% END %]
         </td>
         <td align="right">
           <a href="page.cgi?id=patchreport.html&amp;product=[%- product.name FILTER uri %]&amp;patch-status=[% col.0 FILTER uri %]">
@@ -137,8 +137,8 @@
         </td>
       </tr>
     [% END %]
+    [% END %]
     </table>
-  [% END %]
 
   [% IF by_priority.size %]
     <h3>Priority</h3>
