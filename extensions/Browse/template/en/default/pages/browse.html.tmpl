@@ -79,6 +79,14 @@
         [% no_response_bugs FILTER html %]</a>
     </td>
   </tr>
+
+  <tr>
+    <td>NEEDINFO [% terms.Bugs %]</td>
+    <td align="right">
+      <a href="[% buglink FILTER html %]&amp;bug_status=NEEDINFO&amp;columnlist=component%2Cchangeddate%2Cbug_severity%2Cpriority%2Cshort_desc&amp;order=changeddate%20DESC">
+        [%- total_needinfo_bugs FILTER html %]</a>
+    </td>
+  </tr>
   [%######################################################################
     # Temporary time-limited queries; Please just comment these out when
     # they are not in use if they will be needed again next release
@@ -327,8 +335,6 @@ Browse:
 <table cellpadding="3" cellspacing="0">
 <tr>
   <th>Milestones</th>
-  <td>&nbsp;</td>
-  <th>NEEDINFO by last changed</th>
 </tr>
 <tr>
   <td valign="top">
@@ -346,54 +352,6 @@ Browse:
   [% END %]
   </table>
 
-  </td>
-  <td>&nbsp;</td>
-  <td valign="top">
-
-  <table border="0" cellpadding="0" cellspacing="0" class="figures">
-  [% IF needinfo_split.F %]
-    <tr>
-      <td>&gt;= 1 year</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=&amp;chfieldto=-1y">
-      [% needinfo_split.F FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  [% IF needinfo_split.E %]
-    <tr>
-      <td>6 months - 1 year</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=-1y&amp;chfieldto=-6m">
-      [% needinfo_split.E FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  [% IF needinfo_split.D %]
-    <tr>
-      <td>3 months - 6 months</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=-6m&amp;chfieldto=-3m">
-      [% needinfo_split.D FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  [% IF needinfo_split.C %]
-    <tr>
-      <td>4 weeks - 3 months</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=-3m&amp;chfieldto=-4w">
-      [% needinfo_split.C FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  [% IF needinfo_split.B %]
-    <tr>
-      <td>2 weeks - 4 weeks</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=-4w&amp;chfieldto=-2w">
-      [% needinfo_split.B FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  [% IF needinfo_split.A %]
-    <tr>
-      <td>&lt; 2 weeks ago</a></td>
-      <td align="right"><a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;chfieldfrom=-2w&amp;chfieldto=">
-      [% needinfo_split.A FILTER html %]</a></td>
-    </tr>
-  [% END %]
-  </table>
   </td>
 </tr>
 </table>
