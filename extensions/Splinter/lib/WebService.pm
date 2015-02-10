@@ -31,6 +31,10 @@ use Bugzilla::Extension::Splinter::WebServiceUtil;
 
 use base qw(Bugzilla::WebService);
 
+use constant PUBLIC_METHODS => qw(
+    publish_review
+);
+
 # The idea of this method is to be able to
 #
 #  - Add a comment with says "Review of attachment <id>:" rather than
