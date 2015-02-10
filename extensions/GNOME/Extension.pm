@@ -284,23 +284,6 @@ sub bug_check_can_change_field {
 #    }
 }
 
-sub bugmail_recipients {
-    my ($self, $args) = @_;
-    my $recipients = $args->{recipients};
-    my $users = $args->{users};
-    my $bug = $args->{bug};
-
-    # Don't email to @gnome.bugs and related
-
-    foreach my $user_id (keys %{$recipients}) {
-        $users->{$user_id} ||= Bugzilla::User->new($user_id);
-        my $user = $users->{$user_id};
-
-        delete $recipients->{$user_id} if $user->email =~ /\.bugs$/;
-    }
-}
-
-
 sub webservice {
     my ($self, $args) = @_;
 
