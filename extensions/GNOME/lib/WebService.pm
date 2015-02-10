@@ -28,6 +28,10 @@ use Bugzilla::Product;
 use Bugzilla::Version;
 use Bugzilla::User;
 
+use constant PUBLIC_METHODS => qw(
+    addversionx
+);
+
 # This can be called as Example.hello() from the WebService.
 sub addversionx {
     my $self = shift;
