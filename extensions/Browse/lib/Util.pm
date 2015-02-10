@@ -25,6 +25,7 @@ use base qw(Exporter);
 our @EXPORT = qw(
     page
     total_open_bugs
+    total_needinfo_bugs
     what_new_means
     new_bugs
     new_patches
@@ -34,7 +35,6 @@ our @EXPORT = qw(
     string_bugs
     by_patch_status
     by_version
-    needinfo_split
     by_target
     by_priority
     by_severity
@@ -225,13 +225,14 @@ sub _page_browse {
         }
     }
 
-    $vars->{'classifications'}  = \@classifications;
-    $vars->{'product'}          = $product;
-    $vars->{'total_open_bugs'}  = total_open_bugs($product);
-    $vars->{'what_new_means'}   = what_new_means();
-    $vars->{'new_bugs'}         = new_bugs($product);
-    $vars->{'new_patches'}      = new_patches($product);
-    $vars->{'no_response_bugs'} = scalar(@{no_response_bugs($product)});
+    $vars->{'classifications'}      = \@classifications;
+    $vars->{'product'}              = $product;
+    $vars->{'total_open_bugs'}      = total_open_bugs($product);
+    $vars->{'total_needinfo_bugs'}  = total_needinfo_bugs($product);
+    $vars->{'what_new_means'}       = what_new_means();
+    $vars->{'new_bugs'}             = new_bugs($product);
+    $vars->{'new_patches'}          = new_patches($product);
+    $vars->{'no_response_bugs'}     = scalar(@{no_response_bugs($product)});
 
     my $keyword = Bugzilla::Keyword->new({ name => 'gnome-love' });
     if ($keyword) {
@@ -259,7 +260,6 @@ sub _page_browse {
     $vars->{'by_component'}       = by_component($product);
     $vars->{'target_development'} = gnome_target_development();
     $vars->{'target_stable'}      = gnome_target_stable();
-    $vars->{'needinfo_split'}     = needinfo_split($product);
 
     ($vars->{'blockers_stable'}, $vars->{'blockers_development'}) = list_blockers($product);
 
@@ -287,6 +287,16 @@ sub total_open_bugs {
     return $dbh->selectrow_array("SELECT COUNT(bug_id)
                                     FROM bugs
                                    WHERE bug_status IN (" . browse_open_states() . ")
+                                         AND product_id = ?", undef, $product->id);
+}
+
+sub total_needinfo_bugs {
+    my $product = shift;
+    my $dbh = Bugzilla->dbh;
+
+    return $dbh->selectrow_array("SELECT COUNT(bug_id)
+                                    FROM bugs
+                                   WHERE bug_status = 'NEEDINFO'
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -411,30 +421,6 @@ sub by_version {
                                      GROUP BY version", undef, $product->id)};
 
     return \@result;
-}
-
-sub needinfo_split {
-    my $product = shift;
-    my $dbh = Bugzilla->dbh;
-
-    my $ni_a = Bugzilla::Search::SqlifyDate('-2w');
-    my $ni_b = Bugzilla::Search::SqlifyDate('-4w');
-    my $ni_c = Bugzilla::Search::SqlifyDate('-3m');
-    my $ni_d = Bugzilla::Search::SqlifyDate('-6m');
-    my $ni_e = Bugzilla::Search::SqlifyDate('-1y');
-    my $needinfo_case = "CASE WHEN delta_ts < '$ni_e' THEN 'F'
-                              WHEN delta_ts < '$ni_d' THEN 'E'
-                              WHEN delta_ts < '$ni_c' THEN 'D'
-                              WHEN delta_ts < '$ni_b' THEN 'C'
-                              WHEN delta_ts < '$ni_a' THEN 'B'
-                              ELSE 'A' END";
-
-    my %results = @{$dbh->selectcol_arrayref("SELECT $needinfo_case age, COUNT(bug_id)
-                                       FROM bugs
-                                      WHERE bug_status = 'NEEDINFO'
-                                            AND product_id = ?
-                                      GROUP BY $needinfo_case", { Columns=>[1,2] }, $product->id)};
-    return \%results;
 }
 
 sub by_target {
