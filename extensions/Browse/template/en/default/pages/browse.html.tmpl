@@ -148,44 +148,6 @@
     [% END %]
     </table>
 
-  [% IF by_priority.size %]
-    <h3>Priority</h3>
-    <table border="0" cellpadding="0" cellspacing="0" class="figures">
-    [% FOREACH col = by_priority %]
-      <tr>
-        <td>
-          <a class="boogle_edit"
-             href="javascript:addText('priority:[% col.0 FILTER js %]')">
-            [%- col.0 FILTER html %]</a>
-        </td>
-        <td align="right">
-          <a href="[% buglink FILTER html %]&amp;priority=
-                   [%- col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
-        </td>
-      </tr>
-    [% END %]
-    </table>
-  [% END %]
-
-  [% IF by_severity.size %]
-    <h3>Severity</h3>
-    <table border="0" cellpadding="0" cellspacing="0" class="figures">
-    [% FOREACH col = by_severity %]
-      <tr>
-        <td>
-          <a class="boogle_edit"
-             href="javascript:addText('severity:[% col.0 FILTER js %]')">
-            [%- col.0 FILTER html %]</a>
-        </td>
-        <td align="right">
-          <a href="[% buglink FILTER html %]&amp;bug_severity=
-                   [%- col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
-        </td>
-      </tr>
-    [% END %]
-    </table>
-  [% END %]
-
   <h3>Useful links</h3>
   <ul>
     <li>
@@ -335,10 +297,17 @@ Browse:
 <table cellpadding="3" cellspacing="0">
 <tr>
   <th>Milestones</th>
+  [% IF by_priority.size %]
+  <td>&nbsp;</td>
+  <th>Priority</th>
+  [% END %]
+  [% IF by_severity.size %]
+  <td>&nbsp;</td>
+  <th>Severity</th>
+  [% END %]
 </tr>
 <tr>
   <td valign="top">
-
   <table border="0" cellpadding="0" cellspacing="0" class="figures">
   [% FOREACH col = by_target %]
     <tr>
@@ -351,8 +320,50 @@ Browse:
     </tr>
   [% END %]
   </table>
-
   </td>
+
+  [% IF by_priority.size %]
+  <td>&nbsp;</td>
+  <td valign="top">
+  <table border="0" cellpadding="0" cellspacing="0" class="figures">
+  [% FOREACH col = by_priority %]
+    <tr>
+      <td>
+        <a class="boogle_edit"
+           href="javascript:addText('priority:[% col.0 FILTER js %]')">
+          [%- col.0 FILTER html %]</a>
+      </td>
+      <td align="right">
+        <a href="[% buglink FILTER html %]&amp;priority=
+                 [%- col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+  </td>
+  [% END %]
+
+  [% IF by_severity.size %]
+  <td>&nbsp;</td>
+  <td valign="top">
+  <table border="0" cellpadding="0" cellspacing="0" class="figures">
+  [% FOREACH col = by_severity %]
+    <tr>
+      <td>
+        <a class="boogle_edit"
+           href="javascript:addText('severity:[% col.0 FILTER js %]')">
+          [%- col.0 FILTER html %]</a>
+      </td>
+      <td align="right">
+        <a href="[% buglink FILTER html %]&amp;bug_severity=
+                 [%- col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+  </td>
+  [% END %]
+
 </tr>
 </table>
 
