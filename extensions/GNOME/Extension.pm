@@ -101,6 +101,17 @@ sub install_before_final_checks {
     }
     # Correct visibility_values
     _update_gnome_cf_visibility_values() if ($gnome_version || $gnome_target);
+
+    $gnome_version = Bugzilla::Field->new({'name' => 'cf_gnome_version'});
+    if ($gnome_version && !$gnome_version->buglist()) {
+        $gnome_version->set_buglist(1);
+        $gnome_version->update();
+    }
+    $gnome_target = Bugzilla::Field->new({'name' => 'cf_gnome_target'});
+    if ($gnome_target && !$gnome_target->buglist()) {
+        $gnome_target->set_buglist(1);
+        $gnome_target->update();
+    }
 }
 
 
