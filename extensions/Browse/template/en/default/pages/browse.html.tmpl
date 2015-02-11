@@ -257,11 +257,11 @@ Browse:
   <th>Milestones</th>
   <td>&nbsp;</td>
   [% END %]
-  [% IF by_priority.size %]
+  [% IF by_priority.size > 1 %]
   <th>Priority</th>
+  <td>&nbsp;</td>
   [% END %]
   [% IF by_severity.size %]
-  <td>&nbsp;</td>
   <th>Severity</th>
   [% END %]
 </tr>
@@ -285,7 +285,7 @@ Browse:
   <td>&nbsp;</td>
   [% END %]
 
-  [% IF by_priority.size %]
+  [% IF by_priority.size > 1 %]
   <td valign="top">
   <table border="0" cellpadding="0" cellspacing="0" class="figures">
   [% FOREACH col = by_priority %]
@@ -303,10 +303,10 @@ Browse:
   [% END %]
   </table>
   </td>
+  <td>&nbsp;</td>
   [% END %]
 
   [% IF by_severity.size %]
-  <td>&nbsp;</td>
   <td valign="top">
   <table border="0" cellpadding="0" cellspacing="0" class="figures">
   [% FOREACH col = by_severity %]
