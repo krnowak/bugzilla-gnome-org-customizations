@@ -3,18 +3,17 @@
   It allows you to create reports, add comments, and observe development by
   subscribing to updates.</div>
 
-  <h2>Common links</h2>
-
-  <ul>
+  <div id="commonqueries" style="border: 1px grey solid; margin-top: 5px; padding: 5px">
+    <h2>Common links</h2>
     [% IF user.id %]
-      <li>
+      <div>
         <a href="page.cgi?id=describeuser.html">Reported by and assigned to me</a>
-      </li>
+      </div>
     [% END %]
-    <li>
+    <div>
       <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=5d">Created in last 5 days</a>
-    </li>
-    <li>
+    </div>
+    <div>
       <a href="buglist.cgi?chfieldfrom=5d">Changed in last 5 days</a>
-    </li>
-  </ul>
+    </div>
+  </div>
