@@ -183,20 +183,19 @@ sub add_dispatch {
 
 sub splinter_use_attachbase {
     my $cgi = Bugzilla->cgi;
-    my $attachbase = Bugzilla->params->{'attachment_base'};
     my $urlbase = Bugzilla->params->{'urlbase'};
     my $sslbase = Bugzilla->params->{'sslbase'};
+    my $splinter_base = Bugzilla->params->{'splinter_base'}
+    # TODO: Remove spurious slashes.
+    my $splinter_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)\Q$splinter_base\E/ : qr/^\Q$urlbase\E\Q$splinter_base\E/;
 
-    my $splinter_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)review/ : qr/^\Q$urlbase\Ereview/;
-
-    return ($attachbase ne ''
-            && $attachbase ne $urlbase
-            && $attachbase ne $sslbase
+    return (Bugzilla::Util::_use_attachbase_backup
             && $cgi->referer !~ /$splinter_regexp/) ? 1 : 0;
 }
 
 BEGIN {
-        *Bugzilla::Util::use_attachbase = \&splinter_use_attachbase;
+    *Bugzilla::Util::_use_attachbase_backup = \&Bugzilla::Util::use_attachbase;
+    *Bugzilla::Util::use_attachbase = \&splinter_use_attachbase;
 }
 
 1;
