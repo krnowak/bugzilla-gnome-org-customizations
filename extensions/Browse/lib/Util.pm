@@ -413,7 +413,7 @@ sub by_version {
     my $product = shift;
     my $dbh = Bugzilla->dbh;
 
-    my @result = sort { vers_cmp($a->[0], $b->[0]) }
+    my @result = sort { vers_cmp($b->[0], $a->[0]) }
         @{$dbh->selectall_arrayref("SELECT version, COUNT(bug_id)
                                       FROM bugs
                                      WHERE bug_status IN (" . browse_open_states() . ")
