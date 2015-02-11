@@ -83,7 +83,7 @@
   <tr>
     <td>NEEDINFO [% terms.Bugs %]</td>
     <td align="right">
-      <a href="[% buglink FILTER html %]&amp;bug_status=NEEDINFO&amp;columnlist=component%2Cchangeddate%2Cbug_severity%2Cpriority%2Cshort_desc&amp;order=changeddate%20DESC">
+      <a href="buglist.cgi?product=[% product.name FILTER uri %]&amp;bug_status=NEEDINFO&amp;columnlist=component%2Cchangeddate%2Cbug_severity%2Cpriority%2Cshort_desc&amp;order=changeddate%20DESC">
         [%- total_needinfo_bugs FILTER html %]</a>
     </td>
   </tr>
