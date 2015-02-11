@@ -71,7 +71,7 @@
         <a href="editusers.cgi?action=edit&userid=[% userinfo.id
                 FILTER uri %]">
       [% END %]
-      [% showuser FILTER html %]
+      [%+ showuser FILTER html %]
       [% IF user.in_group('editusers') %]
         </a>
       [% END %]
