@@ -193,6 +193,7 @@ sub splinter_use_attachbase {
             && $attachbase ne $urlbase
             && $attachbase ne $sslbase
             && $cgi->referer !~ /$splinter_regexp/) ? 1 : 0;
+}
 
 BEGIN {
         *Bugzilla::Util::use_attachbase = \&splinter_use_attachbase;
