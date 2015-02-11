@@ -253,49 +253,6 @@ Browse:
 
 <table cellpadding="3" cellspacing="0">
 <tr>
-  <th>Components</th>
-  <td>&nbsp;</td>
-  <th>Versions</th>
-</tr>
-<tr>
-  <td valign="top">
-
-  <table border="0" cellpadding="0" cellspacing="0" class="figures">
-  [% FOREACH col = by_component %]
-    <tr>
-      <td>
-        <a class="boogle_edit" href="javascript:addText('component:[% col.0 FILTER js %]')">[% col.0 FILTER html %]</a>
-      </td>
-      <td align="right">
-        <a href="[% buglink FILTER html %]&amp;component=[% col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
-      </td>
-    </tr>
-  [% END %]
-  </table>
-
-  </td>
-  <td>&nbsp;</td>
-  <td valign="top">
-
-  <table border="0" cellpadding="0" cellspacing="0" class="figures">
-  [% FOREACH col = by_version %]
-    <tr>
-      <td>
-        <a class="boogle_edit" href="javascript:addText('version:[% col.0 FILTER js %]')">[% col.0 FILTER html %]</a>
-      </td>
-      <td align="right">
-        <a href="[% buglink FILTER html %]&amp;version=[% col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
-      </td>
-    </tr>
-  [% END %]
-  </table>
-
-  </td>
-</tr>
-</table>
-
-<table cellpadding="3" cellspacing="0">
-<tr>
   <th>Milestones</th>
   [% IF by_priority.size %]
   <td>&nbsp;</td>
@@ -364,6 +321,49 @@ Browse:
   </td>
   [% END %]
 
+</tr>
+</table>
+
+<table cellpadding="3" cellspacing="0">
+<tr>
+  <th>Components</th>
+  <td>&nbsp;</td>
+  <th>Versions</th>
+</tr>
+<tr>
+  <td valign="top">
+
+  <table border="0" cellpadding="0" cellspacing="0" class="figures">
+  [% FOREACH col = by_component %]
+    <tr>
+      <td>
+        <a class="boogle_edit" href="javascript:addText('component:[% col.0 FILTER js %]')">[% col.0 FILTER html %]</a>
+      </td>
+      <td align="right">
+        <a href="[% buglink FILTER html %]&amp;component=[% col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+
+  </td>
+  <td>&nbsp;</td>
+  <td valign="top">
+
+  <table border="0" cellpadding="0" cellspacing="0" class="figures">
+  [% FOREACH col = by_version %]
+    <tr>
+      <td>
+        <a class="boogle_edit" href="javascript:addText('version:[% col.0 FILTER js %]')">[% col.0 FILTER html %]</a>
+      </td>
+      <td align="right">
+        <a href="[% buglink FILTER html %]&amp;version=[% col.0 FILTER uri %]">[% col.1 FILTER html %]</a>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+
+  </td>
 </tr>
 </table>
 
