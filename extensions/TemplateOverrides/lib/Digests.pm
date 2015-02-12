@@ -24,7 +24,7 @@ sub overrides_digests {
         'bug/create/create-guided.html.tmpl' => '179b44af75073441734201d0ac6c660ef94960f7f172642e8c8c2edf91c8ccab',
         'bug/navigate.html.tmpl' => 'fb426f9e95e6d8627a344ef6c9b4aaf87aaee3386dfe6b2230a3525cb512f31a',
         'bug/show.xml.tmpl' => '5db212d9751e3275253b548a7397c615ef217933468a3b3abc7489c729dfc501',
-        'email/bugmail-header.txt.tmpl' => '42dea22e287885b7b00448494da5ada892a957227883a88fac4f897b25ed597e',
+        'email/bugmail-header.txt.tmpl' => 'eef085ad511d24818de97a33fed9e0beb783e8c55d2be2b08d7ebeb243059835',
         'global/choose-classification.html.tmpl' => 'da8b876b1a79fb40b5ec2e46e6706b63aa0d6ec15a6a41c80ebc1ad889e6e0d4',
         'global/choose-product.html.tmpl' => 'ab607993022411e13f6cfa51d3c6c32e9309b4c54640347e67742baee8a5e941',
         'global/common-links.html.tmpl' => 'bd97d3329db516532e773b6446da863e7d5eb141e057f1a121d1d1a4417e4f06',
