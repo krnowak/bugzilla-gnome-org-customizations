@@ -11,7 +11,7 @@
 [% show_new = isnew
               && (to_user.settings.bugmail_new_prefix.value == 'on') %]
 
-From: "[% bug.product %]" (GNOME Bugzilla) [% Param('mailfrom') %]
+From: "[% bug.product %]" (GNOME Bugzilla) <[% Param('mailfrom') %]>
 To: [% to_user.email %]
 Subject: [[% terms.Bug %] [%+ bug.id %]] [% 'New: ' IF show_new %][%+ bug.short_desc %]
 Date: [% date %]
