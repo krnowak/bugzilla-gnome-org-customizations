@@ -71,6 +71,12 @@
 
         <div class="bz_common_actions">
           <ul>
+            [% IF user.id %]
+            <li>
+              <a id="my_bugs" href="page.cgi?id=describeuser.html">
+              <span>My [% terms.Bugs %]</span></a>
+            </li>
+            [% END %]
             <li>
               <a id="enter_bug" href="enter_bug.cgi"><span>File
               [%= terms.aBug %]</span></a>
