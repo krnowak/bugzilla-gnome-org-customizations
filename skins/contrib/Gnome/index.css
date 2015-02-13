@@ -6,8 +6,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
-    /* link to DescribeUser - bug 744445 */
-    #my_bugs   { background: url(index/my-bugs.png)     no-repeat; }
     /* 1:1 copy from standard skin so BZ picks up custom frontpage images - bug 744236 */
     #enter_bug { background: url(index/file-a-bug.png)     no-repeat; }
     #query     { background: url(index/search.png)  no-repeat; }
