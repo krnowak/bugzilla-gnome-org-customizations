@@ -29,6 +29,7 @@ sub overrides_digests {
         'global/choose-product.html.tmpl' => 'ab607993022411e13f6cfa51d3c6c32e9309b4c54640347e67742baee8a5e941',
         'global/common-links.html.tmpl' => 'bd97d3329db516532e773b6446da863e7d5eb141e057f1a121d1d1a4417e4f06',
         'global/user.html.tmpl' => 'ca16e2a988436109612b7b249e536f49669d4c5a9161911e3c14906a5f6d041d',
+        'index.html.tmpl' => 'bf449976b004eac5e9e013aaa406e7ffc71c6cce69b84c497c6ed1453fb3e13a',
     );
 
     %digests;
