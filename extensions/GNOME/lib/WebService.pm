@@ -56,7 +56,7 @@ sub addversionx {
     # If the full version already exists, we don't create a .x version.
     my $version = Bugzilla::Version->new({ product => $product, name => $new_version });
     if ($version) {
-        return ", exists (", $product->name, ")";
+        return ", exists (" . $product->name . ")";
     }
 
     # The version number, but ending in .x instead of its final number.
@@ -74,7 +74,7 @@ sub addversionx {
     while (1) {
         my $version = Bugzilla::Version->new({ product => $product, name => $version_x });
         if ($version) {
-            return ", exists (", $product->name, ")";
+            return ", exists (" . $product->name . ")";
         }
         $last_version_x = $version_x;
         $version_x =~ s/^([\d\.]+)\.\d\.x+$/$1.x/;
